@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Rodar o sistema",
+      "request": "launch",
+      "mainClass": "br.org.fmc.Launcher",
+      "vmArgs": "--enable-native-access=ALL-UNNAMED"
+    }
+  ]
+}

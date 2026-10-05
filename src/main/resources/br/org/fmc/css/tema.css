@@ -1,0 +1,82 @@
+/*
+ * Tema do sistema, baseado no design system da Fundação Manuel Cruz:
+ * azul #1D4D7A, fontes Urbanist (títulos) e Plus Jakarta Sans (texto),
+ * sem sombras nem gradientes.
+ *
+ * Para usar as fontes oficiais, coloque os arquivos .ttf em
+ * resources/br/org/fmc/fonts/ (ver README). Sem elas, usa Segoe UI.
+ */
+
+.root {
+    -fmc-azul: #1D4D7A;
+    -fmc-azul-escuro: #173F66;
+    -fmc-azul-claro: #EEF4FA;
+    -fmc-fundo: #F1F3F5;
+    -fmc-cartao: #FFFFFF;
+    -fmc-borda: #E4E7EB;
+    -fmc-texto: #13202E;
+    -fmc-texto-suave: #646D79;
+
+    -fx-font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fmc-texto;
+}
+
+.raiz {
+    -fx-background-color: -fmc-fundo;
+}
+
+/* Menu lateral */
+.menu-lateral {
+    -fx-background-color: -fmc-azul;
+    -fx-padding: 24 12 24 12;
+    -fx-pref-width: 220;
+}
+
+.marca {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 0 8 20 8;
+}
+
+.item-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: #DDE8F4;
+    -fx-alignment: center-left;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.item-menu:hover {
+    -fx-background-color: -fmc-azul-escuro;
+    -fx-text-fill: white;
+}
+
+.item-menu.ativo {
+    -fx-background-color: white;
+    -fx-text-fill: -fmc-azul;
+    -fx-font-weight: bold;
+}
+
+/* Conteúdo */
+.titulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.texto {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.cartao {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16 20 16 20;
+}

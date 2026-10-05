@@ -1,0 +1,16 @@
+# Arquivos gerados pelo Maven (são recriados ao compilar)
+target/
+
+# Banco de dados local: cada pessoa tem o seu, com dados de teste.
+# NUNCA subir dados reais da Fundação para o GitHub.
+data/
+*.db
+
+# IDEs e sistema
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.DS_Store
+Thumbs.db
