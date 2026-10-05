@@ -1,0 +1,5 @@
+# Mantém o fim de linha certo para cada sistema operacional
+* text=auto
+mvnw text eol=lf
+*.sh text eol=lf
+*.cmd text eol=crlf
