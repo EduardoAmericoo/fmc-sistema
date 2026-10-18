@@ -90,3 +90,64 @@
     -fx-text-fill: -fmc-texto-suave;
     -fx-font-size: 12px;
 }
+
+/* Usuário logado no rodapé do menu */
+.usuario-logado {
+    -fx-text-fill: #DDE8F4;
+    -fx-font-size: 12px;
+    -fx-padding: 12 12 4 12;
+}
+
+/* Tela de login (BOARD-33) */
+.login-fundo {
+    -fx-background-color: -fmc-fundo;
+}
+
+.login-cartao {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 32;
+}
+
+.login-titulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-azul;
+}
+
+.rotulo {
+    -fx-font-weight: bold;
+    -fx-padding: 8 0 0 0;
+}
+
+.campo {
+    -fx-pref-height: 40;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #D2D7DD;
+    -fx-background-color: white;
+}
+
+.campo:focused {
+    -fx-border-color: -fmc-azul;
+}
+
+.erro {
+    -fx-text-fill: #B42318;
+}
+
+.botao-primario {
+    -fx-background-color: -fmc-azul;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-pref-height: 42;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.botao-primario:hover {
+    -fx-background-color: -fmc-azul-escuro;
+}

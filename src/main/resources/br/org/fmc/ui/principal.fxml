@@ -10,6 +10,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane fx:id="raiz" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
@@ -17,13 +18,16 @@
 
     <left>
         <VBox fx:id="menu" styleClass="menu-lateral" spacing="4">
-            <Label text="Fundação Manuel Cruz" styleClass="marca"/>
+            <Label text="Fundação Manuel Cruz" styleClass="marca" wrapText="true"/>
             <Button text="Painel" userData="painel" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
             <Button text="Aluguéis" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
             <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
             <Button text="Inquilinos" userData="inquilinos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
             <Button text="Contratos" userData="contratos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
             <Button text="Usuários" userData="usuarios" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label fx:id="usuarioLogado" styleClass="usuario-logado" wrapText="true"/>
+            <Button text="Sair" onAction="#sair" styleClass="item-menu" maxWidth="Infinity"/>
         </VBox>
     </left>
 

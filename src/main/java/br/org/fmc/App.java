@@ -1,27 +1,25 @@
 package br.org.fmc;
 
 import br.org.fmc.db.Database;
+import br.org.fmc.service.ServicoAcesso;
+import br.org.fmc.ui.Navegador;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Ponto de entrada do sistema: prepara o banco e abre a janela principal.
+ * Ponto de entrada do sistema: prepara o banco, garante que existe um
+ * Administrador e abre a tela de login.
  */
 public class App extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
         Database.inicializar();
-
-        Parent raiz = FXMLLoader.load(getClass().getResource("ui/principal.fxml"));
-        Scene cena = new Scene(raiz, 1100, 700);
-        cena.getStylesheets().add(getClass().getResource("css/tema.css").toExternalForm());
+        new ServicoAcesso().garantirAdministradorInicial();
 
         stage.setTitle("Fundação Manuel Cruz");
-        stage.setScene(cena);
+        Navegador.iniciar(stage);
+        Navegador.mostrarLogin();
         stage.show();
     }
 
