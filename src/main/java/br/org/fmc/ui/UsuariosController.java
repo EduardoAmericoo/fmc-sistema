@@ -1,5 +1,6 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.Acao;
 import br.org.fmc.model.Perfil;
 import br.org.fmc.model.Usuario;
 import br.org.fmc.service.AcessoNegadoException;
@@ -62,6 +63,7 @@ public class UsuariosController {
 
         campoPerfil.getItems().setAll(Perfil.values());
         campoPerfil.setValue(Perfil.SECRETARIA);
+        Permissoes.mostrarSe(formulario, Acao.GERENCIAR_USUARIOS);
 
         limparMensagem();
         carregarLista();

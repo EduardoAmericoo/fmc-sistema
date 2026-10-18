@@ -1,5 +1,6 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.Tela;
 import br.org.fmc.model.Usuario;
 import br.org.fmc.service.ServicoAcesso;
 import br.org.fmc.service.ServicoSistema;
@@ -43,6 +44,7 @@ public class PrincipalController {
             Usuario u = Sessao.usuario();
             usuarioLogado.setText(u.getNome() + "\n" + u.getPerfil().getDescricao());
         }
+        esconderTelasSemPermissao();
         abrir("painel");
         try {
             statusBanco.setText("Banco de dados conectado (schema v" + servicoSistema.versaoDoBanco() + ")");
@@ -63,6 +65,17 @@ public class PrincipalController {
     private void sair() {
         servicoAcesso.sair();
         Navegador.mostrarLogin();
+    }
+
+    /** Cada botão do menu só aparece se o perfil de quem entrou pode abrir a tela dele. */
+    private void esconderTelasSemPermissao() {
+        for (Node item : menu.getChildren()) {
+            if (item.getUserData() instanceof String arquivo) {
+                boolean pode = Tela.porArquivo(arquivo).map(Sessao::podeAbrir).orElse(false);
+                item.setVisible(pode);
+                item.setManaged(pode);
+            }
+        }
     }
 
     private void abrir(String tela) {
