@@ -26,6 +26,11 @@ public class Usuario {
         return ativo && perfil.permite(acao);
     }
 
+    /** O usuário pode abrir esta tela do menu? */
+    public boolean podeAbrir(Tela tela) {
+        return ativo && tela.liberadaPara(perfil);
+    }
+
     public Long getId() {
         return id;
     }
