@@ -1,8 +1,10 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.Tela;
+import br.org.fmc.service.Sessao;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
+import java.util.Optional;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -16,20 +18,12 @@ import javafx.stage.Stage;
  * Troca a tela mostrada no centro da janela principal.
  *
  * Como criar a tela de uma história: crie o arquivo
- * resources/br/org/fmc/ui/&lt;nome&gt;.fxml com o nome da tabela abaixo
- * (ex.: imoveis.fxml) e o controller dela neste pacote. Pronto: o botão do
- * menu já abre a sua tela. Enquanto o arquivo não existe, aparece "Em construção".
+ * resources/br/org/fmc/ui/&lt;nome&gt;.fxml com o nome que está no enum
+ * model/Tela (ex.: imoveis.fxml) e o controller dela neste pacote. Pronto: o
+ * botão do menu já abre a sua tela. Enquanto o arquivo não existe, aparece
+ * "Em construção". Quem não tem permissão para a tela vê um aviso no lugar dela.
  */
 public final class Navegador {
-
-    /** Nome do arquivo .fxml → título da tela. */
-    public static final Map<String, String> TELAS = Map.of(
-            "painel", "Painel",
-            "alugueis", "Aluguéis",
-            "imoveis", "Imóveis",
-            "inquilinos", "Inquilinos",
-            "contratos", "Contratos",
-            "usuarios", "Usuários");
 
     private static final String CSS = "/br/org/fmc/css/tema.css";
     private static final double LARGURA = 1100;
@@ -79,12 +73,18 @@ public final class Navegador {
         janela.setCenter(carregar(tela));
     }
 
-    private static Node carregar(String tela) {
-        URL fxml = Navegador.class.getResource("/br/org/fmc/ui/" + tela + ".fxml");
-        if (fxml == null) {
-            return emConstrucao(TELAS.getOrDefault(tela, tela));
+    private static Node carregar(String arquivo) {
+        Optional<Tela> tela = Tela.porArquivo(arquivo);
+        String titulo = tela.map(Tela::getTitulo).orElse(arquivo);
+        // Segunda barreira: mesmo que alguém chame abrir() direto, a tela proibida não abre.
+        if (tela.isPresent() && !Sessao.podeAbrir(tela.get())) {
+            return aviso(titulo, "O seu perfil não tem acesso a esta tela.");
         }
-        return carregarFxml(fxml, tela);
+        URL fxml = Navegador.class.getResource("/br/org/fmc/ui/" + arquivo + ".fxml");
+        if (fxml == null) {
+            return aviso(titulo, "Tela em construção.");
+        }
+        return carregarFxml(fxml, arquivo);
     }
 
     private static Node carregarFxml(URL fxml, String nome) {
@@ -98,10 +98,10 @@ public final class Navegador {
         }
     }
 
-    private static Node emConstrucao(String titulo) {
+    private static Node aviso(String titulo, String texto) {
         Label nome = new Label(titulo);
         nome.getStyleClass().add("titulo");
-        Label aviso = new Label("Tela em construção.");
+        Label aviso = new Label(texto);
         aviso.getStyleClass().add("texto");
         VBox caixa = new VBox(12, nome, aviso);
         caixa.getStyleClass().add("conteudo");
