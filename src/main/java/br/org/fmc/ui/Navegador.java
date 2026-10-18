@@ -5,9 +5,12 @@ import java.net.URL;
 import java.util.Map;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * Troca a tela mostrada no centro da janela principal.
@@ -28,9 +31,39 @@ public final class Navegador {
             "contratos", "Contratos",
             "usuarios", "Usuários");
 
+    private static final String CSS = "/br/org/fmc/css/tema.css";
+    private static final double LARGURA = 1100;
+    private static final double ALTURA = 700;
+
+    private static Stage palco;
     private static BorderPane janela;
 
     private Navegador() {
+    }
+
+    /** Chamado uma vez pelo App, com a janela do sistema. */
+    public static void iniciar(Stage stage) {
+        palco = stage;
+    }
+
+    /** Mostra a tela de login (ao abrir o sistema e ao sair). */
+    public static void mostrarLogin() {
+        trocarCena("login");
+    }
+
+    /** Mostra o sistema (menu + telas), depois do login. */
+    public static void mostrarSistema() {
+        trocarCena("principal");
+    }
+
+    private static void trocarCena(String fxml) {
+        if (palco == null) {
+            throw new IllegalStateException("Chame Navegador.iniciar(stage) antes.");
+        }
+        Parent raiz = (Parent) carregarFxml(Navegador.class.getResource("/br/org/fmc/ui/" + fxml + ".fxml"), fxml);
+        Scene cena = new Scene(raiz, LARGURA, ALTURA);
+        cena.getStylesheets().add(Navegador.class.getResource(CSS).toExternalForm());
+        palco.setScene(cena);
     }
 
     /** Chamado uma vez pela tela principal, para dizer onde as telas aparecem. */
@@ -51,10 +84,17 @@ public final class Navegador {
         if (fxml == null) {
             return emConstrucao(TELAS.getOrDefault(tela, tela));
         }
+        return carregarFxml(fxml, tela);
+    }
+
+    private static Node carregarFxml(URL fxml, String nome) {
+        if (fxml == null) {
+            throw new IllegalStateException("Arquivo " + nome + ".fxml não encontrado.");
+        }
         try {
             return FXMLLoader.load(fxml);
         } catch (IOException e) {
-            throw new IllegalStateException("Não foi possível abrir a tela " + tela + ".fxml", e);
+            throw new IllegalStateException("Não foi possível abrir a tela " + nome + ".fxml", e);
         }
     }
 
