@@ -71,7 +71,12 @@ Para usar as fontes oficiais (Urbanist e Plus Jakarta Sans), coloque os arquivos
 
 ## Combinados de trabalho com Git
 
-1. Antes de começar: **Fetch/Pull** no GitHub Desktop.
-2. Trabalhe numa **branch** com o número do card. Ex.: `BOARD-53-cadastro-usuarios`.
-3. Faça commits pequenos, com mensagem clara.
-4. Ao terminar, **Push** e abra um **Pull Request** para alguém revisar antes de juntar na `main`.
+As regras completas, com passo a passo e prompts prontos para a IA, estão no **Guia de Git do Grupo FMC** (peça o link ao PO). O resumo:
+
+1. **Ninguém faz commit direto na `main`.** Tudo entra por Pull Request, com 1 aprovação de outra pessoa.
+2. **Uma tarefa do Plane = uma branch**, no modelo `tipo/BOARD-numero-descricao`.
+   Ex.: `feature/BOARD-53-cadastro-usuarios` (tipos: `feature/`, `fix/`, `docs/`, `test/`).
+3. Antes de criar a branch, atualize a `main` (**Pull**).
+4. Commits pequenos, no modelo `tipo(BOARD-numero): o que foi feito`.
+   Ex.: `feat(BOARD-53): cria tela de cadastro de usuários`.
+5. Antes do Pull Request, o sistema precisa compilar e abrir.
