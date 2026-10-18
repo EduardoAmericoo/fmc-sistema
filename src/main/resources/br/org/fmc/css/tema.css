@@ -151,3 +151,39 @@
 .botao-primario:hover {
     -fx-background-color: -fmc-azul-escuro;
 }
+
+/* Telas de cadastro (a partir da BOARD-53) */
+.subtitulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.cartao-formulario {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+}
+
+.dica {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-size: 12px;
+}
+
+.sucesso {
+    -fx-text-fill: #1B6B43;
+}
+
+.table-view {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F8F9FA;
+}
