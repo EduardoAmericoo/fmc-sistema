@@ -14,3 +14,6 @@ data/
 .settings/
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
