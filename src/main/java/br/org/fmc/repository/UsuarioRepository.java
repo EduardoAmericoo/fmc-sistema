@@ -84,6 +84,11 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         return lista;
     }
 
+    /** Já existe usuário com este e-mail? (sem diferenciar maiúsculas) */
+    public boolean existeEmail(String email) throws SQLException {
+        return buscarPorEmail(email).isPresent();
+    }
+
     /** Quantos usuários existem (usado para criar o Administrador inicial). */
     public int contar() throws SQLException {
         try (Connection conexao = Database.conectar();
