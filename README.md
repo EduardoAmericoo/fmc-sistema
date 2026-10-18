@@ -29,6 +29,16 @@ mvnw javafx:run
 
 Na primeira vez demora alguns minutos, porque baixa o Maven, o JavaFX e o driver do SQLite.
 
+## Primeiro acesso
+
+O sistema nasce com um único usuário, o **Administrador**:
+
+| E-mail | Senha |
+|---|---|
+| `admin@fmc.org` | `Fmc@2026` |
+
+É ele quem cadastra os outros usuários. Esta senha é só para desenvolvimento e testes; a troca de senha pelo próprio usuário é a história desejável D2.
+
 ## Como rodar os testes
 
 ```
