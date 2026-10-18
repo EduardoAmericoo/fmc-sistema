@@ -80,3 +80,13 @@
     -fx-background-radius: 12;
     -fx-padding: 16 20 16 20;
 }
+
+/* Área das telas e rodapé */
+.conteudo {
+    -fx-padding: 32;
+}
+
+.rodape {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-size: 12px;
+}
