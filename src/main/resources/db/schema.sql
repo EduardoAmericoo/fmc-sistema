@@ -3,7 +3,8 @@
 -- "CREATE TABLE IF NOT EXISTS" para não apagar dados existentes.
 --
 -- Cada história do MVP acrescenta aqui as suas tabelas
--- (usuario, imovel, inquilino, contrato, garantia, cobranca, pagamento, recibo).
+-- (usuario, imovel, inquilino, fiador, contrato, garantia, aluguel, recibo).
+-- O pagamento fica registrado na própria tabela recibo.
 
 CREATE TABLE IF NOT EXISTS sistema (
     chave TEXT PRIMARY KEY,
