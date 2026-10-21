@@ -27,6 +27,38 @@ public final class Formatos {
         return NumberFormat.getCurrencyInstance(BRASIL).format(valor).replace(' ', ' ');
     }
 
+    /** Ex.: 1.234,56 (sem "R$"), para preencher um campo que depois é lido com lerValor(). */
+    public static String numero(BigDecimal valor) {
+        if (valor == null) {
+            return "";
+        }
+        NumberFormat formato = NumberFormat.getNumberInstance(BRASIL);
+        formato.setMinimumFractionDigits(2);
+        formato.setMaximumFractionDigits(2);
+        return formato.format(valor);
+    }
+
+    /**
+     * Lê um valor em dinheiro digitado na tela. Aceita "2500", "2.500", "2.500,50",
+     * "2500,5", "2500.50" e "R$ 2.500,00". Vazio vira zero.
+     *
+     * @throws IllegalArgumentException se não for um valor válido (ex.: letras ou negativo)
+     */
+    public static BigDecimal lerValor(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+        String t = texto.replace("R$", "").replaceAll("\\s", "");
+        if (t.matches("\\d{1,3}(\\.\\d{3})*(,\\d{1,2})?")) {
+            t = t.replace(".", "").replace(',', '.'); // 2.500,50
+        } else if (t.matches("\\d+(,\\d{1,2})?")) {
+            t = t.replace(',', '.'); // 2500,50
+        } else if (!t.matches("\\d+(\\.\\d{1,2})?")) { // 2500.50
+            throw new IllegalArgumentException("Valor inválido: " + texto);
+        }
+        return new BigDecimal(t).setScale(2, RoundingMode.UNNECESSARY);
+    }
+
     /** Ex.: 23/09/2026. Nulo vira "—". */
     public static String data(LocalDate data) {
         return data == null ? "—" : data.format(DATA);
