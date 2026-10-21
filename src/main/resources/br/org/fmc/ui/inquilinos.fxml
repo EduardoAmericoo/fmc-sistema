@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-35 · Tela "Inquilinos": lista de inquilinos e formulário com os dados da proposta.
+  Clicar num inquilino da lista abre os dados dele no formulário para editar.
+  Os campos do cônjuge só aparecem para casado(a) ou união estável.
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="br.org.fmc.ui.InquilinosController" styleClass="conteudo" spacing="16">
+
+    <VBox spacing="4">
+        <Label text="Inquilinos" styleClass="titulo"/>
+        <Label text="Cadastre o inquilino com os dados da proposta. Clique em um nome da lista para editar."
+               styleClass="texto" wrapText="true"/>
+    </VBox>
+
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tabela" HBox.hgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colunaNome" text="Nome" prefWidth="200"/>
+                <TableColumn fx:id="colunaCpf" text="CPF" prefWidth="130"/>
+                <TableColumn fx:id="colunaTelefone" text="Telefone" prefWidth="120"/>
+                <TableColumn fx:id="colunaRenda" text="Renda familiar" prefWidth="120"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+            </columnResizePolicy>
+        </TableView>
+
+        <ScrollPane fx:id="formulario" fitToWidth="true" prefWidth="360" minWidth="300"
+                    hbarPolicy="NEVER" styleClass="rolagem">
+            <VBox styleClass="cartao-formulario" spacing="8">
+                <Label fx:id="tituloFormulario" text="Novo inquilino" styleClass="subtitulo"/>
+
+                <Label text="Nome completo *" labelFor="$campoNome" styleClass="rotulo"/>
+                <TextField fx:id="campoNome" styleClass="campo"/>
+
+                <Label text="CPF *" labelFor="$campoCpf" styleClass="rotulo"/>
+                <TextField fx:id="campoCpf" promptText="000.000.000-00" styleClass="campo"/>
+
+                <Label text="Telefone" labelFor="$campoTelefone" styleClass="rotulo"/>
+                <TextField fx:id="campoTelefone" promptText="(79) 99999-9999" styleClass="campo"/>
+
+                <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
+                <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
+
+                <Label text="Estado civil *" labelFor="$campoEstadoCivil" styleClass="rotulo"/>
+                <ComboBox fx:id="campoEstadoCivil" maxWidth="Infinity" styleClass="campo"/>
+
+                <Label text="Profissão" labelFor="$campoProfissao" styleClass="rotulo"/>
+                <TextField fx:id="campoProfissao" styleClass="campo"/>
+
+                <Label text="Local de trabalho" labelFor="$campoLocalTrabalho" styleClass="rotulo"/>
+                <TextField fx:id="campoLocalTrabalho" styleClass="campo"/>
+
+                <Label text="Renda mensal (R$)" labelFor="$campoRenda" styleClass="rotulo"/>
+                <TextField fx:id="campoRenda" promptText="2.500,00" styleClass="campo"/>
+
+                <Label text="Outras rendas (R$)" labelFor="$campoOutrasRendas" styleClass="rotulo"/>
+                <TextField fx:id="campoOutrasRendas" promptText="0,00" styleClass="campo"/>
+
+                <VBox fx:id="blocoConjuge" spacing="8">
+                    <Label text="Cônjuge" styleClass="subtitulo"/>
+                    <Label text="A renda do cônjuge entra na renda familiar." styleClass="dica" wrapText="true"
+                           minHeight="-Infinity"/>
+
+                    <Label text="Nome do cônjuge" labelFor="$campoConjugeNome" styleClass="rotulo"/>
+                    <TextField fx:id="campoConjugeNome" styleClass="campo"/>
+
+                    <Label text="CPF do cônjuge" labelFor="$campoConjugeCpf" styleClass="rotulo"/>
+                    <TextField fx:id="campoConjugeCpf" promptText="000.000.000-00" styleClass="campo"/>
+
+                    <Label text="Renda do cônjuge (R$)" labelFor="$campoConjugeRenda" styleClass="rotulo"/>
+                    <TextField fx:id="campoConjugeRenda" promptText="0,00" styleClass="campo"/>
+                </VBox>
+
+                <Label text="* obrigatório" styleClass="dica"/>
+
+                <!-- minHeight="-Infinity" deixa o texto quebrar em várias linhas em vez de cortar com "..." -->
+                <Label fx:id="mensagem" wrapText="true" minHeight="-Infinity"/>
+
+                <Button fx:id="botaoSalvar" text="Cadastrar inquilino" onAction="#salvar"
+                        styleClass="botao-primario" maxWidth="Infinity"/>
+                <Button text="Limpar / novo inquilino" onAction="#novo" styleClass="botao-secundario"
+                        maxWidth="Infinity"/>
+            </VBox>
+        </ScrollPane>
+    </HBox>
+</VBox>

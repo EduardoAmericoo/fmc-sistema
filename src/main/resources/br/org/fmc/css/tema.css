@@ -177,6 +177,28 @@
     -fx-text-fill: #1B6B43;
 }
 
+.botao-secundario {
+    -fx-background-color: white;
+    -fx-text-fill: -fmc-azul;
+    -fx-border-color: -fmc-azul;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-pref-height: 42;
+    -fx-cursor: hand;
+}
+
+.botao-secundario:hover {
+    -fx-background-color: -fmc-azul-claro;
+}
+
+/* Formulário comprido (a partir da BOARD-35): rola sem mostrar fundo cinza */
+.rolagem,
+.rolagem > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
 .table-view {
     -fx-background-color: -fmc-cartao;
     -fx-border-color: -fmc-borda;
