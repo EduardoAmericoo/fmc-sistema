@@ -290,6 +290,12 @@
     -fx-effect: dropshadow(gaussian, -fmc-azul-100, 0, 1, 0, 0);
 }
 
+/* Campo com valor errado (ex.: CPF que não confere), BOARD-165 */
+.campo.campo-erro,
+.campo.campo-erro:focused {
+    -fx-border-color: -fmc-erro;
+}
+
 .dica {
     -fx-text-fill: -fmc-texto-suave;
 }

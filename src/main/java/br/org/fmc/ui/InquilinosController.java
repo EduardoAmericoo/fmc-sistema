@@ -106,11 +106,23 @@ public class InquilinosController {
     private TextField campoConjugeRenda;
     @FXML
     private Button botaoSalvar;
+    @FXML
+    private Label dicaCpf;
+    @FXML
+    private Label dicaConjugeCpf;
 
     @FXML
     private void initialize() {
         podeEditar = Sessao.pode(Acao.CADASTRAR_INQUILINO);
         montarTabela();
+
+        // Máscaras: os campos se formatam sozinhos enquanto a pessoa digita (BOARD-165).
+        Mascara.cpf(campoCpf, dicaCpf);
+        Mascara.cpf(campoConjugeCpf, dicaConjugeCpf);
+        Mascara.telefone(campoTelefone);
+        Mascara.dinheiro(campoRenda);
+        Mascara.dinheiro(campoOutrasRendas);
+        Mascara.dinheiro(campoConjugeRenda);
 
         campoEstadoCivil.getItems().setAll(EstadoCivil.values());
         campoEstadoCivil.valueProperty().addListener((obs, antes, agora) -> mostrarConjuge());
