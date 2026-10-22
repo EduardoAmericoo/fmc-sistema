@@ -57,17 +57,17 @@ class PermissoesEditaveisTest {
         servico.sair();
         servico.login("secretaria@exemplo.org", "senha1");
         assertFalse(Sessao.pode(Acao.RECEBER_ALUGUEL));
-        assertTrue(Sessao.pode(Acao.CADASTRAR_INQUILINO));
+        assertTrue(Sessao.pode(Acao.CRIAR_INQUILINO));
         assertThrows(AcessoNegadoException.class, () -> Sessao.exigir(Acao.RECEBER_ALUGUEL));
     }
 
     @Test
     void ajusteFicaGravadoNoBanco() throws Exception {
-        servico.alterarPermissoes(secretaria.getId(), Set.of(Acao.VER_CADASTROS));
+        servico.alterarPermissoes(secretaria.getId(), Set.of(Acao.VER_INQUILINOS));
 
         Usuario lido = repo.buscarPorId(secretaria.getId()).orElseThrow();
         assertTrue(lido.temPermissoesPersonalizadas());
-        assertEquals(Set.of(Acao.VER_CADASTROS), lido.getPermissoes());
+        assertEquals(Set.of(Acao.VER_INQUILINOS), lido.getPermissoes());
         assertFalse(lido.podeAbrir(Tela.ALUGUEIS));
     }
 
@@ -93,8 +93,8 @@ class PermissoesEditaveisTest {
     void administradorNaoTiraDeSiMesmoGerenciarUsuarios() throws Exception {
         Usuario admin = Sessao.usuario();
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
-                () -> servico.alterarPermissoes(admin.getId(), Set.of(Acao.VER_CADASTROS)));
-        assertEquals(List.of("Você não pode tirar de si mesmo a permissão de gerenciar usuários."), e.getErros());
+                () -> servico.alterarPermissoes(admin.getId(), Set.of(Acao.VER_INQUILINOS)));
+        assertEquals(List.of("Você não pode tirar de si mesmo a permissão de ajustar permissões."), e.getErros());
         assertFalse(repo.buscarPorId(admin.getId()).orElseThrow().temPermissoesPersonalizadas());
     }
 
@@ -107,13 +107,13 @@ class PermissoesEditaveisTest {
         servico.alterarPermissoes(admin.getId(), semReceber);
 
         assertFalse(Sessao.pode(Acao.RECEBER_ALUGUEL));
-        assertTrue(Sessao.pode(Acao.GERENCIAR_USUARIOS));
+        assertTrue(Sessao.pode(Acao.EDITAR_PERMISSOES));
     }
 
     @Test
     void secretariaComPermissaoDeUsuariosPassaAGerenciar() throws Exception {
         Set<Acao> acoes = EnumSet.copyOf(Perfil.SECRETARIA.getPermissoes());
-        acoes.add(Acao.GERENCIAR_USUARIOS);
+        acoes.add(Acao.EDITAR_PERMISSOES);
         servico.alterarPermissoes(secretaria.getId(), acoes);
 
         servico.sair();

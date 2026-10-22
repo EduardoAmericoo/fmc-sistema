@@ -7,10 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import br.org.fmc.db.Database;
+import br.org.fmc.model.Acao;
 import br.org.fmc.model.Perfil;
 import br.org.fmc.model.Usuario;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.EnumSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -59,6 +63,22 @@ class UsuarioRepositoryTest {
         assertFalse(lido.isAtivo());
         assertEquals(Perfil.FINANCEIRO, lido.getPerfil());
         assertEquals(1, repo.contar());
+    }
+
+    @Test
+    void ajusteGravadoComNomesAntigosContinuaValendo() throws Exception {
+        Usuario u = novo("secretaria@exemplo.org");
+        repo.salvar(u);
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement(
+                     "INSERT INTO usuario_permissoes (usuario_id, acoes) VALUES (?, 'VER_CADASTROS,CADASTRAR_INQUILINO')")) {
+            st.setLong(1, u.getId());
+            st.executeUpdate();
+        }
+
+        Usuario lido = repo.buscarPorId(u.getId()).orElseThrow();
+        assertEquals(EnumSet.of(Acao.VER_IMOVEIS, Acao.VER_INQUILINOS, Acao.VER_CONTRATOS,
+                Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO), lido.getPermissoes());
     }
 
     @Test

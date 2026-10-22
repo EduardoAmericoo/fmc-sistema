@@ -61,14 +61,14 @@ public class ServicoAcesso {
     }
 
     /**
-     * Cria um usuário novo (BOARD-53). Só quem pode gerenciar usuários (o Administrador).
+     * Cria um usuário novo (BOARD-53). Só quem pode criar usuários (o Administrador).
      * Junta todos os problemas encontrados numa única RegraNegocioException,
      * para a tela mostrar tudo de uma vez.
      *
      * @return o usuário criado, já com id
      */
     public Usuario criarUsuario(String nome, String email, Perfil perfil, String senhaInicial) throws SQLException {
-        Sessao.exigir(Acao.GERENCIAR_USUARIOS);
+        Sessao.exigir(Acao.CRIAR_USUARIO);
 
         List<String> erros = new ArrayList<>();
         if (nome == null || nome.isBlank()) {
@@ -95,21 +95,21 @@ public class ServicoAcesso {
         return novo;
     }
 
-    /** Todos os usuários, em ordem de nome. Só para quem pode gerenciar usuários. */
+    /** Todos os usuários, em ordem de nome. Só para quem pode ver a tela de Usuários. */
     public List<Usuario> listarUsuarios() throws SQLException {
-        Sessao.exigir(Acao.GERENCIAR_USUARIOS);
+        Sessao.exigir(Acao.VER_USUARIOS);
         return usuarios.listarTodos();
     }
 
     /**
      * Define exatamente o que esta pessoa pode fazer, além do perfil (BOARD-41).
-     * Só o Administrador. Ninguém pode tirar de si mesmo a permissão de gerenciar
-     * usuários, para o sistema não ficar sem ninguém que consiga desfazer o ajuste.
+     * Só quem pode ajustar permissões. Ninguém pode tirar de si mesmo essa permissão,
+     * para o sistema não ficar sem ninguém que consiga desfazer o ajuste.
      *
      * @return o usuário já com as permissões novas
      */
     public Usuario alterarPermissoes(long usuarioId, Set<Acao> acoes) throws SQLException {
-        Sessao.exigir(Acao.GERENCIAR_USUARIOS);
+        Sessao.exigir(Acao.EDITAR_PERMISSOES);
         if (acoes == null) {
             throw new RegraNegocioException("Escolha as permissões.");
         }
@@ -120,7 +120,7 @@ public class ServicoAcesso {
 
     /** Desfaz os ajustes: a pessoa volta a ter só as permissões do perfil dela. */
     public Usuario restaurarPermissoesDoPerfil(long usuarioId) throws SQLException {
-        Sessao.exigir(Acao.GERENCIAR_USUARIOS);
+        Sessao.exigir(Acao.EDITAR_PERMISSOES);
         Usuario usuario = buscarParaAlterar(usuarioId);
         usuario.restaurarPermissoesDoPerfil();
         return salvarPermissoes(usuario);
@@ -133,8 +133,8 @@ public class ServicoAcesso {
 
     private Usuario salvarPermissoes(Usuario usuario) throws SQLException {
         boolean ehQuemEstaLogado = usuario.getId().equals(Sessao.usuario().getId());
-        if (ehQuemEstaLogado && !usuario.pode(Acao.GERENCIAR_USUARIOS)) {
-            throw new RegraNegocioException("Você não pode tirar de si mesmo a permissão de gerenciar usuários.");
+        if (ehQuemEstaLogado && !usuario.pode(Acao.EDITAR_PERMISSOES)) {
+            throw new RegraNegocioException("Você não pode tirar de si mesmo a permissão de ajustar permissões.");
         }
         usuarios.salvar(usuario);
         if (ehQuemEstaLogado) {

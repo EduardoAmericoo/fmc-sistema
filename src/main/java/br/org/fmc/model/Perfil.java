@@ -5,16 +5,21 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Perfis fixos do MVP. Cada perfil já vem com as suas ações liberadas.
- * (Permissões editáveis pessoa a pessoa ficaram para depois do MVP.)
+ * Perfis do sistema. Cada perfil é o ponto de partida: já vem com as suas ações
+ * liberadas, e o Administrador pode ajustar pessoa a pessoa (BOARD-41).
+ *
+ * Administrador: tudo. Secretaria: tudo, menos a tela de Usuários.
+ * Financeiro: só consulta (vê as telas, não cria nem edita nada).
  */
 public enum Perfil {
     ADMINISTRADOR("Administrador", EnumSet.allOf(Acao.class)),
     SECRETARIA("Secretaria", EnumSet.of(
-            Acao.VER_CADASTROS, Acao.VER_FINANCEIRO,
-            Acao.CADASTRAR_IMOVEL, Acao.CADASTRAR_INQUILINO, Acao.CADASTRAR_CONTRATO,
-            Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL)),
-    FINANCEIRO("Financeiro", EnumSet.of(Acao.VER_CADASTROS, Acao.VER_FINANCEIRO));
+            Acao.VER_IMOVEIS, Acao.CRIAR_IMOVEL, Acao.EDITAR_IMOVEL,
+            Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO,
+            Acao.VER_CONTRATOS, Acao.CRIAR_CONTRATO,
+            Acao.VER_ALUGUEIS, Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL)),
+    FINANCEIRO("Financeiro", EnumSet.of(
+            Acao.VER_IMOVEIS, Acao.VER_INQUILINOS, Acao.VER_CONTRATOS, Acao.VER_ALUGUEIS));
 
     private final String descricao;
     private final Set<Acao> permissoes;

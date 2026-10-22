@@ -11,10 +11,10 @@ class PerfilTest {
 
     @Test
     void cadaPerfilTemSuasPermissoes() {
-        assertTrue(Perfil.ADMINISTRADOR.permite(Acao.GERENCIAR_USUARIOS));
+        assertTrue(Perfil.ADMINISTRADOR.permite(Acao.EDITAR_PERMISSOES));
         assertTrue(Perfil.SECRETARIA.permite(Acao.RECEBER_ALUGUEL));
-        assertFalse(Perfil.SECRETARIA.permite(Acao.GERENCIAR_USUARIOS));
-        assertTrue(Perfil.FINANCEIRO.permite(Acao.VER_FINANCEIRO));
+        assertFalse(Perfil.SECRETARIA.permite(Acao.EDITAR_PERMISSOES));
+        assertTrue(Perfil.FINANCEIRO.permite(Acao.VER_ALUGUEIS));
         assertFalse(Perfil.FINANCEIRO.permite(Acao.RECEBER_ALUGUEL));
     }
 
@@ -23,7 +23,7 @@ class PerfilTest {
         Usuario u = new Usuario("Admin", "Admin@Exemplo.org", Perfil.ADMINISTRADOR);
         assertEquals("admin@exemplo.org", u.getEmail());
         u.setAtivo(false);
-        assertFalse(u.pode(Acao.VER_CADASTROS));
+        assertFalse(u.pode(Acao.VER_INQUILINOS));
         assertThrows(IllegalArgumentException.class, () -> u.setEmail("sem-arroba"));
     }
 

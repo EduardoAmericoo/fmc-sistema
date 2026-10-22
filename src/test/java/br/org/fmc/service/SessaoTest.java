@@ -21,14 +21,14 @@ class SessaoTest {
 
     @Test
     void semLoginNaoPodeNada() {
-        assertFalse(Sessao.pode(Acao.VER_CADASTROS));
+        assertFalse(Sessao.pode(Acao.VER_INQUILINOS));
         assertThrows(AcessoNegadoException.class, Sessao::usuario);
     }
 
     @Test
     void exigirBarraQuemNaoTemPermissao() {
         Sessao.iniciar(new Usuario("Contabilidade", "contabilidade@exemplo.org", Perfil.FINANCEIRO));
-        assertDoesNotThrow(() -> Sessao.exigir(Acao.VER_FINANCEIRO));
+        assertDoesNotThrow(() -> Sessao.exigir(Acao.VER_ALUGUEIS));
         assertThrows(AcessoNegadoException.class, () -> Sessao.exigir(Acao.RECEBER_ALUGUEL));
     }
 

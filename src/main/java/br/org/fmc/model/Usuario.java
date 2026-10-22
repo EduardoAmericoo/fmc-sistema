@@ -60,6 +60,12 @@ public class Usuario {
     public void personalizarPermissoes(Set<Acao> acoes) {
         Valida.obrigatorio(acoes, "as permissões");
         Set<Acao> escolhidas = acoes.isEmpty() ? EnumSet.noneOf(Acao.class) : EnumSet.copyOf(acoes);
+        // Quem pode criar ou editar numa tela precisa poder abrir a tela: o "ver" entra junto.
+        for (Acao acao : EnumSet.copyOf(escolhidas.isEmpty() ? EnumSet.noneOf(Acao.class) : escolhidas)) {
+            if (acao.getRequisito() != null) {
+                escolhidas.add(acao.getRequisito());
+            }
+        }
         permissoesPersonalizadas = escolhidas.equals(perfil.getPermissoes()) ? null : escolhidas;
     }
 
