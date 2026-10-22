@@ -1,21 +1,55 @@
 /*
- * Tema do sistema, baseado no design system da Fundação Manuel Cruz:
- * azul #1D4D7A, fontes Urbanist (títulos) e Plus Jakarta Sans (texto),
- * sem sombras nem gradientes.
+ * Tema do sistema, seguindo o design system da Fundação Manuel Cruz
+ * (Fundação Manuel Cruz — Design System.zip, na pasta do projeto):
+ * azul #1D4D7A, Urbanist (títulos), Plus Jakarta Sans (texto), cinza chapado,
+ * cartões brancos com borda de 1px e quase nenhuma sombra.
  *
- * Para usar as fontes oficiais, coloque os arquivos .ttf em
- * resources/br/org/fmc/fonts/ (ver README). Sem elas, usa Segoe UI.
+ * Fica por cima do AtlantaFX (ver ui/Tema.java): o AtlantaFX dá a base moderna
+ * dos controles e aqui ajustamos as cores e medidas da Fundação.
+ * As fontes ficam em resources/br/org/fmc/fonts/ e são carregadas pelo Tema.
  */
 
 .root {
+    /* Cores do design system */
     -fmc-azul: #1D4D7A;
     -fmc-azul-escuro: #173F66;
+    -fmc-azul-mais-escuro: #123352;
+    -fmc-azul-medio: #3A76AE;
+    -fmc-azul-100: #DDE8F4;
     -fmc-azul-claro: #EEF4FA;
     -fmc-fundo: #F1F3F5;
+    -fmc-fundo-afundado: #F8F9FA;
     -fmc-cartao: #FFFFFF;
     -fmc-borda: #E4E7EB;
+    -fmc-borda-forte: #D2D7DD;
     -fmc-texto: #13202E;
+    -fmc-texto-corpo: #3A424D;
     -fmc-texto-suave: #646D79;
+    -fmc-texto-desligado: #8A939E;
+    -fmc-sucesso: #1B6B43;
+    -fmc-sucesso-fundo: #E3F2E9;
+    -fmc-alerta: #8F5208;
+    -fmc-alerta-fundo: #FCF0DE;
+    -fmc-erro: #B42318;
+    -fmc-erro-escuro: #9A1F15;
+    -fmc-erro-fundo: #FBE9E7;
+    -fmc-erro-borda: #F2C4BF;
+
+    /* As mesmas cores, nos nomes que o AtlantaFX usa nos controles */
+    -color-fg-default: -fmc-texto;
+    -color-fg-muted: -fmc-texto-suave;
+    -color-fg-subtle: -fmc-texto-desligado;
+    -color-bg-default: -fmc-cartao;
+    -color-bg-subtle: -fmc-fundo-afundado;
+    -color-border-default: -fmc-borda-forte;
+    -color-border-muted: -fmc-borda;
+    -color-accent-fg: -fmc-azul;
+    -color-accent-emphasis: -fmc-azul;
+    -color-accent-muted: -fmc-azul-100;
+    -color-accent-subtle: -fmc-azul-claro;
+    -color-success-fg: -fmc-sucesso;
+    -color-danger-fg: -fmc-erro;
+    -color-danger-emphasis: -fmc-erro;
 
     -fx-font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
     -fx-font-size: 14px;
@@ -26,42 +60,106 @@
     -fx-background-color: -fmc-fundo;
 }
 
-/* Menu lateral */
+/* ===================== Menu lateral ===================== */
+
 .menu-lateral {
-    -fx-background-color: -fmc-azul;
-    -fx-padding: 24 12 24 12;
-    -fx-pref-width: 220;
+    -fx-background-color: -fmc-fundo;
+    -fx-border-color: transparent -fmc-borda transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 20 14 14 14;
+    -fx-pref-width: 260;
 }
 
 .marca {
     -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
-    -fx-font-size: 18px;
+    -fx-font-size: 19px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
-    -fx-padding: 0 8 20 8;
+    -fx-text-fill: -fmc-azul;
+}
+
+.marca-sub {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-weight: 500;
+}
+
+.secao-menu {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 6 10;
 }
 
 .item-menu {
     -fx-background-color: transparent;
-    -fx-text-fill: #DDE8F4;
-    -fx-alignment: center-left;
-    -fx-padding: 10 12 10 12;
     -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-text-fill: -fmc-texto-corpo;
+    -fx-font-weight: 500;
+    -fx-alignment: center-left;
+    -fx-graphic-text-gap: 12;
+    -fx-pref-height: 40;
+    -fx-padding: 0 12 0 12;
     -fx-cursor: hand;
 }
 
+.item-menu .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-suave;
+    -fx-icon-size: 18;
+}
+
 .item-menu:hover {
-    -fx-background-color: -fmc-azul-escuro;
-    -fx-text-fill: white;
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+    -fx-text-fill: -fmc-texto;
 }
 
 .item-menu.ativo {
     -fx-background-color: white;
-    -fx-text-fill: -fmc-azul;
+    -fx-border-color: -fmc-borda;
+    -fx-text-fill: -fmc-texto;
     -fx-font-weight: bold;
 }
 
-/* Conteúdo */
+.item-menu.ativo .ikonli-font-icon {
+    -fx-icon-color: -fmc-azul;
+}
+
+/* Cartão do usuário logado, no rodapé do menu */
+.cartao-usuario {
+    -fx-background-color: white;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10 8 10 10;
+}
+
+.avatar {
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
+    -fx-background-color: -fmc-azul-100;
+    -fx-background-radius: 18;
+    -fx-text-fill: -fmc-azul-escuro;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+.usuario-nome {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.usuario-perfil {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+/* ===================== Página ===================== */
+
+.conteudo {
+    -fx-padding: 28 32 32 32;
+}
+
 .titulo {
     -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
     -fx-font-size: 28px;
@@ -73,6 +171,13 @@
     -fx-text-fill: -fmc-texto-suave;
 }
 
+.subtitulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
 .cartao {
     -fx-background-color: -fmc-cartao;
     -fx-border-color: -fmc-borda;
@@ -81,24 +186,356 @@
     -fx-padding: 16 20 16 20;
 }
 
-/* Área das telas e rodapé */
-.conteudo {
-    -fx-padding: 32;
-}
-
 .rodape {
     -fx-text-fill: -fmc-texto-suave;
-    -fx-font-size: 12px;
 }
 
-/* Usuário logado no rodapé do menu */
-.usuario-logado {
-    -fx-text-fill: #DDE8F4;
-    -fx-font-size: 12px;
-    -fx-padding: 12 12 4 12;
+/* ===================== Botões ===================== */
+
+.botao-primario {
+    -fx-background-color: -fmc-azul;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-pref-height: 40;
+    -fx-min-height: 40;
+    -fx-padding: 0 16 0 16;
+    -fx-graphic-text-gap: 8;
+    -fx-cursor: hand;
 }
 
-/* Tela de login (BOARD-33) */
+.botao-primario .ikonli-font-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 16;
+}
+
+.botao-primario:hover {
+    -fx-background-color: -fmc-azul-escuro;
+}
+
+.botao-primario:pressed {
+    -fx-background-color: -fmc-azul-mais-escuro;
+}
+
+.botao-secundario {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: -fmc-borda-forte;
+    -fx-border-radius: 8;
+    -fx-text-fill: -fmc-texto;
+    -fx-font-weight: bold;
+    -fx-pref-height: 40;
+    -fx-min-height: 40;
+    -fx-padding: 0 16 0 16;
+    -fx-cursor: hand;
+}
+
+.botao-secundario:hover {
+    -fx-background-color: -fmc-fundo;
+}
+
+/* Botão só com ícone (editar, fechar, sair) */
+.botao-icone {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-border-color: transparent;
+    -fx-min-width: 34;
+    -fx-min-height: 34;
+    -fx-max-width: 34;
+    -fx-max-height: 34;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.botao-icone .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-suave;
+    -fx-icon-size: 18;
+}
+
+.botao-icone:hover {
+    -fx-background-color: -fmc-fundo;
+}
+
+.botao-icone:hover .ikonli-font-icon {
+    -fx-icon-color: -fmc-azul;
+}
+
+.botao-sair:hover .ikonli-font-icon {
+    -fx-icon-color: -fmc-erro-escuro;
+}
+
+/* ===================== Campos de formulário ===================== */
+
+.rotulo {
+    -fx-font-weight: 500;
+    -fx-text-fill: -fmc-texto;
+}
+
+.campo {
+    -fx-pref-height: 40;
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: -fmc-borda-forte;
+    -fx-border-radius: 8;
+    -fx-prompt-text-fill: -fmc-texto-desligado;
+}
+
+.campo:hover {
+    -fx-border-color: #B4BBC4;
+}
+
+.campo:focused {
+    -fx-border-color: -fmc-azul-medio;
+    -fx-effect: dropshadow(gaussian, -fmc-azul-100, 0, 1, 0, 0);
+}
+
+.dica {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.erro {
+    -fx-text-fill: -fmc-erro;
+}
+
+.sucesso {
+    -fx-text-fill: -fmc-sucesso;
+}
+
+/* ===================== Tabela ===================== */
+
+.cartao-tabela {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 1;
+}
+
+.tabela-fmc {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.tabela-fmc .column-header-background {
+    -fx-background-color: -fmc-fundo-afundado;
+    -fx-background-radius: 11 11 0 0;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}
+
+.tabela-fmc .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+.tabela-fmc .column-header {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-pref-height: 42;
+}
+
+.tabela-fmc .column-header .label {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-weight: 500;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 12;
+}
+
+.tabela-fmc .table-row-cell {
+    -fx-cell-size: 60;
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tabela-fmc .table-row-cell:empty {
+    -fx-border-color: transparent;
+}
+
+.tabela-fmc .table-row-cell:filled:hover {
+    -fx-background-color: -fmc-fundo-afundado;
+    -fx-cursor: hand;
+}
+
+.tabela-fmc .table-row-cell:filled:selected {
+    -fx-background-color: -fmc-azul-claro;
+}
+
+.tabela-fmc .table-cell {
+    -fx-border-width: 0;
+    -fx-padding: 0 12 0 12;
+    -fx-alignment: center-left;
+    -fx-text-fill: -fmc-texto;
+}
+
+.tabela-fmc .celula-numero {
+    -fx-alignment: center-right;
+    -fx-padding: 0 24 0 12;
+}
+
+.tabela-fmc .column-header.coluna-numero > .label {
+    -fx-alignment: center-right;
+    -fx-max-width: infinity;
+    -fx-padding: 0 24 0 0;
+}
+
+.celula-nome {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.celula-detalhe {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.tabela-vazia-titulo {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.tabela-vazia .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-desligado;
+    -fx-icon-size: 32;
+}
+
+/* Selo (Badge) */
+.selo {
+    -fx-background-radius: 6;
+    -fx-padding: 3 8 3 8;
+    -fx-font-weight: 500;
+}
+
+.selo-neutro {
+    -fx-background-color: -fmc-fundo;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 6;
+    -fx-text-fill: -fmc-texto-corpo;
+}
+
+.selo-info {
+    -fx-background-color: -fmc-azul-claro;
+    -fx-text-fill: -fmc-azul;
+}
+
+.selo-sucesso {
+    -fx-background-color: -fmc-sucesso-fundo;
+    -fx-text-fill: -fmc-sucesso;
+}
+
+/* ===================== Janela (Dialog) ===================== */
+
+/* Véu escuro por trás da janela */
+.veu {
+    -fx-background-color: rgba(12, 34, 56, 0.44);
+}
+
+.janela {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(12, 34, 56, 0.18), 40, 0, 0, 16);
+}
+
+.janela-topo {
+    -fx-padding: 22 20 18 24;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}
+
+.janela-titulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.janela-sub {
+    -fx-text-fill: -fmc-texto-corpo;
+    -fx-font-size: 15px;
+}
+
+.janela-corpo {
+    -fx-padding: 20 24 24 24;
+}
+
+.janela-rodape {
+    -fx-padding: 16 24 16 24;
+    -fx-background-color: -fmc-fundo-afundado;
+    -fx-background-radius: 0 0 16 16;
+    -fx-border-color: -fmc-borda transparent transparent transparent;
+}
+
+.secao-formulario {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-azul;
+}
+
+/* Aviso de erro (Alert) */
+.aviso-erro {
+    -fx-background-color: -fmc-erro-fundo;
+    -fx-border-color: -fmc-erro-borda;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 12 14 12 14;
+}
+
+.aviso-erro .label {
+    -fx-text-fill: -fmc-erro-escuro;
+}
+
+.aviso-erro .ikonli-font-icon {
+    -fx-icon-color: -fmc-erro;
+    -fx-icon-size: 18;
+}
+
+/* Mensagem rápida no canto da tela (Toast) */
+.toast {
+    -fx-background-color: -fmc-texto;
+    -fx-background-radius: 10;
+    -fx-padding: 12 16 12 14;
+    -fx-effect: dropshadow(gaussian, rgba(12, 34, 56, 0.12), 12, 0, 0, 4);
+}
+
+.toast .label {
+    -fx-text-fill: white;
+    -fx-font-weight: 500;
+}
+
+.toast .ikonli-font-icon {
+    -fx-icon-color: #8FD3AE;
+    -fx-icon-size: 18;
+}
+
+/* Rolagem sem fundo cinza */
+.rolagem,
+.rolagem > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+/* ===================== Telas antigas (Usuários, BOARD-53/41) ===================== */
+
+.cartao-formulario {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+}
+
+.table-view {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+/* ===================== Login (BOARD-33) ===================== */
+
 .login-fundo {
     -fx-background-color: -fmc-fundo;
 }
@@ -116,96 +553,4 @@
     -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: -fmc-azul;
-}
-
-.rotulo {
-    -fx-font-weight: bold;
-    -fx-padding: 8 0 0 0;
-}
-
-.campo {
-    -fx-pref-height: 40;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #D2D7DD;
-    -fx-background-color: white;
-}
-
-.campo:focused {
-    -fx-border-color: -fmc-azul;
-}
-
-.erro {
-    -fx-text-fill: #B42318;
-}
-
-.botao-primario {
-    -fx-background-color: -fmc-azul;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-pref-height: 42;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-}
-
-.botao-primario:hover {
-    -fx-background-color: -fmc-azul-escuro;
-}
-
-/* Telas de cadastro (a partir da BOARD-53) */
-.subtitulo {
-    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -fmc-texto;
-}
-
-.cartao-formulario {
-    -fx-background-color: -fmc-cartao;
-    -fx-border-color: -fmc-borda;
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
-    -fx-padding: 20;
-}
-
-.dica {
-    -fx-text-fill: -fmc-texto-suave;
-    -fx-font-size: 12px;
-}
-
-.sucesso {
-    -fx-text-fill: #1B6B43;
-}
-
-.botao-secundario {
-    -fx-background-color: white;
-    -fx-text-fill: -fmc-azul;
-    -fx-border-color: -fmc-azul;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-pref-height: 42;
-    -fx-cursor: hand;
-}
-
-.botao-secundario:hover {
-    -fx-background-color: -fmc-azul-claro;
-}
-
-/* Formulário comprido (a partir da BOARD-35): rola sem mostrar fundo cinza */
-.rolagem,
-.rolagem > .viewport {
-    -fx-background-color: transparent;
-    -fx-background-insets: 0;
-    -fx-padding: 0;
-}
-
-.table-view {
-    -fx-background-color: -fmc-cartao;
-    -fx-border-color: -fmc-borda;
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
-}
-
-.table-view .column-header-background {
-    -fx-background-color: #F8F9FA;
 }

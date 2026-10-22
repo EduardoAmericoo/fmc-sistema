@@ -74,10 +74,17 @@ Para criar uma tabela nova, acrescente um `CREATE TABLE IF NOT EXISTS ...` em `s
 
 ⚠️ Nunca use nomes ou CPFs reais da Fundação como dados de teste.
 
-## Fontes do design system (opcional)
+## Visual das telas (design system)
 
-Para usar as fontes oficiais (Urbanist e Plus Jakarta Sans), coloque os arquivos `.ttf` em
-`src/main/resources/br/org/fmc/fonts/`. Sem elas, o sistema usa a fonte Segoe UI.
+O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):
+
+- **AtlantaFX** dá a base moderna dos controles e **`css/tema.css`** aplica as cores e medidas da Fundação.
+- **Ícones:** pacote Feather do Ikonli. No FXML: `<FontIcon iconLiteral="fth-home"/>`
+  (lista completa: https://kordamp.org/ikonli/cheat-sheet-feather.html).
+- **Fontes:** já estão em `src/main/resources/br/org/fmc/fonts/` (licença livre, Google Fonts).
+- **Modelo para telas novas:** a tela de Inquilinos (`inquilinos.fxml` + `InquilinosController`):
+  cabeçalho com título e botão principal, tabela num cartão (`tabela-fmc`) e o formulário numa
+  janela por cima da tela (`Navegador.mostrarJanela`).
 
 ## Combinados de trabalho com Git
 

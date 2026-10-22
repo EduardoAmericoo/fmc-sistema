@@ -10,7 +10,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**
@@ -32,25 +34,35 @@ public class PrincipalController {
     private VBox menu;
 
     @FXML
-    private Label usuarioLogado;
+    private HBox cartaoUsuario;
 
     @FXML
-    private Label statusBanco;
+    private Label avatar;
+
+    @FXML
+    private Label usuarioNome;
+
+    @FXML
+    private Label usuarioPerfil;
 
     @FXML
     private void initialize() {
         Navegador.configurar(raiz);
         if (Sessao.estaLogado()) {
             Usuario u = Sessao.usuario();
-            usuarioLogado.setText(u.getNome() + "\n" + u.getPerfil().getDescricao());
+            avatar.setText(Iniciais.de(u.getNome()));
+            usuarioNome.setText(u.getNome());
+            usuarioPerfil.setText(u.getPerfil().getDescricao());
         }
         esconderTelasSemPermissao();
         abrir("painel");
+        String statusBanco;
         try {
-            statusBanco.setText("Banco de dados conectado (schema v" + servicoSistema.versaoDoBanco() + ")");
+            statusBanco = "Banco de dados conectado (schema v" + servicoSistema.versaoDoBanco() + ")";
         } catch (Exception e) {
-            statusBanco.setText("Erro no banco de dados: " + e.getMessage());
+            statusBanco = "Erro no banco de dados: " + e.getMessage();
         }
+        Tooltip.install(cartaoUsuario, new Tooltip(statusBanco));
     }
 
     /** Clique em qualquer botão do menu que abre uma tela. */

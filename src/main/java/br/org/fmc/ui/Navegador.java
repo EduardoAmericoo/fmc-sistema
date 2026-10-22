@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -31,6 +32,9 @@ public final class Navegador {
 
     private static Stage palco;
     private static BorderPane janela;
+
+    /** Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver). */
+    private static StackPane camadas;
 
     private Navegador() {
     }
@@ -55,9 +59,26 @@ public final class Navegador {
             throw new IllegalStateException("Chame Navegador.iniciar(stage) antes.");
         }
         Parent raiz = (Parent) carregarFxml(Navegador.class.getResource("/br/org/fmc/ui/" + fxml + ".fxml"), fxml);
-        Scene cena = new Scene(raiz, LARGURA, ALTURA);
+        camadas = new StackPane(raiz);
+        Scene cena = new Scene(camadas, LARGURA, ALTURA);
         cena.getStylesheets().add(Navegador.class.getResource(CSS).toExternalForm());
         palco.setScene(cena);
+    }
+
+    /**
+     * Mostra uma janela (formulário sobre um véu escuro) por cima da tela inteira,
+     * inclusive do menu lateral. Use fecharJanela() com o mesmo componente para tirar.
+     */
+    public static void mostrarJanela(Node veu) {
+        if (!camadas.getChildren().contains(veu)) {
+            camadas.getChildren().add(veu);
+        }
+        veu.setVisible(true);
+        veu.setManaged(true);
+    }
+
+    public static void fecharJanela(Node veu) {
+        camadas.getChildren().remove(veu);
     }
 
     /** Chamado uma vez pela tela principal, para dizer onde as telas aparecem. */
