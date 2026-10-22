@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Entrada e saída do sistema e cadastro de usuários.
@@ -98,6 +99,48 @@ public class ServicoAcesso {
     public List<Usuario> listarUsuarios() throws SQLException {
         Sessao.exigir(Acao.GERENCIAR_USUARIOS);
         return usuarios.listarTodos();
+    }
+
+    /**
+     * Define exatamente o que esta pessoa pode fazer, além do perfil (BOARD-41).
+     * Só o Administrador. Ninguém pode tirar de si mesmo a permissão de gerenciar
+     * usuários, para o sistema não ficar sem ninguém que consiga desfazer o ajuste.
+     *
+     * @return o usuário já com as permissões novas
+     */
+    public Usuario alterarPermissoes(long usuarioId, Set<Acao> acoes) throws SQLException {
+        Sessao.exigir(Acao.GERENCIAR_USUARIOS);
+        if (acoes == null) {
+            throw new RegraNegocioException("Escolha as permissões.");
+        }
+        Usuario usuario = buscarParaAlterar(usuarioId);
+        usuario.personalizarPermissoes(acoes);
+        return salvarPermissoes(usuario);
+    }
+
+    /** Desfaz os ajustes: a pessoa volta a ter só as permissões do perfil dela. */
+    public Usuario restaurarPermissoesDoPerfil(long usuarioId) throws SQLException {
+        Sessao.exigir(Acao.GERENCIAR_USUARIOS);
+        Usuario usuario = buscarParaAlterar(usuarioId);
+        usuario.restaurarPermissoesDoPerfil();
+        return salvarPermissoes(usuario);
+    }
+
+    private Usuario buscarParaAlterar(long usuarioId) throws SQLException {
+        return usuarios.buscarPorId(usuarioId)
+                .orElseThrow(() -> new RegraNegocioException("Usuário não encontrado."));
+    }
+
+    private Usuario salvarPermissoes(Usuario usuario) throws SQLException {
+        boolean ehQuemEstaLogado = usuario.getId().equals(Sessao.usuario().getId());
+        if (ehQuemEstaLogado && !usuario.pode(Acao.GERENCIAR_USUARIOS)) {
+            throw new RegraNegocioException("Você não pode tirar de si mesmo a permissão de gerenciar usuários.");
+        }
+        usuarios.salvar(usuario);
+        if (ehQuemEstaLogado) {
+            Sessao.iniciar(usuario); // a sessão passa a valer com as permissões novas
+        }
+        return usuario;
     }
 
     /** Sai do sistema. */
