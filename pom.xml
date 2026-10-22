@@ -40,6 +40,23 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- Visual moderno: tema AtlantaFX (base dos controles) + ícones de linha Feather via Ikonli -->
+        <dependency>
+            <groupId>io.github.mkpaz</groupId>
+            <artifactId>atlantafx-base</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>12.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-feather-pack</artifactId>
+            <version>12.3.1</version>
+        </dependency>
+
         <!-- Banco de dados SQLite (um arquivo, sem servidor) -->
         <dependency>
             <groupId>org.xerial</groupId>

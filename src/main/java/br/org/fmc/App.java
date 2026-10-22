@@ -3,6 +3,7 @@ package br.org.fmc;
 import br.org.fmc.db.Database;
 import br.org.fmc.service.ServicoAcesso;
 import br.org.fmc.ui.Navegador;
+import br.org.fmc.ui.Tema;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -17,6 +18,7 @@ public class App extends Application {
         Database.inicializar();
         new ServicoAcesso().garantirAdministradorInicial();
 
+        Tema.aplicar();
         stage.setTitle("Fundação Manuel Cruz");
         Navegador.iniciar(stage);
         Navegador.mostrarLogin();

@@ -4,36 +4,62 @@
   Janela principal: menu lateral à esquerda, tela escolhida no centro.
   Cada botão do menu tem userData = nome do arquivo .fxml da tela (ver ui/Navegador.java).
   Para criar uma tela nova, NÃO precisa mexer aqui: crie o .fxml com o nome certo.
+  Os ícones são do pacote Feather (Ikonli): https://kordamp.org/ikonli/cheat-sheet-feather.html
 -->
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane fx:id="raiz" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.org.fmc.ui.PrincipalController" styleClass="raiz">
 
     <left>
-        <VBox fx:id="menu" styleClass="menu-lateral" spacing="4">
-            <Label text="Fundação Manuel Cruz" styleClass="marca" wrapText="true"/>
-            <Button text="Painel" userData="painel" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
-            <Button text="Aluguéis" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
-            <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
-            <Button text="Inquilinos" userData="inquilinos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
-            <Button text="Contratos" userData="contratos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
-            <Button text="Usuários" userData="usuarios" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity"/>
+        <VBox styleClass="menu-lateral" spacing="20">
+            <VBox spacing="2">
+                <Label text="Fundação Manuel Cruz" styleClass="marca" wrapText="true"/>
+                <Label text="Gestão de aluguéis" styleClass="marca-sub"/>
+            </VBox>
+
+            <VBox fx:id="menu" spacing="2">
+                <Label text="MENU" styleClass="secao-menu"/>
+                <Button text="Painel" userData="painel" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-grid"/></graphic>
+                </Button>
+                <Button text="Aluguéis" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
+                </Button>
+                <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-home"/></graphic>
+                </Button>
+                <Button text="Inquilinos" userData="inquilinos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-users"/></graphic>
+                </Button>
+                <Button text="Contratos" userData="contratos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-file-text"/></graphic>
+                </Button>
+                <Button text="Usuários" userData="usuarios" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-shield"/></graphic>
+                </Button>
+            </VBox>
+
             <Region VBox.vgrow="ALWAYS"/>
-            <Label fx:id="usuarioLogado" styleClass="usuario-logado" wrapText="true"/>
-            <Button text="Sair" onAction="#sair" styleClass="item-menu" maxWidth="Infinity"/>
+
+            <!-- Quem está logado; passar o mouse mostra a situação do banco de dados -->
+            <HBox fx:id="cartaoUsuario" styleClass="cartao-usuario" spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="avatar" styleClass="avatar"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label fx:id="usuarioNome" styleClass="usuario-nome"/>
+                    <Label fx:id="usuarioPerfil" styleClass="usuario-perfil"/>
+                </VBox>
+                <Button onAction="#sair" styleClass="botao-icone, botao-sair" accessibleText="Sair">
+                    <graphic><FontIcon iconLiteral="fth-log-out"/></graphic>
+                </Button>
+            </HBox>
         </VBox>
     </left>
-
-    <bottom>
-        <Label fx:id="statusBanco" styleClass="rodape">
-            <padding><Insets top="8" right="16" bottom="8" left="16"/></padding>
-        </Label>
-    </bottom>
 </BorderPane>
