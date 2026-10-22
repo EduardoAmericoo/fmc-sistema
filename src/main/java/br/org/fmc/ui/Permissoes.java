@@ -10,7 +10,7 @@ import javafx.scene.Node;
  * Uso no initialize() do controller da sua tela:
  *
  * <pre>
- *     Permissoes.mostrarSe(botaoNovoImovel, Acao.CADASTRAR_IMOVEL);
+ *     Permissoes.mostrarSe(botaoNovoImovel, Acao.CRIAR_IMOVEL);
  *     Permissoes.mostrarSe(botaoReceber, Acao.RECEBER_ALUGUEL);
  * </pre>
  *

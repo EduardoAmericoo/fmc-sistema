@@ -16,7 +16,7 @@ import java.util.Optional;
  * Cadastro e edição de inquilinos com os dados da proposta (BOARD-35).
  *
  * Regras: CPF válido pelos dígitos verificadores, sem dois inquilinos com o
- * mesmo CPF, e só quem pode cadastrar inquilinos (Administrador e Secretaria).
+ * mesmo CPF. Criar, editar e ver dependem cada um da sua permissão (BOARD-41).
  */
 public class ServicoInquilinos {
 
@@ -38,13 +38,13 @@ public class ServicoInquilinos {
      * @return o inquilino cadastrado, já com id
      */
     public Inquilino cadastrar(DadosInquilino dados) throws SQLException {
-        Sessao.exigir(Acao.CADASTRAR_INQUILINO);
+        Sessao.exigir(Acao.CRIAR_INQUILINO);
         return salvar(null, dados);
     }
 
     /** Altera os dados de um inquilino já cadastrado. Mesmas regras do cadastro. */
     public Inquilino editar(long id, DadosInquilino dados) throws SQLException {
-        Sessao.exigir(Acao.CADASTRAR_INQUILINO);
+        Sessao.exigir(Acao.EDITAR_INQUILINO);
         if (inquilinos.buscarPorId(id).isEmpty()) {
             throw new RegraNegocioException("Inquilino não encontrado.");
         }
@@ -53,7 +53,7 @@ public class ServicoInquilinos {
 
     /** Todos os inquilinos, em ordem de nome. Qualquer perfil que veja os cadastros. */
     public List<Inquilino> listar() throws SQLException {
-        Sessao.exigir(Acao.VER_CADASTROS);
+        Sessao.exigir(Acao.VER_INQUILINOS);
         return inquilinos.listarTodos();
     }
 

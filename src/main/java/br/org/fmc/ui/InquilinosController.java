@@ -43,7 +43,7 @@ public class InquilinosController {
     /** Inquilino aberto na janela para editar; null quando é um cadastro novo. */
     private Inquilino emEdicao;
 
-    /** Quem está logado pode cadastrar e editar? (o Financeiro só consulta) */
+    /** Quem está logado pode editar inquilinos? (mostra o lápis e abre a janela ao clicar na linha) */
     private boolean podeEditar;
 
     @FXML
@@ -113,7 +113,7 @@ public class InquilinosController {
 
     @FXML
     private void initialize() {
-        podeEditar = Sessao.pode(Acao.CADASTRAR_INQUILINO);
+        podeEditar = Sessao.pode(Acao.EDITAR_INQUILINO);
         montarTabela();
 
         // Máscaras: os campos se formatam sozinhos enquanto a pessoa digita (BOARD-165).
@@ -127,8 +127,8 @@ public class InquilinosController {
         campoEstadoCivil.getItems().setAll(EstadoCivil.values());
         campoEstadoCivil.valueProperty().addListener((obs, antes, agora) -> mostrarConjuge());
 
-        // O Financeiro só consulta: vê a lista, mas não cadastra nem edita.
-        Permissoes.mostrarSe(botaoNovo, Acao.CADASTRAR_INQUILINO);
+        // Cada botão só aparece para quem tem a permissão dele (ex.: pode editar, mas não criar).
+        Permissoes.mostrarSe(botaoNovo, Acao.CRIAR_INQUILINO);
         colunaAcoes.setVisible(podeEditar);
 
         // Esc fecha a janela do formulário.
@@ -220,7 +220,7 @@ public class InquilinosController {
         FontIcon icone = new FontIcon("fth-users");
         Label titulo = new Label("Nenhum inquilino cadastrado ainda");
         titulo.getStyleClass().add("tabela-vazia-titulo");
-        Label dica = new Label(podeEditar ? "Clique em \"Novo inquilino\" para começar." : "Os inquilinos aparecem aqui.");
+        Label dica = new Label(Sessao.pode(Acao.CRIAR_INQUILINO) ? "Clique em \"Novo inquilino\" para começar." : "Os inquilinos aparecem aqui.");
         dica.getStyleClass().add("texto");
         VBox vazio = new VBox(8, icone, titulo, dica);
         vazio.setAlignment(Pos.CENTER);

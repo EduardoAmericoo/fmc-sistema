@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -148,11 +149,28 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         return u;
     }
 
-    /** "VER_CADASTROS,VER_FINANCEIRO" vira o conjunto de ações. Nomes que não existem mais são ignorados. */
+    /**
+     * Nomes das permissões antes de serem divididas por tela e por ação (BOARD-41, 2ª versão).
+     * Ajustes gravados com os nomes antigos continuam valendo, traduzidos para os novos.
+     */
+    private static final Map<String, Set<Acao>> NOMES_ANTIGOS = Map.of(
+            "VER_CADASTROS", EnumSet.of(Acao.VER_IMOVEIS, Acao.VER_INQUILINOS, Acao.VER_CONTRATOS),
+            "VER_FINANCEIRO", EnumSet.of(Acao.VER_ALUGUEIS),
+            "CADASTRAR_IMOVEL", EnumSet.of(Acao.CRIAR_IMOVEL, Acao.EDITAR_IMOVEL),
+            "CADASTRAR_INQUILINO", EnumSet.of(Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO),
+            "CADASTRAR_CONTRATO", EnumSet.of(Acao.CRIAR_CONTRATO),
+            "GERENCIAR_USUARIOS", EnumSet.of(Acao.VER_USUARIOS, Acao.CRIAR_USUARIO, Acao.EDITAR_PERMISSOES));
+
+    /** "VER_IMOVEIS,VER_INQUILINOS" vira o conjunto de ações. Nomes que não existem mais são ignorados. */
     private static Set<Acao> lerAcoes(String texto) {
         Set<Acao> acoes = EnumSet.noneOf(Acao.class);
         for (String nome : texto.split(",")) {
-            Arrays.stream(Acao.values()).filter(a -> a.name().equals(nome.trim())).findFirst().ifPresent(acoes::add);
+            String n = nome.trim();
+            if (NOMES_ANTIGOS.containsKey(n)) {
+                acoes.addAll(NOMES_ANTIGOS.get(n));
+            } else {
+                Arrays.stream(Acao.values()).filter(a -> a.name().equals(n)).findFirst().ifPresent(acoes::add);
+            }
         }
         return acoes;
     }

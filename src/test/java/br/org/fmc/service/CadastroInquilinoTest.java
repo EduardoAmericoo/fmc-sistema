@@ -7,13 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import br.org.fmc.db.Database;
+import br.org.fmc.model.Acao;
 import br.org.fmc.model.EstadoCivil;
 import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.Perfil;
+import br.org.fmc.model.Usuario;
 import br.org.fmc.repository.InquilinoRepository;
 import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,6 +142,21 @@ class CadastroInquilinoTest {
         acesso.login("contabilidade@exemplo.org", "senha1");
 
         assertEquals(1, servico.listar().size());
+        assertThrows(AcessoNegadoException.class, () -> servico.cadastrar(maria(CPF_CARLOS)));
+    }
+
+    @Test
+    void jovemAprendizEditaMasNaoCria() throws Exception {
+        Inquilino maria = servico.cadastrar(maria(CPF_MARIA));
+        Usuario aprendiz = acesso.criarUsuario("Jovem Aprendiz", "aprendiz@exemplo.org", Perfil.SECRETARIA, "senha1");
+        Set<Acao> semCriar = EnumSet.copyOf(Perfil.SECRETARIA.getPermissoes());
+        semCriar.remove(Acao.CRIAR_INQUILINO);
+        acesso.alterarPermissoes(aprendiz.getId(), semCriar);
+        acesso.sair();
+        acesso.login("aprendiz@exemplo.org", "senha1");
+
+        assertEquals(1, servico.listar().size());
+        servico.editar(maria.getId(), maria(CPF_MARIA));
         assertThrows(AcessoNegadoException.class, () -> servico.cadastrar(maria(CPF_CARLOS)));
     }
 

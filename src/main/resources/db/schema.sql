@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS usuario (
 
 -- BOARD-41 · Permissões ajustadas pelo Administrador, pessoa a pessoa.
 -- Só tem linha aqui quem foge do padrão do perfil. "acoes" guarda os nomes
--- separados por vírgula (ex.: "VER_CADASTROS,VER_FINANCEIRO"). Vazio = não pode nada.
+-- separados por vírgula (ex.: "VER_IMOVEIS,VER_INQUILINOS"). Vazio = não pode nada.
 CREATE TABLE IF NOT EXISTS usuario_permissoes (
     usuario_id INTEGER PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
     acoes      TEXT    NOT NULL

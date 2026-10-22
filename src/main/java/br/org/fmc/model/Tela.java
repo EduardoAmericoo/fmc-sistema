@@ -11,11 +11,11 @@ import java.util.Optional;
  */
 public enum Tela {
     PAINEL("painel", "Painel", null),
-    ALUGUEIS("alugueis", "Aluguéis", Acao.VER_FINANCEIRO),
-    IMOVEIS("imoveis", "Imóveis", Acao.VER_CADASTROS),
-    INQUILINOS("inquilinos", "Inquilinos", Acao.VER_CADASTROS),
-    CONTRATOS("contratos", "Contratos", Acao.VER_CADASTROS),
-    USUARIOS("usuarios", "Usuários", Acao.GERENCIAR_USUARIOS);
+    ALUGUEIS("alugueis", "Aluguéis", Acao.VER_ALUGUEIS),
+    IMOVEIS("imoveis", "Imóveis", Acao.VER_IMOVEIS),
+    INQUILINOS("inquilinos", "Inquilinos", Acao.VER_INQUILINOS),
+    CONTRATOS("contratos", "Contratos", Acao.VER_CONTRATOS),
+    USUARIOS("usuarios", "Usuários", Acao.VER_USUARIOS);
 
     private final String arquivo;
     private final String titulo;

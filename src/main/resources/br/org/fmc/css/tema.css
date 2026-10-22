@@ -567,3 +567,12 @@
     -fx-font-weight: bold;
     -fx-text-fill: -fmc-azul;
 }
+
+/* Título de cada grupo de caixinhas (Imóveis, Inquilinos...), BOARD-41 */
+.grupo-permissao {
+    -fx-background-color: -fmc-fundo-afundado;
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-weight: bold;
+    -fx-padding: 8 14 8 14;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}

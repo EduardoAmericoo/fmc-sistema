@@ -6,6 +6,7 @@ import br.org.fmc.model.Usuario;
 import br.org.fmc.service.AcessoNegadoException;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoAcesso;
+import br.org.fmc.service.Sessao;
 import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Set;
@@ -97,17 +98,10 @@ public class UsuariosController {
     private void initialize() {
         montarTabela();
         campoPerfil.getItems().setAll(Perfil.values());
-        Permissoes.mostrarSe(botaoNovo, Acao.GERENCIAR_USUARIOS);
-
-        // Uma caixinha para cada ação do sistema; o userData guarda qual ação ela representa.
-        for (Acao acao : Acao.values()) {
-            CheckBox caixa = new CheckBox(acao.getDescricao());
-            caixa.setUserData(acao);
-            caixa.setWrapText(true);
-            caixa.getStyleClass().add("item-permissao");
-            caixa.setMaxWidth(Double.MAX_VALUE);
-            caixasPermissoes.getChildren().add(caixa);
-        }
+        // Cada botão só aparece para quem tem a permissão dele.
+        Permissoes.mostrarSe(botaoNovo, Acao.CRIAR_USUARIO);
+        colunaAcoes.setVisible(Sessao.pode(Acao.EDITAR_PERMISSOES));
+        montarCaixinhas();
 
         // Esc fecha a janela aberta.
         veuNovo.setOnKeyPressed(e -> {
@@ -162,17 +156,60 @@ public class UsuariosController {
             return ajustar;
         }));
 
-        // Clicar na linha também abre as permissões.
+        // Clicar na linha também abre as permissões (para quem pode ajustá-las).
         tabela.setRowFactory(t -> {
             TableRow<Usuario> linha = new TableRow<>();
             linha.setOnMouseClicked(e -> {
-                if (!linha.isEmpty()) {
+                if (Sessao.pode(Acao.EDITAR_PERMISSOES) && !linha.isEmpty()) {
                     abrirPermissoes(linha.getItem());
                 }
             });
             return linha;
         });
         tabela.setPlaceholder(vazio("fth-users", "Nenhum usuário para mostrar", ""));
+    }
+
+    /**
+     * Uma caixinha para cada ação, agrupadas por tela (Imóveis, Inquilinos...).
+     * O userData de cada caixinha guarda a ação que ela representa.
+     * Marcar "criar" ou "editar" marca junto o "ver" da tela; desmarcar o "ver" desmarca o resto da tela.
+     */
+    private void montarCaixinhas() {
+        String telaAtual = null;
+        for (Acao acao : Acao.values()) {
+            if (!acao.getTela().equals(telaAtual)) {
+                telaAtual = acao.getTela();
+                Label grupo = new Label(telaAtual);
+                grupo.getStyleClass().add("grupo-permissao");
+                grupo.setMaxWidth(Double.MAX_VALUE);
+                caixasPermissoes.getChildren().add(grupo);
+            }
+            CheckBox caixa = new CheckBox(acao.getDescricao());
+            caixa.setUserData(acao);
+            caixa.setWrapText(true);
+            caixa.getStyleClass().add("item-permissao");
+            caixa.setMaxWidth(Double.MAX_VALUE);
+            caixa.selectedProperty().addListener((obs, antes, marcada) -> manterRequisitos(acao, marcada));
+            caixasPermissoes.getChildren().add(caixa);
+        }
+    }
+
+    private void manterRequisitos(Acao acao, boolean marcada) {
+        for (CheckBox outra : caixinhas()) {
+            Acao a = (Acao) outra.getUserData();
+            if (marcada && a == acao.getRequisito()) {
+                outra.setSelected(true);
+            } else if (!marcada && a.getRequisito() == acao) {
+                outra.setSelected(false);
+            }
+        }
+    }
+
+    private java.util.List<CheckBox> caixinhas() {
+        return caixasPermissoes.getChildren().stream()
+                .filter(CheckBox.class::isInstance)
+                .map(CheckBox.class::cast)
+                .toList();
     }
 
     /** Célula de tabela que desenha um componente a partir do usuário da linha. */
@@ -244,8 +281,7 @@ public class UsuariosController {
                 + (usuario.temPermissoesPersonalizadas()
                         ? "Esta pessoa tem permissões ajustadas pelo Administrador."
                         : "Esta pessoa segue o padrão do perfil."));
-        for (Node item : caixasPermissoes.getChildren()) {
-            CheckBox caixa = (CheckBox) item;
+        for (CheckBox caixa : caixinhas()) {
             caixa.setSelected(usuario.getPermissoes().contains((Acao) caixa.getUserData()));
         }
         esconder(avisoPermissoes);
@@ -263,8 +299,7 @@ public class UsuariosController {
     @FXML
     private void salvarPermissoes() {
         Set<Acao> marcadas = EnumSet.noneOf(Acao.class);
-        for (Node item : caixasPermissoes.getChildren()) {
-            CheckBox caixa = (CheckBox) item;
+        for (CheckBox caixa : caixinhas()) {
             if (caixa.isSelected()) {
                 marcadas.add((Acao) caixa.getUserData());
             }
@@ -306,13 +341,13 @@ public class UsuariosController {
             tabela.getItems().setAll(servico.listarUsuarios());
             int total = tabela.getItems().size();
             contagem.setText((total == 1 ? "1 usuário" : total + " usuários")
-                    + " · Clique em um usuário para ajustar as permissões.");
+                    + (Sessao.pode(Acao.EDITAR_PERMISSOES) ? " · Clique em um usuário para ajustar as permissões." : ""));
         } catch (AcessoNegadoException e) {
-            // Quem não gerencia usuários vê só o aviso, no lugar da lista.
+            // Quem não pode ver a lista de usuários vê só o aviso, no lugar dela.
             tabela.getItems().clear();
-            contagem.setText("Somente o Administrador pode ver e criar usuários.");
+            contagem.setText("O seu perfil não tem acesso à lista de usuários.");
             tabela.setPlaceholder(vazio("fth-lock", "Acesso restrito",
-                    "Somente o Administrador pode ver e criar usuários."));
+                    "O seu perfil não tem acesso à lista de usuários."));
         } catch (SQLException e) {
             contagem.setText("Erro no banco de dados: " + e.getMessage());
         }
