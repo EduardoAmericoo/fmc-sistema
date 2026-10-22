@@ -1,6 +1,7 @@
 package br.org.fmc.repository;
 
 import br.org.fmc.db.Database;
+import br.org.fmc.model.Acao;
 import br.org.fmc.model.Perfil;
 import br.org.fmc.model.Usuario;
 import java.sql.Connection;
@@ -9,13 +10,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/** Salva e busca usuários na tabela "usuario". */
+/** Salva e busca usuários na tabela "usuario", com as permissões personalizadas de cada um. */
 public class UsuarioRepository implements Repositorio<Usuario> {
 
-    private static final String COLUNAS = "id, nome, email, senha_hash, perfil, ativo";
+    /** Junta as permissões personalizadas (BOARD-41): p.acoes vem nulo para quem segue o perfil. */
+    private static final String SELECT = "SELECT u.id, u.nome, u.email, u.senha_hash, u.perfil, u.ativo, p.acoes "
+            + "FROM usuario u LEFT JOIN usuario_permissoes p ON p.usuario_id = u.id";
 
     @Override
     public void salvar(Usuario usuario) throws SQLException {
@@ -24,6 +31,7 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         } else {
             atualizar(usuario);
         }
+        salvarPermissoes(usuario);
     }
 
     private void inserir(Usuario u) throws SQLException {
@@ -58,9 +66,28 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         st.setInt(5, u.isAtivo() ? 1 : 0);
     }
 
+    /** Grava as permissões personalizadas; quem segue o perfil fica sem linha em usuario_permissoes. */
+    private void salvarPermissoes(Usuario u) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            try (PreparedStatement st = conexao.prepareStatement("DELETE FROM usuario_permissoes WHERE usuario_id = ?")) {
+                st.setLong(1, u.getId());
+                st.executeUpdate();
+            }
+            if (u.temPermissoesPersonalizadas()) {
+                String acoes = u.getPermissoes().stream().map(Acao::name).collect(Collectors.joining(","));
+                try (PreparedStatement st = conexao.prepareStatement(
+                        "INSERT INTO usuario_permissoes (usuario_id, acoes) VALUES (?, ?)")) {
+                    st.setLong(1, u.getId());
+                    st.setString(2, acoes);
+                    st.executeUpdate();
+                }
+            }
+        }
+    }
+
     @Override
     public Optional<Usuario> buscarPorId(long id) throws SQLException {
-        return buscarUm("SELECT " + COLUNAS + " FROM usuario WHERE id = ?", id);
+        return buscarUm(SELECT + " WHERE u.id = ?", id);
     }
 
     /** O e-mail é procurado em minúsculas, do mesmo jeito que é guardado. */
@@ -68,14 +95,14 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         if (email == null) {
             return Optional.empty();
         }
-        return buscarUm("SELECT " + COLUNAS + " FROM usuario WHERE email = ?", email.trim().toLowerCase());
+        return buscarUm(SELECT + " WHERE u.email = ?", email.trim().toLowerCase());
     }
 
     @Override
     public List<Usuario> listarTodos() throws SQLException {
         List<Usuario> lista = new ArrayList<>();
         try (Connection conexao = Database.conectar();
-             PreparedStatement st = conexao.prepareStatement("SELECT " + COLUNAS + " FROM usuario ORDER BY nome");
+             PreparedStatement st = conexao.prepareStatement(SELECT + " ORDER BY u.nome");
              ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 lista.add(montar(rs));
@@ -114,6 +141,19 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         u.setId(rs.getLong("id"));
         u.setSenhaHash(rs.getString("senha_hash"));
         u.setAtivo(rs.getInt("ativo") == 1);
+        String acoes = rs.getString("acoes");
+        if (acoes != null) {
+            u.personalizarPermissoes(lerAcoes(acoes));
+        }
         return u;
+    }
+
+    /** "VER_CADASTROS,VER_FINANCEIRO" vira o conjunto de ações. Nomes que não existem mais são ignorados. */
+    private static Set<Acao> lerAcoes(String texto) {
+        Set<Acao> acoes = EnumSet.noneOf(Acao.class);
+        for (String nome : texto.split(",")) {
+            Arrays.stream(Acao.values()).filter(a -> a.name().equals(nome.trim())).findFirst().ifPresent(acoes::add);
+        }
+        return acoes;
     }
 }

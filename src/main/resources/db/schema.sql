@@ -24,6 +24,14 @@ CREATE TABLE IF NOT EXISTS usuario (
     ativo      INTEGER NOT NULL DEFAULT 1
 );
 
+-- BOARD-41 · Permissões ajustadas pelo Administrador, pessoa a pessoa.
+-- Só tem linha aqui quem foge do padrão do perfil. "acoes" guarda os nomes
+-- separados por vírgula (ex.: "VER_CADASTROS,VER_FINANCEIRO"). Vazio = não pode nada.
+CREATE TABLE IF NOT EXISTS usuario_permissoes (
+    usuario_id INTEGER PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
+    acoes      TEXT    NOT NULL
+);
+
 -- BOARD-35 · Inquilinos, com os dados da proposta.
 -- O CPF é guardado só com os 11 dígitos e não pode se repetir.
 -- Valores em dinheiro ficam como texto (ex.: "2500.00") para não perder centavos.
