@@ -2,6 +2,7 @@
 
 <!--
   BOARD-53 · Tela "Usuários": lista de usuários e cadastro de usuário novo.
+  BOARD-41 · Clicar num usuário da lista abre as permissões dele em caixinhas.
   Aberta pelo botão "Usuários" do menu (o nome do arquivo é o mesmo do userData do botão).
 -->
 
@@ -9,6 +10,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -20,7 +22,7 @@
 
     <VBox spacing="4">
         <Label text="Usuários" styleClass="titulo"/>
-        <Label text="O Administrador cria o acesso de cada pessoa da equipe e escolhe o perfil dela."
+        <Label text="O Administrador cria o acesso de cada pessoa da equipe e escolhe o perfil dela. Clique em um usuário da lista para ajustar as permissões dele."
                styleClass="texto" wrapText="true"/>
         <Label fx:id="aviso" styleClass="erro" wrapText="true" minHeight="-Infinity"/>
     </VBox>
@@ -28,9 +30,10 @@
     <HBox spacing="20" VBox.vgrow="ALWAYS">
         <TableView fx:id="tabela" HBox.hgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colunaNome" text="Nome" prefWidth="180"/>
-                <TableColumn fx:id="colunaEmail" text="E-mail" prefWidth="220"/>
-                <TableColumn fx:id="colunaPerfil" text="Perfil" prefWidth="120"/>
+                <TableColumn fx:id="colunaNome" text="Nome" prefWidth="160"/>
+                <TableColumn fx:id="colunaEmail" text="E-mail" prefWidth="200"/>
+                <TableColumn fx:id="colunaPerfil" text="Perfil" prefWidth="110"/>
+                <TableColumn fx:id="colunaPermissoes" text="Permissões" prefWidth="120"/>
                 <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="90"/>
             </columns>
             <columnResizePolicy>
@@ -38,27 +41,47 @@
             </columnResizePolicy>
         </TableView>
 
-        <VBox fx:id="formulario" styleClass="cartao-formulario" spacing="8" prefWidth="320" minWidth="280">
-            <Label text="Novo usuário" styleClass="subtitulo"/>
+        <ScrollPane fx:id="ladoDireito" fitToWidth="true" prefWidth="340" minWidth="300"
+                    hbarPolicy="NEVER" styleClass="rolagem">
+            <VBox spacing="16">
+                <!-- BOARD-41 · Aparece quando um usuário é escolhido na lista -->
+                <VBox fx:id="cartaoPermissoes" styleClass="cartao-formulario" spacing="8">
+                    <Label fx:id="tituloPermissoes" text="Permissões" styleClass="subtitulo" wrapText="true"
+                           minHeight="-Infinity"/>
+                    <Label fx:id="dicaPermissoes" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                    <VBox fx:id="caixasPermissoes" spacing="6"/>
+                    <Label fx:id="mensagemPermissoes" wrapText="true" minHeight="-Infinity"/>
+                    <Button text="Salvar permissões" onAction="#salvarPermissoes" styleClass="botao-primario"
+                            maxWidth="Infinity"/>
+                    <Button text="Voltar ao padrão do perfil" onAction="#restaurarPermissoes"
+                            styleClass="botao-secundario" maxWidth="Infinity"/>
+                    <Button text="Fechar" onAction="#fecharPermissoes" styleClass="botao-secundario"
+                            maxWidth="Infinity"/>
+                </VBox>
 
-            <Label text="Nome" labelFor="$campoNome" styleClass="rotulo"/>
-            <TextField fx:id="campoNome" styleClass="campo"/>
+                <VBox fx:id="formulario" styleClass="cartao-formulario" spacing="8">
+                    <Label text="Novo usuário" styleClass="subtitulo"/>
 
-            <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
-            <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
+                    <Label text="Nome" labelFor="$campoNome" styleClass="rotulo"/>
+                    <TextField fx:id="campoNome" styleClass="campo"/>
 
-            <Label text="Perfil" labelFor="$campoPerfil" styleClass="rotulo"/>
-            <ComboBox fx:id="campoPerfil" maxWidth="Infinity" styleClass="campo"/>
+                    <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
+                    <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
 
-            <Label text="Senha inicial" labelFor="$campoSenha" styleClass="rotulo"/>
-            <PasswordField fx:id="campoSenha" styleClass="campo"/>
-            <Label text="Mínimo de 6 caracteres. Entregue a senha à pessoa." styleClass="dica" wrapText="true"
-                   minHeight="-Infinity"/>
+                    <Label text="Perfil" labelFor="$campoPerfil" styleClass="rotulo"/>
+                    <ComboBox fx:id="campoPerfil" maxWidth="Infinity" styleClass="campo"/>
 
-            <!-- minHeight="-Infinity" deixa o texto quebrar em várias linhas em vez de cortar com "..." -->
-            <Label fx:id="mensagem" wrapText="true" minHeight="-Infinity"/>
+                    <Label text="Senha inicial" labelFor="$campoSenha" styleClass="rotulo"/>
+                    <PasswordField fx:id="campoSenha" styleClass="campo"/>
+                    <Label text="Mínimo de 6 caracteres. Entregue a senha à pessoa." styleClass="dica" wrapText="true"
+                           minHeight="-Infinity"/>
 
-            <Button text="Criar usuário" onAction="#criar" styleClass="botao-primario" maxWidth="Infinity"/>
-        </VBox>
+                    <!-- minHeight="-Infinity" deixa o texto quebrar em várias linhas em vez de cortar com "..." -->
+                    <Label fx:id="mensagem" wrapText="true" minHeight="-Infinity"/>
+
+                    <Button text="Criar usuário" onAction="#criar" styleClass="botao-primario" maxWidth="Infinity"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
     </HBox>
 </VBox>
