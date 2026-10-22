@@ -29,6 +29,26 @@ public final class Cpf {
         return digito(d, 9) == d.charAt(9) - '0' && digito(d, 10) == d.charAt(10) - '0';
     }
 
+    /**
+     * Explica por que o CPF não serve, para mostrar na tela; null se estiver certo.
+     * Ex.: "CPF incompleto: tem 9 números, precisa ter 11."
+     */
+    public static String problema(String numero) {
+        String d = numero == null ? "" : numero.replaceAll("\\D", "");
+        if (d.length() != 11) {
+            return d.length() < 11
+                    ? "CPF incompleto: tem " + d.length() + " números, precisa ter 11."
+                    : "CPF com números a mais: tem " + d.length() + ", precisa ter 11.";
+        }
+        if (d.chars().distinct().count() == 1) {
+            return "CPF inválido: números todos iguais não formam um CPF.";
+        }
+        if (!ehValido(d)) {
+            return "CPF inválido: os 2 últimos números não conferem com os 9 primeiros. Confira se digitou certo.";
+        }
+        return null;
+    }
+
     /** Calcula o dígito verificador da posição informada (9 ou 10). */
     private static int digito(String d, int posicao) {
         int soma = 0;

@@ -67,12 +67,13 @@ public class ServicoInquilinos {
         if (d.cpf() == null || d.cpf().isBlank()) {
             erros.add("Informe o CPF.");
         } else if (!Cpf.ehValido(d.cpf())) {
-            erros.add("CPF inválido: confira os dígitos.");
+            erros.add(Cpf.problema(d.cpf()));
         } else {
             cpf = new Cpf(d.cpf());
             Optional<Inquilino> mesmoCpf = inquilinos.buscarPorCpf(cpf);
             if (mesmoCpf.isPresent() && !mesmoCpf.get().getId().equals(id)) {
-                erros.add("Já existe um inquilino com este CPF: " + mesmoCpf.get().getNome() + ".");
+                erros.add("Este CPF já está cadastrado para " + mesmoCpf.get().getNome()
+                        + ". Para mudar os dados, clique no nome na lista.");
             }
         }
         if (d.email() != null && !d.email().isBlank() && !d.email().trim().matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {
@@ -119,7 +120,7 @@ public class ServicoInquilinos {
         }
         // O CPF do cônjuge não é obrigatório, mas, se for digitado, precisa ser válido.
         if (preenchido(d.conjugeCpf()) && !Cpf.ehValido(d.conjugeCpf())) {
-            erros.add("CPF do cônjuge inválido: confira os dígitos.");
+            erros.add("Cônjuge: " + Cpf.problema(d.conjugeCpf()));
         }
         BigDecimal renda = lerValor(d.conjugeRenda(), "Renda do cônjuge inválida", erros);
         if (erros.size() > errosAntes) {

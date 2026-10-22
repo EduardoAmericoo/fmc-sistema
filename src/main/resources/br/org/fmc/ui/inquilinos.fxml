@@ -101,7 +101,8 @@
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="1">
                             <Label text="CPF *" labelFor="$campoCpf" styleClass="rotulo"/>
-                            <TextField fx:id="campoCpf" promptText="000.000.000-00" styleClass="campo"/>
+                            <TextField fx:id="campoCpf" promptText="Só os números" styleClass="campo"/>
+                            <Label fx:id="dicaCpf" wrapText="true" minHeight="-Infinity"/>
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
                             <Label text="Estado civil *" labelFor="$campoEstadoCivil" styleClass="rotulo"/>
@@ -109,7 +110,7 @@
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="2">
                             <Label text="Telefone" labelFor="$campoTelefone" styleClass="rotulo"/>
-                            <TextField fx:id="campoTelefone" promptText="(79) 99999-9999" styleClass="campo"/>
+                            <TextField fx:id="campoTelefone" promptText="DDD e número" styleClass="campo"/>
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="2" GridPane.columnIndex="1">
                             <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
@@ -157,7 +158,8 @@
                             </VBox>
                             <VBox spacing="6" GridPane.rowIndex="1">
                                 <Label text="CPF do cônjuge" labelFor="$campoConjugeCpf" styleClass="rotulo"/>
-                                <TextField fx:id="campoConjugeCpf" promptText="000.000.000-00" styleClass="campo"/>
+                                <TextField fx:id="campoConjugeCpf" promptText="Só os números" styleClass="campo"/>
+                                <Label fx:id="dicaConjugeCpf" wrapText="true" minHeight="-Infinity"/>
                             </VBox>
                             <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
                                 <Label text="Renda do cônjuge (R$)" labelFor="$campoConjugeRenda" styleClass="rotulo"/>

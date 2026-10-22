@@ -24,6 +24,8 @@ class CadastroInquilinoTest {
 
     private static final String CPF_MARIA = "529.982.247-25";
     private static final String CPF_CARLOS = "11144477735";
+    private static final String CPF_DA_MARIA_REPETIDO =
+            "Este CPF já está cadastrado para Maria Teste. Para mudar os dados, clique no nome na lista.";
 
     @TempDir
     Path pasta;
@@ -65,7 +67,8 @@ class CadastroInquilinoTest {
     void cpfInvalidoNaoEAceito() throws Exception {
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
                 () -> servico.cadastrar(maria("529.982.247-26")));
-        assertEquals(List.of("CPF inválido: confira os dígitos."), e.getErros());
+        assertEquals(List.of("CPF inválido: os 2 últimos números não conferem com os 9 primeiros. "
+                + "Confira se digitou certo."), e.getErros());
         assertTrue(repo.listarTodos().isEmpty());
     }
 
@@ -75,7 +78,7 @@ class CadastroInquilinoTest {
         // Mesmo CPF digitado sem pontos: continua sendo repetido.
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
                 () -> servico.cadastrar(maria("52998224725")));
-        assertEquals(List.of("Já existe um inquilino com este CPF: Maria Teste."), e.getErros());
+        assertEquals(List.of(CPF_DA_MARIA_REPETIDO), e.getErros());
         assertEquals(1, repo.listarTodos().size());
     }
 
@@ -103,7 +106,7 @@ class CadastroInquilinoTest {
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
                 () -> servico.editar(carlos.getId(), maria(CPF_MARIA)));
-        assertTrue(e.getErros().contains("Já existe um inquilino com este CPF: Maria Teste."));
+        assertTrue(e.getErros().contains(CPF_DA_MARIA_REPETIDO));
     }
 
     @Test
@@ -117,7 +120,7 @@ class CadastroInquilinoTest {
                 "Informe um e-mail válido.",
                 "Renda mensal inválida: use só números, ex.: 2.500,00.",
                 "Informe o nome do cônjuge.",
-                "CPF do cônjuge inválido: confira os dígitos."), e.getErros());
+                "Cônjuge: CPF incompleto: tem 3 números, precisa ter 11."), e.getErros());
     }
 
     @Test
