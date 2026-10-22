@@ -2,10 +2,13 @@
 
 <!--
   BOARD-53 · Tela "Usuários": lista de usuários e cadastro de usuário novo.
-  BOARD-41 · Clicar num usuário da lista abre as permissões dele em caixinhas.
-  Aberta pelo botão "Usuários" do menu (o nome do arquivo é o mesmo do userData do botão).
+  BOARD-41 · Permissões ajustadas pessoa a pessoa.
+  BOARD-166 · Visual do design system, no mesmo padrão da tela de Inquilinos:
+  página (cabeçalho + tabela), aviso rápido e duas janelas sobre véu escuro
+  (Novo usuário e Permissões).
 -->
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -14,74 +17,138 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="br.org.fmc.ui.UsuariosController" styleClass="conteudo" spacing="16">
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.UsuariosController">
 
-    <VBox spacing="4">
-        <Label text="Usuários" styleClass="titulo"/>
-        <Label text="O Administrador cria o acesso de cada pessoa da equipe e escolhe o perfil dela. Clique em um usuário da lista para ajustar as permissões dele."
-               styleClass="texto" wrapText="true"/>
-        <Label fx:id="aviso" styleClass="erro" wrapText="true" minHeight="-Infinity"/>
+    <!-- 1. Página -->
+    <VBox styleClass="conteudo" spacing="24">
+        <HBox alignment="BOTTOM_LEFT" spacing="24">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Usuários" styleClass="titulo"/>
+                <Label fx:id="contagem" styleClass="texto"/>
+            </VBox>
+            <Button fx:id="botaoNovo" text="Novo usuário" onAction="#novo" styleClass="botao-primario">
+                <graphic><FontIcon iconLiteral="fth-user-plus"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colunaNome" text="Usuário" prefWidth="320"/>
+                    <TableColumn fx:id="colunaPerfil" text="Perfil" prefWidth="150"/>
+                    <TableColumn fx:id="colunaPermissoes" text="Permissões" prefWidth="170"/>
+                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="130"/>
+                    <TableColumn fx:id="colunaAcoes" prefWidth="56" maxWidth="56" minWidth="56" sortable="false"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+                </columnResizePolicy>
+            </TableView>
+        </VBox>
     </VBox>
 
-    <HBox spacing="20" VBox.vgrow="ALWAYS">
-        <TableView fx:id="tabela" HBox.hgrow="ALWAYS">
-            <columns>
-                <TableColumn fx:id="colunaNome" text="Nome" prefWidth="160"/>
-                <TableColumn fx:id="colunaEmail" text="E-mail" prefWidth="200"/>
-                <TableColumn fx:id="colunaPerfil" text="Perfil" prefWidth="110"/>
-                <TableColumn fx:id="colunaPermissoes" text="Permissões" prefWidth="120"/>
-                <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="90"/>
-            </columns>
-            <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
-            </columnResizePolicy>
-        </TableView>
-
-        <ScrollPane fx:id="ladoDireito" fitToWidth="true" prefWidth="340" minWidth="300"
-                    hbarPolicy="NEVER" styleClass="rolagem">
-            <VBox spacing="16">
-                <!-- BOARD-41 · Aparece quando um usuário é escolhido na lista -->
-                <VBox fx:id="cartaoPermissoes" styleClass="cartao-formulario" spacing="8">
-                    <Label fx:id="tituloPermissoes" text="Permissões" styleClass="subtitulo" wrapText="true"
-                           minHeight="-Infinity"/>
-                    <Label fx:id="dicaPermissoes" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
-                    <VBox fx:id="caixasPermissoes" spacing="6"/>
-                    <Label fx:id="mensagemPermissoes" wrapText="true" minHeight="-Infinity"/>
-                    <Button text="Salvar permissões" onAction="#salvarPermissoes" styleClass="botao-primario"
-                            maxWidth="Infinity"/>
-                    <Button text="Voltar ao padrão do perfil" onAction="#restaurarPermissoes"
-                            styleClass="botao-secundario" maxWidth="Infinity"/>
-                    <Button text="Fechar" onAction="#fecharPermissoes" styleClass="botao-secundario"
-                            maxWidth="Infinity"/>
-                </VBox>
-
-                <VBox fx:id="formulario" styleClass="cartao-formulario" spacing="8">
-                    <Label text="Novo usuário" styleClass="subtitulo"/>
-
-                    <Label text="Nome" labelFor="$campoNome" styleClass="rotulo"/>
-                    <TextField fx:id="campoNome" styleClass="campo"/>
-
-                    <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
-                    <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
-
-                    <Label text="Perfil" labelFor="$campoPerfil" styleClass="rotulo"/>
-                    <ComboBox fx:id="campoPerfil" maxWidth="Infinity" styleClass="campo"/>
-
-                    <Label text="Senha inicial" labelFor="$campoSenha" styleClass="rotulo"/>
-                    <PasswordField fx:id="campoSenha" styleClass="campo"/>
-                    <Label text="Mínimo de 6 caracteres. Entregue a senha à pessoa." styleClass="dica" wrapText="true"
-                           minHeight="-Infinity"/>
-
-                    <!-- minHeight="-Infinity" deixa o texto quebrar em várias linhas em vez de cortar com "..." -->
-                    <Label fx:id="mensagem" wrapText="true" minHeight="-Infinity"/>
-
-                    <Button text="Criar usuário" onAction="#criar" styleClass="botao-primario" maxWidth="Infinity"/>
-                </VBox>
-            </VBox>
-        </ScrollPane>
+    <!-- 2. Aviso rápido depois de salvar -->
+    <HBox fx:id="toast" styleClass="toast" spacing="10" alignment="CENTER_LEFT"
+          StackPane.alignment="BOTTOM_RIGHT" maxWidth="-Infinity" maxHeight="-Infinity">
+        <StackPane.margin><Insets right="32" bottom="28"/></StackPane.margin>
+        <FontIcon iconLiteral="fth-check-circle"/>
+        <Label fx:id="textoToast"/>
     </HBox>
-</VBox>
+
+    <!-- 3. Janela "Novo usuário" -->
+    <StackPane fx:id="veuNovo" styleClass="veu">
+        <VBox styleClass="janela" maxWidth="620" maxHeight="-Infinity">
+            <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+            <HBox styleClass="janela-topo" spacing="16">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Novo usuário" styleClass="janela-titulo"/>
+                    <Label text="A pessoa entra no sistema com este e-mail e a senha inicial." styleClass="janela-sub"
+                           wrapText="true"/>
+                </VBox>
+                <Button onAction="#fecharNovo" styleClass="botao-icone" accessibleText="Fechar">
+                    <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+                </Button>
+            </HBox>
+
+            <VBox styleClass="janela-corpo" spacing="16">
+                <HBox fx:id="avisoNovo" styleClass="aviso-erro" spacing="10">
+                    <FontIcon iconLiteral="fth-alert-circle"/>
+                    <Label fx:id="textoAvisoNovo" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <GridPane hgap="16" vgap="14">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+                    <VBox spacing="6" GridPane.columnSpan="2">
+                        <Label text="Nome" labelFor="$campoNome" styleClass="rotulo"/>
+                        <TextField fx:id="campoNome" styleClass="campo"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                        <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
+                        <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.rowIndex="2">
+                        <Label text="Perfil" labelFor="$campoPerfil" styleClass="rotulo"/>
+                        <ComboBox fx:id="campoPerfil" maxWidth="Infinity" styleClass="campo"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <Label text="Senha inicial" labelFor="$campoSenha" styleClass="rotulo"/>
+                        <PasswordField fx:id="campoSenha" styleClass="campo"/>
+                    </VBox>
+                </GridPane>
+                <Label text="A senha precisa ter pelo menos 6 caracteres. Entregue-a à pessoa." styleClass="dica"
+                       wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+
+            <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancelar" onAction="#fecharNovo" styleClass="botao-secundario"/>
+                <Button text="Criar usuário" onAction="#criar" styleClass="botao-primario" defaultButton="true"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- 4. Janela "Permissões de ..." (BOARD-41) -->
+    <StackPane fx:id="veuPermissoes" styleClass="veu">
+        <VBox styleClass="janela" maxWidth="560" maxHeight="-Infinity">
+            <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+            <HBox styleClass="janela-topo" spacing="16">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label fx:id="tituloPermissoes" text="Permissões" styleClass="janela-titulo" wrapText="true"/>
+                    <Label fx:id="dicaPermissoes" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+                </VBox>
+                <Button onAction="#fecharPermissoes" styleClass="botao-icone" accessibleText="Fechar">
+                    <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+                </Button>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
+                <VBox styleClass="janela-corpo" spacing="14">
+                    <HBox fx:id="avisoPermissoes" styleClass="aviso-erro" spacing="10">
+                        <FontIcon iconLiteral="fth-alert-circle"/>
+                        <Label fx:id="textoAvisoPermissoes" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <VBox fx:id="caixasPermissoes" styleClass="lista-permissoes"/>
+                </VBox>
+            </ScrollPane>
+
+            <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_LEFT">
+                <Button text="Voltar ao padrão do perfil" onAction="#restaurarPermissoes" styleClass="botao-secundario"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancelar" onAction="#fecharPermissoes" styleClass="botao-secundario"/>
+                <Button text="Salvar permissões" onAction="#salvarPermissoes" styleClass="botao-primario"
+                        defaultButton="true"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>

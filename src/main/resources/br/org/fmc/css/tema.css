@@ -517,21 +517,28 @@
     -fx-border-width: 0;
 }
 
-/* ===================== Telas antigas (Usuários, BOARD-53/41) ===================== */
+/* ===================== Lista de caixinhas (permissões, BOARD-41) ===================== */
 
-.cartao-formulario {
-    -fx-background-color: -fmc-cartao;
+.lista-permissoes {
     -fx-border-color: -fmc-borda;
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
-    -fx-padding: 20;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
 }
 
-.table-view {
-    -fx-background-color: -fmc-cartao;
-    -fx-border-color: -fmc-borda;
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
+.item-permissao {
+    -fx-padding: 12 14 12 14;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+    -fx-text-fill: -fmc-texto;
+    -fx-cursor: hand;
+}
+
+.item-permissao:hover {
+    -fx-background-color: -fmc-fundo-afundado;
+}
+
+.item-permissao:selected .box {
+    -fx-background-color: -fmc-azul;
+    -fx-border-color: -fmc-azul;
 }
 
 /* ===================== Login (BOARD-33) ===================== */

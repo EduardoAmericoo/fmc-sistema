@@ -9,18 +9,28 @@ import br.org.fmc.service.ServicoAcesso;
 import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Set;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * Controla a tela "Usuários" (ui/usuarios.fxml).
@@ -30,26 +40,37 @@ public class UsuariosController {
 
     private final ServicoAcesso servico = new ServicoAcesso();
 
-    /** Usuário com as permissões abertas nas caixinhas; null quando o cartão está fechado. */
+    /** Usuário com as permissões abertas na janela; null quando ela está fechada. */
     private Usuario selecionado;
 
     @FXML
+    private Label contagem;
+    @FXML
+    private Button botaoNovo;
+    @FXML
     private TableView<Usuario> tabela;
     @FXML
-    private TableColumn<Usuario, String> colunaNome;
+    private TableColumn<Usuario, Usuario> colunaNome;
     @FXML
-    private TableColumn<Usuario, String> colunaEmail;
+    private TableColumn<Usuario, Usuario> colunaPerfil;
     @FXML
-    private TableColumn<Usuario, String> colunaPerfil;
+    private TableColumn<Usuario, Usuario> colunaPermissoes;
     @FXML
-    private TableColumn<Usuario, String> colunaPermissoes;
+    private TableColumn<Usuario, Usuario> colunaSituacao;
     @FXML
-    private TableColumn<Usuario, String> colunaSituacao;
+    private TableColumn<Usuario, Usuario> colunaAcoes;
 
     @FXML
-    private ScrollPane ladoDireito;
+    private HBox toast;
     @FXML
-    private VBox formulario;
+    private Label textoToast;
+
+    @FXML
+    private StackPane veuNovo;
+    @FXML
+    private HBox avisoNovo;
+    @FXML
+    private Label textoAvisoNovo;
     @FXML
     private TextField campoNome;
     @FXML
@@ -58,89 +79,184 @@ public class UsuariosController {
     private ComboBox<Perfil> campoPerfil;
     @FXML
     private PasswordField campoSenha;
-    @FXML
-    private Label mensagem;
-    @FXML
-    private Label aviso;
 
     @FXML
-    private VBox cartaoPermissoes;
+    private StackPane veuPermissoes;
     @FXML
     private Label tituloPermissoes;
     @FXML
     private Label dicaPermissoes;
     @FXML
-    private VBox caixasPermissoes;
+    private HBox avisoPermissoes;
     @FXML
-    private Label mensagemPermissoes;
+    private Label textoAvisoPermissoes;
+    @FXML
+    private VBox caixasPermissoes;
 
     @FXML
     private void initialize() {
-        esconder(aviso);
-        colunaNome.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNome()));
-        colunaEmail.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getEmail()));
-        colunaPerfil.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPerfil().getDescricao()));
-        colunaPermissoes.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().temPermissoesPersonalizadas() ? "Personalizadas" : "Padrão do perfil"));
-        colunaSituacao.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().isAtivo() ? "Ativo" : "Desativado"));
-        tabela.setPlaceholder(new Label("Nenhum usuário para mostrar."));
-
+        montarTabela();
         campoPerfil.getItems().setAll(Perfil.values());
-        campoPerfil.setValue(Perfil.SECRETARIA);
-        Permissoes.mostrarSe(ladoDireito, Acao.GERENCIAR_USUARIOS);
+        Permissoes.mostrarSe(botaoNovo, Acao.GERENCIAR_USUARIOS);
 
         // Uma caixinha para cada ação do sistema; o userData guarda qual ação ela representa.
         for (Acao acao : Acao.values()) {
             CheckBox caixa = new CheckBox(acao.getDescricao());
             caixa.setUserData(acao);
             caixa.setWrapText(true);
+            caixa.getStyleClass().add("item-permissao");
+            caixa.setMaxWidth(Double.MAX_VALUE);
             caixasPermissoes.getChildren().add(caixa);
         }
-        tabela.getSelectionModel().selectedItemProperty().addListener((obs, antes, agora) -> {
-            if (agora != null) {
-                abrirPermissoes(agora);
+
+        // Esc fecha a janela aberta.
+        veuNovo.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                fecharNovo();
+            }
+        });
+        veuPermissoes.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                fecharPermissoes();
             }
         });
 
-        fecharPermissoes();
-        limparMensagem();
+        esconder(veuNovo);
+        esconder(veuPermissoes);
+        esconder(toast);
         carregarLista();
+    }
+
+    private void montarTabela() {
+        // Coluna "Usuário": círculo com as iniciais, nome e, embaixo, o e-mail.
+        colunaNome.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaNome.setCellFactory(c -> celula(u -> {
+            Label avatar = new Label(Iniciais.de(u.getNome()));
+            avatar.getStyleClass().add("avatar");
+            Label nome = new Label(u.getNome());
+            nome.getStyleClass().add("celula-nome");
+            Label email = new Label(u.getEmail());
+            email.getStyleClass().add("celula-detalhe");
+            HBox caixa = new HBox(12, avatar, new VBox(2, nome, email));
+            caixa.setAlignment(Pos.CENTER_LEFT);
+            return caixa;
+        }));
+        colunaPerfil.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaPerfil.setCellFactory(c -> celula(u -> selo(u.getPerfil().getDescricao(), "selo-neutro")));
+        colunaPermissoes.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaPermissoes.setCellFactory(c -> celula(u -> u.temPermissoesPersonalizadas()
+                ? selo("Personalizadas", "selo-info")
+                : selo("Padrão do perfil", "selo-neutro")));
+        colunaSituacao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaSituacao.setCellFactory(c -> celula(u -> u.isAtivo()
+                ? selo("Ativo", "selo-sucesso")
+                : selo("Desativado", "selo-neutro")));
+
+        // Coluna de ações: botão para ajustar as permissões.
+        colunaAcoes.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaAcoes.setCellFactory(c -> celula(u -> {
+            Button ajustar = new Button(null, new FontIcon("fth-sliders"));
+            ajustar.getStyleClass().add("botao-icone");
+            ajustar.setTooltip(new Tooltip("Ajustar permissões de " + u.getNome()));
+            ajustar.setOnAction(e -> abrirPermissoes(u));
+            return ajustar;
+        }));
+
+        // Clicar na linha também abre as permissões.
+        tabela.setRowFactory(t -> {
+            TableRow<Usuario> linha = new TableRow<>();
+            linha.setOnMouseClicked(e -> {
+                if (!linha.isEmpty()) {
+                    abrirPermissoes(linha.getItem());
+                }
+            });
+            return linha;
+        });
+        tabela.setPlaceholder(vazio("fth-users", "Nenhum usuário para mostrar", ""));
+    }
+
+    /** Célula de tabela que desenha um componente a partir do usuário da linha. */
+    private static TableCell<Usuario, Usuario> celula(java.util.function.Function<Usuario, Node> desenho) {
+        return new TableCell<>() {
+            @Override
+            protected void updateItem(Usuario u, boolean vazio) {
+                super.updateItem(u, vazio);
+                setGraphic(vazio || u == null ? null : desenho.apply(u));
+            }
+        };
+    }
+
+    private static Label selo(String texto, String tipo) {
+        Label selo = new Label(texto);
+        selo.getStyleClass().addAll("selo", tipo);
+        return selo;
+    }
+
+    private static VBox vazio(String icone, String titulo, String dica) {
+        Label rotulo = new Label(titulo);
+        rotulo.getStyleClass().add("tabela-vazia-titulo");
+        Label texto = new Label(dica);
+        texto.getStyleClass().add("texto");
+        VBox caixa = new VBox(8, new FontIcon(icone), rotulo, texto);
+        caixa.setAlignment(Pos.CENTER);
+        caixa.getStyleClass().add("tabela-vazia");
+        return caixa;
+    }
+
+    /** Botão "Novo usuário": abre a janela vazia. */
+    @FXML
+    private void novo() {
+        campoNome.clear();
+        campoEmail.clear();
+        campoSenha.clear();
+        campoPerfil.setValue(Perfil.SECRETARIA);
+        esconder(avisoNovo);
+        Navegador.mostrarJanela(veuNovo);
+        campoNome.requestFocus();
+    }
+
+    @FXML
+    private void fecharNovo() {
+        Navegador.fecharJanela(veuNovo);
     }
 
     /** Botão "Criar usuário". */
     @FXML
     private void criar() {
-        limparMensagem();
         try {
             Usuario novo = servico.criarUsuario(campoNome.getText(), campoEmail.getText(),
                     campoPerfil.getValue(), campoSenha.getText());
-            mostrar(mensagem, "Usuário criado: " + novo.getNome() + ". O acesso já funciona com o e-mail "
-                    + novo.getEmail() + " e a senha inicial.", false);
-            limparCampos();
+            fecharNovo();
             carregarLista();
+            mostrarToast("Usuário criado: " + novo.getNome() + ". O acesso já funciona.");
         } catch (RegraNegocioException e) {
-            mostrar(mensagem, String.join("\n", e.getErros()), true);
+            mostrarAviso(avisoNovo, textoAvisoNovo, String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrar(mensagem, "Erro no banco de dados: " + e.getMessage(), true);
+            mostrarAviso(avisoNovo, textoAvisoNovo, "Erro no banco de dados: " + e.getMessage());
         }
     }
 
-    /** Mostra as permissões do usuário escolhido na lista, já marcadas como estão hoje. */
+    /** Abre a janela com as permissões do usuário, já marcadas como estão hoje. */
     private void abrirPermissoes(Usuario usuario) {
         selecionado = usuario;
         tituloPermissoes.setText("Permissões de " + usuario.getNome());
         dicaPermissoes.setText("Perfil " + usuario.getPerfil().getDescricao() + ". "
                 + (usuario.temPermissoesPersonalizadas()
                         ? "Esta pessoa tem permissões ajustadas pelo Administrador."
-                        : "Esta pessoa segue o padrão do perfil.")
-                + " Marque ou desmarque para ajustar só para ela.");
+                        : "Esta pessoa segue o padrão do perfil."));
         for (Node item : caixasPermissoes.getChildren()) {
             CheckBox caixa = (CheckBox) item;
             caixa.setSelected(usuario.getPermissoes().contains((Acao) caixa.getUserData()));
         }
-        esconder(mensagemPermissoes);
-        cartaoPermissoes.setVisible(true);
-        cartaoPermissoes.setManaged(true);
+        esconder(avisoPermissoes);
+        Navegador.mostrarJanela(veuPermissoes);
+    }
+
+    @FXML
+    private void fecharPermissoes() {
+        selecionado = null;
+        tabela.getSelectionModel().clearSelection();
+        Navegador.fecharJanela(veuPermissoes);
     }
 
     /** Botão "Salvar permissões". */
@@ -153,23 +269,15 @@ public class UsuariosController {
                 marcadas.add((Acao) caixa.getUserData());
             }
         }
-        aplicar(() -> servico.alterarPermissoes(selecionado.getId(), marcadas), "Permissões salvas.");
+        long id = selecionado.getId();
+        aplicar(() -> servico.alterarPermissoes(id, marcadas), "Permissões salvas");
     }
 
     /** Botão "Voltar ao padrão do perfil". */
     @FXML
     private void restaurarPermissoes() {
-        aplicar(() -> servico.restaurarPermissoesDoPerfil(selecionado.getId()),
-                "Permissões de volta ao padrão do perfil.");
-    }
-
-    /** Botão "Fechar": esconde o cartão de permissões. */
-    @FXML
-    private void fecharPermissoes() {
-        selecionado = null;
-        tabela.getSelectionModel().clearSelection();
-        cartaoPermissoes.setVisible(false);
-        cartaoPermissoes.setManaged(false);
+        long id = selecionado.getId();
+        aplicar(() -> servico.restaurarPermissoesDoPerfil(id), "Permissões de volta ao padrão do perfil");
     }
 
     /** Uma alteração de permissões que pode dar erro de regra ou de banco. */
@@ -183,56 +291,51 @@ public class UsuariosController {
         }
         try {
             Usuario atualizado = alteracao.executar();
+            fecharPermissoes();
             carregarLista();
-            // Selecionar de novo reabre o cartão (e limpa a mensagem), por isso a mensagem vem depois.
-            tabela.getItems().stream()
-                    .filter(u -> u.getId().equals(atualizado.getId()))
-                    .findFirst()
-                    .ifPresent(u -> tabela.getSelectionModel().select(u));
-            mostrar(mensagemPermissoes, sucesso + " Valem a partir do próximo login da pessoa.", false);
+            mostrarToast(sucesso + ": " + atualizado.getNome() + ". Valem a partir do próximo login.");
         } catch (RegraNegocioException e) {
-            mostrar(mensagemPermissoes, String.join("\n", e.getErros()), true);
+            mostrarAviso(avisoPermissoes, textoAvisoPermissoes, String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrar(mensagemPermissoes, "Erro no banco de dados: " + e.getMessage(), true);
+            mostrarAviso(avisoPermissoes, textoAvisoPermissoes, "Erro no banco de dados: " + e.getMessage());
         }
     }
 
     private void carregarLista() {
         try {
             tabela.getItems().setAll(servico.listarUsuarios());
+            int total = tabela.getItems().size();
+            contagem.setText((total == 1 ? "1 usuário" : total + " usuários")
+                    + " · Clique em um usuário para ajustar as permissões.");
         } catch (AcessoNegadoException e) {
+            // Quem não gerencia usuários vê só o aviso, no lugar da lista.
             tabela.getItems().clear();
-            ladoDireito.setVisible(false);
-            ladoDireito.setManaged(false);
-            aviso.setText("Somente o Administrador pode ver e criar usuários.");
-            aviso.setVisible(true);
-            aviso.setManaged(true);
+            contagem.setText("Somente o Administrador pode ver e criar usuários.");
+            tabela.setPlaceholder(vazio("fth-lock", "Acesso restrito",
+                    "Somente o Administrador pode ver e criar usuários."));
         } catch (SQLException e) {
-            mostrar(mensagem, "Erro no banco de dados: " + e.getMessage(), true);
+            contagem.setText("Erro no banco de dados: " + e.getMessage());
         }
     }
 
-    private void limparCampos() {
-        campoNome.clear();
-        campoEmail.clear();
-        campoSenha.clear();
-        campoPerfil.setValue(Perfil.SECRETARIA);
+    private static void mostrarAviso(HBox aviso, Label texto, String mensagem) {
+        texto.setText(mensagem);
+        aviso.setVisible(true);
+        aviso.setManaged(true);
     }
 
-    private void mostrar(Label rotulo, String texto, boolean erro) {
-        rotulo.setText(texto);
-        rotulo.getStyleClass().setAll("label", erro ? "erro" : "sucesso");
-        rotulo.setVisible(true);
-        rotulo.setManaged(true);
+    /** Aviso rápido no canto da tela, que some sozinho depois de 3 segundos. */
+    private void mostrarToast(String texto) {
+        textoToast.setText(texto);
+        toast.setVisible(true);
+        toast.setManaged(true);
+        PauseTransition espera = new PauseTransition(Duration.seconds(3));
+        espera.setOnFinished(e -> esconder(toast));
+        espera.play();
     }
 
-    private void limparMensagem() {
-        esconder(mensagem);
-    }
-
-    private static void esconder(Label rotulo) {
-        rotulo.setText("");
-        rotulo.setVisible(false);
-        rotulo.setManaged(false);
+    private static void esconder(Node componente) {
+        componente.setVisible(false);
+        componente.setManaged(false);
     }
 }
