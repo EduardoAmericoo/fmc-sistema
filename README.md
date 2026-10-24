@@ -94,8 +94,15 @@ GitHub): o que você cadastra não aparece para os outros, e o que eles cadastra
 
 Na versão entregue à Fundação, a carga automática deve ser desligada com `FMC_DADOS_TESTE=nao`.
 
-Usuários de teste (senha `teste123`): `secretaria@exemplo.org` (Secretaria), `financeiro@exemplo.org` (Financeiro) e
-`aprendiz@exemplo.org` (Secretaria que não pode cadastrar inquilino novo). O Administrador continua `admin@fmc.org`.
+Acessos depois da carga:
+
+| E-mail | Senha | Perfil |
+|---|---|---|
+| `admin@fmc.org` | `Fmc@2026` | Administrador inicial (o mesmo de sempre) |
+| `administrador@exemplo.org` | `teste123` | Administrador |
+| `secretaria@exemplo.org` | `teste123` | Secretaria |
+| `financeiro@exemplo.org` | `teste123` | Financeiro (só consulta) |
+| `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
 
 Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os arquivos de
 contratos, fiadores e cauções já estão prontos e passam a ser carregados quando o cadastro de contratos (BOARD-36/57) existir.

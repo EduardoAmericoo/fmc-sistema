@@ -57,8 +57,7 @@ public class App extends Application {
                 return; // o banco já tinha dados: abre normalmente
             }
             aviso = new Alert(Alert.AlertType.INFORMATION, "Carregados: " + resumo.get()
-                    + "\n\nUsuários de teste: secretaria@exemplo.org, financeiro@exemplo.org e aprendiz@exemplo.org"
-                    + ", senha " + ServicoDadosTeste.SENHA_TESTE + ".");
+                    + "\n\n" + ServicoDadosTeste.acessos());
             aviso.setHeaderText(doZero ? "Dados de teste recarregados do zero"
                     : "Banco vazio: dados de teste carregados");
         } catch (Exception e) {
