@@ -55,12 +55,12 @@ class DadosTesteTest {
 
         assertEquals(124, resumo.imoveis());
         assertEquals(110, resumo.inquilinos());
-        assertEquals(3, resumo.usuarios());
+        assertEquals(4, resumo.usuarios());
         assertEquals(110, resumo.contratosAguardando());
         entrarComoAdministrador();
         assertEquals(124, new ServicoImoveis().listar().size());
         assertEquals(110, new ServicoInquilinos().listar().size());
-        assertEquals(4, acesso.listarUsuarios().size()); // Administrador + 3 de teste
+        assertEquals(5, acesso.listarUsuarios().size()); // Administrador inicial + 4 de teste
     }
 
     @Test
@@ -76,7 +76,7 @@ class DadosTesteTest {
         entrarComoAdministrador();
         assertEquals(124, new ServicoImoveis().listar().size());
         assertFalse(new ServicoImoveis().listar().stream().anyMatch(i -> i.getCodigo().equals("EXTRA-1")));
-        assertEquals(4, acesso.listarUsuarios().size());
+        assertEquals(5, acesso.listarUsuarios().size());
     }
 
     @Test
@@ -105,6 +105,9 @@ class DadosTesteTest {
     void usuariosDeTesteEntramComAsPermissoesCertas() throws Exception {
         dados.recarregarDoZero();
 
+        acesso.login(ServicoAcesso.EMAIL_ADMIN_INICIAL, ServicoAcesso.SENHA_ADMIN_INICIAL); // o de sempre continua entrando
+        acesso.login("administrador@exemplo.org", ServicoDadosTeste.SENHA_TESTE);
+        assertTrue(Sessao.pode(Acao.CRIAR_USUARIO));
         acesso.login("secretaria@exemplo.org", ServicoDadosTeste.SENHA_TESTE);
         assertTrue(Sessao.pode(Acao.CRIAR_INQUILINO));
         acesso.login("financeiro@exemplo.org", ServicoDadosTeste.SENHA_TESTE);

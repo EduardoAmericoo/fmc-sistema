@@ -83,13 +83,24 @@ public class ServicoDadosTeste {
 
     /** Um usuário de cada perfil, mais a "jovem aprendiz" (Secretaria sem cadastrar inquilino novo). */
     private int carregarUsuarios(ServicoAcesso acesso) throws SQLException {
+        acesso.criarUsuario("Ana Administradora Teste", "administrador@exemplo.org", Perfil.ADMINISTRADOR, SENHA_TESTE);
         acesso.criarUsuario("Bruna Secretária Teste", "secretaria@exemplo.org", Perfil.SECRETARIA, SENHA_TESTE);
         acesso.criarUsuario("Carlos Financeiro Teste", "financeiro@exemplo.org", Perfil.FINANCEIRO, SENHA_TESTE);
         Usuario aprendiz = acesso.criarUsuario("Júlia Aprendiz Teste", "aprendiz@exemplo.org", Perfil.SECRETARIA, SENHA_TESTE);
         Set<Acao> semCriarInquilino = EnumSet.copyOf(Perfil.SECRETARIA.getPermissoes());
         semCriarInquilino.remove(Acao.CRIAR_INQUILINO);
         acesso.alterarPermissoes(aprendiz.getId(), semCriarInquilino);
-        return 3;
+        return 4;
+    }
+
+    /** Os acessos para entrar no sistema depois da carga, para mostrar na tela. */
+    public static String acessos() {
+        return "Administrador: " + ServicoAcesso.EMAIL_ADMIN_INICIAL + " (senha " + ServicoAcesso.SENHA_ADMIN_INICIAL + ")"
+                + "\nUsuários de teste (senha " + SENHA_TESTE + "):"
+                + "\n  administrador@exemplo.org (Administrador)"
+                + "\n  secretaria@exemplo.org (Secretaria)"
+                + "\n  financeiro@exemplo.org (Financeiro)"
+                + "\n  aprendiz@exemplo.org (Secretaria que não cadastra inquilino novo)";
     }
 
     private int carregarImoveis() throws SQLException {
