@@ -14,7 +14,7 @@ import java.util.Set;
 public enum Perfil {
     ADMINISTRADOR("Administrador", EnumSet.allOf(Acao.class)),
     SECRETARIA("Secretaria", EnumSet.of(
-            Acao.VER_IMOVEIS, Acao.CRIAR_IMOVEL, Acao.EDITAR_IMOVEL,
+            Acao.VER_IMOVEIS, Acao.CRIAR_IMOVEL, Acao.EDITAR_IMOVEL, Acao.EXCLUIR_IMOVEL,
             Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO,
             Acao.VER_CONTRATOS, Acao.CRIAR_CONTRATO,
             Acao.VER_ALUGUEIS, Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL)),

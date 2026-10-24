@@ -52,3 +52,21 @@ CREATE TABLE IF NOT EXISTS inquilino (
     conjuge_cpf    TEXT,
     conjuge_renda  TEXT
 );
+
+-- BOARD-34 · Imóveis da Fundação.
+-- O código é a identificação e não pode se repetir. A unidade é opcional
+-- (ex.: "Apto 101 · Bloco A"), mas, se for informada, também não se repete (regra no service).
+-- Valores em dinheiro ficam como texto (ex.: "1500.00") para não perder centavos.
+CREATE TABLE IF NOT EXISTS imovel (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo        TEXT NOT NULL UNIQUE,
+    unidade       TEXT,
+    tipo          TEXT NOT NULL,
+    endereco      TEXT NOT NULL,
+    bairro        TEXT,
+    grupo         TEXT,
+    valor_aluguel TEXT NOT NULL,
+    taxa_luz      TEXT NOT NULL DEFAULT '0',
+    valor_iptu    TEXT NOT NULL DEFAULT '0',
+    situacao      TEXT NOT NULL
+);

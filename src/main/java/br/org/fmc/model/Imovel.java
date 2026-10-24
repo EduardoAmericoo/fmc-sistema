@@ -7,6 +7,7 @@ public class Imovel {
 
     private Long id;
     private String codigo;
+    private String unidade;
     private TipoImovel tipo;
     private String endereco;
     private String bairro;
@@ -51,6 +52,15 @@ public class Imovel {
 
     public String getCodigo() {
         return codigo;
+    }
+
+    /** Pode ser nulo. Ex.: "Apto 101 · Bloco A". Se for informada, não pode se repetir. */
+    public String getUnidade() {
+        return unidade;
+    }
+
+    public void setUnidade(String unidade) {
+        this.unidade = Valida.textoOpcional(unidade);
     }
 
     public void setCodigo(String codigo) {
