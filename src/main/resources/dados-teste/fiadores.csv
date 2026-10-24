@@ -1,0 +1,101 @@
+contrato;nome;cpf;celular;estado_civil;renda;conjuge;cpf_conjuge;endereco
+CT-1001;Sofia Pereira Carvalho;635.191.845-67;(79) 99709-3057;Viúvo(a);4980.00;;;Av. Fictícia, 896 · Suissa · Aracaju/SE
+CT-1002;Rodrigo Nunes Araújo;775.517.075-65;(79) 98559-0341;Casado(a);9560.00;Sabrina Lopes Araújo;859.458.105-09;Av. Fictícia, 432 · Farolândia · Aracaju/SE
+CT-1003;Sabrina Ramos Farias;687.930.325-01;(79) 99680-4765;Casado(a);7810.00;Eduardo Melo Farias;295.309.635-30;Rua Modelo, 217 · Inácio Barbosa · Aracaju/SE
+CT-1004;Clara Santana Farias;306.964.955-62;(79) 98914-1373;Solteiro(a);13290.00;;;Rua Exemplo, 376 · Grageru · Aracaju/SE
+CT-1005;Ricardo Bezerra Santos;570.867.305-21;(79) 98813-5104;Solteiro(a);12510.00;;;Rua Exemplo, 25 · Inácio Barbosa · Aracaju/SE
+CT-1007;Mariana Batista Almeida;816.818.055-02;(79) 98977-9120;Casado(a);8100.00;Gabriel Ribeiro Almeida;;Travessa Teste, 67 · Farolândia · Aracaju/SE
+CT-1008;Natália Almeida Moraes;510.248.225-40;(79) 99373-0989;Divorciado(a);9460.00;;;Av. Fictícia, 128 · Suissa · Aracaju/SE
+CT-1009;Henrique Bezerra Monteiro;889.706.225-35;(79) 98346-8757;Solteiro(a);4850.00;;;Rua Exemplo, 699 · Inácio Barbosa · Aracaju/SE
+CT-1010;Fernando Castro Santos;834.414.055-28;(79) 99701-1175;Solteiro(a);8120.00;;;Rua Modelo, 760 · Centro · Aracaju/SE
+CT-1011;Sabrina Rezende Castro;655.813.085-86;(79) 98724-6374;Viúvo(a);7100.00;;;Av. Fictícia, 263 · Coroa do Meio · Aracaju/SE
+CT-1012;Renata Mendes Lima;784.116.705-97;(79) 98972-2120;Viúvo(a);12670.00;;;Travessa Teste, 22 · Salgado Filho · Aracaju/SE
+CT-1013;Otávio Siqueira Pinto;864.413.305-55;(79) 99369-4276;União estável;4720.00;Lívia Monteiro Pinto;431.501.845-76;Rua Modelo, 447 · Luzia · Aracaju/SE
+CT-1014;Renato Nunes Nascimento;175.076.265-04;(79) 99570-3373;União estável;5860.00;Priscila Pinto Nascimento;477.283.715-92;Travessa Teste, 339 · Centro · Aracaju/SE
+CT-1015;Marcelo Pinto Gomes;101.526.775-00;(79) 98075-0929;Solteiro(a);6160.00;;;Rua Modelo, 524 · Coroa do Meio · Aracaju/SE
+CT-1016;Lucas Barbosa Lima;167.655.455-65;(79) 99223-1452;União estável;9130.00;Marina Machado Lima;643.138.595-00;Travessa Teste, 370 · Coroa do Meio · Aracaju/SE
+CT-1018;Beatriz Fernandes Melo;165.278.715-11;(79) 98975-8424;Solteiro(a);11070.00;;;Travessa Teste, 100 · Luzia · Aracaju/SE
+CT-1019;Lívia Bezerra Vasconcelos;231.105.115-68;(79) 98804-8331;Casado(a);9800.00;Sérgio Ribeiro Vasconcelos;685.697.625-93;Travessa Teste, 628 · Grageru · Aracaju/SE
+CT-1020;Sérgio Souza Soares;273.248.915-86;(79) 99481-9281;União estável;10470.00;Yasmin Rezende Soares;100.331.155-59;Rua Exemplo, 904 · Centro · Aracaju/SE
+CT-1021;Gabriela Nascimento Castro;281.295.565-10;(79) 98547-0861;Divorciado(a);12750.00;;;Rua Modelo, 371 · Suissa · Aracaju/SE
+CT-1022;Caio Soares Cavalcante;007.723.785-41;(79) 99402-7888;Casado(a);8520.00;Karina Bezerra Cavalcante;;Av. Fictícia, 114 · Salgado Filho · Aracaju/SE
+CT-1023;Priscila Vasconcelos Nascimento;171.477.305-18;(79) 99159-6160;Viúvo(a);7860.00;;;Av. Fictícia, 91 · Inácio Barbosa · Aracaju/SE
+CT-1024;Alexandre Lopes Moura;115.915.625-54;(79) 98912-4941;União estável;12290.00;Débora Souza Moura;059.097.205-70;Rua Exemplo, 657 · Farolândia · Aracaju/SE
+CT-1025;Valéria Santana Batista;311.552.435-87;(79) 99166-6075;Divorciado(a);9750.00;;;Travessa Teste, 885 · Farolândia · Aracaju/SE
+CT-1026;Jéssica Melo Moura;002.490.035-46;(79) 99337-7545;Casado(a);6300.00;Thiago Carvalho Moura;;Rua Modelo, 101 · Salgado Filho · Aracaju/SE
+CT-1027;Patrícia Barbosa Lopes;381.809.075-03;(79) 98163-3539;Casado(a);12060.00;Gabriel Mendes Lopes;973.826.775-75;Rua Exemplo, 315 · Coroa do Meio · Aracaju/SE
+CT-1029;Pedro Oliveira Mendes;428.424.325-09;(79) 99485-7542;União estável;8650.00;Ana Araújo Mendes;;Rua Exemplo, 50 · Inácio Barbosa · Aracaju/SE
+CT-1030;André Gomes Moraes;717.617.735-00;(79) 98284-9623;União estável;6850.00;Lívia Santana Moraes;989.270.595-57;Av. Fictícia, 521 · Farolândia · Aracaju/SE
+CT-1031;Bianca Silva Martins;078.656.945-04;(79) 98018-6939;Viúvo(a);5120.00;;;Rua Modelo, 749 · Farolândia · Aracaju/SE
+CT-1032;Marcos Soares Pinto;821.626.545-04;(79) 98279-7923;Solteiro(a);11340.00;;;Rua Modelo, 570 · Suissa · Aracaju/SE
+CT-1033;Jéssica Cavalcante Santana;029.957.765-14;(79) 98658-2626;Divorciado(a);11950.00;;;Rua Exemplo, 852 · Luzia · Aracaju/SE
+CT-1034;Luana Freitas Dias;909.951.005-51;(79) 98594-8069;Viúvo(a);12860.00;;;Rua Modelo, 451 · Coroa do Meio · Aracaju/SE
+CT-1035;Lucas Siqueira Farias;791.267.645-71;(79) 98468-4806;Casado(a);5840.00;Renata Rocha Farias;227.485.225-16;Rua Modelo, 113 · Suissa · Aracaju/SE
+CT-1036;Otávio Castro Siqueira;844.674.115-69;(79) 99553-6026;Viúvo(a);12320.00;;;Av. Fictícia, 128 · Suissa · Aracaju/SE
+CT-1037;Priscila Dias Araújo;711.702.555-74;(79) 98433-7942;Viúvo(a);11860.00;;;Rua Exemplo, 709 · Grageru · Aracaju/SE
+CT-1038;Carlos Nascimento Oliveira;106.390.435-85;(79) 98159-7293;Solteiro(a);13060.00;;;Rua Modelo, 213 · Centro · Aracaju/SE
+CT-1040;Felipe Nascimento Lopes;009.671.815-34;(79) 99208-8764;Viúvo(a);8620.00;;;Rua Modelo, 596 · Salgado Filho · Aracaju/SE
+CT-1041;Larissa Machado Soares;405.995.575-24;(79) 99404-3117;Casado(a);6260.00;João Martins Soares;489.789.585-59;Av. Fictícia, 713 · Inácio Barbosa · Aracaju/SE
+CT-1042;Caio Pinto Costa;367.447.795-59;(79) 99636-2080;União estável;11210.00;Lívia Barbosa Costa;;Av. Fictícia, 308 · Farolândia · Aracaju/SE
+CT-1043;Rafael Fernandes Nascimento;502.682.885-00;(79) 98066-7693;União estável;9070.00;Larissa Cavalcante Nascimento;;Rua Modelo, 620 · Farolândia · Aracaju/SE
+CT-1044;Aline Martins Farias;033.870.235-02;(79) 98916-7239;Casado(a);6550.00;Otávio Nascimento Farias;;Av. Fictícia, 252 · Suissa · Aracaju/SE
+CT-1045;Antônio Vasconcelos Bezerra;417.043.365-38;(79) 98351-4375;União estável;5940.00;Natália Ribeiro Bezerra;657.355.005-62;Rua Modelo, 535 · Suissa · Aracaju/SE
+CT-1046;Ricardo Siqueira Cavalcante;012.335.125-10;(79) 98001-7985;Casado(a);13340.00;Daniela Moura Cavalcante;358.900.685-47;Travessa Teste, 43 · Inácio Barbosa · Aracaju/SE
+CT-1047;Clara Almeida Bezerra;671.938.455-43;(79) 98491-3440;Casado(a);13820.00;Leonardo Cardoso Bezerra;051.665.285-06;Travessa Teste, 784 · Suissa · Aracaju/SE
+CT-1048;Gabriela Cavalcante Teixeira;436.799.145-80;(79) 98332-5420;Solteiro(a);8080.00;;;Rua Modelo, 807 · Inácio Barbosa · Aracaju/SE
+CT-1049;Alexandre Machado Rocha;354.636.545-30;(79) 98889-9922;União estável;9560.00;Joana Nunes Rocha;;Rua Modelo, 383 · Inácio Barbosa · Aracaju/SE
+CT-1051;Daniela Souza Carvalho;141.503.905-41;(79) 99560-6907;Viúvo(a);15370.00;;;Rua Exemplo, 801 · Luzia · Aracaju/SE
+CT-1052;Carlos Ribeiro Lopes;542.160.095-57;(79) 99061-0464;Casado(a);15070.00;Raquel Lima Lopes;;Rua Modelo, 223 · Centro · Aracaju/SE
+CT-1053;Renato Moura Mendes;864.851.855-50;(79) 98091-9793;União estável;11250.00;Fernanda Cardoso Mendes;846.878.835-08;Travessa Teste, 540 · Farolândia · Aracaju/SE
+CT-1054;Camila Monteiro Araújo;134.715.125-78;(79) 98567-3140;Casado(a);16710.00;Caio Moura Araújo;882.588.765-54;Av. Fictícia, 570 · Grageru · Aracaju/SE
+CT-1055;Eduarda Oliveira Lima;697.413.015-53;(79) 99708-8812;Casado(a);6050.00;Otávio Prado Lima;840.920.475-41;Travessa Teste, 225 · Farolândia · Aracaju/SE
+CT-1056;Karina Freitas Nascimento;949.019.935-42;(79) 98903-0633;Casado(a);14770.00;Caio Monteiro Nascimento;206.353.195-19;Av. Fictícia, 820 · Grageru · Aracaju/SE
+CT-1057;Mariana Costa Nunes;228.206.165-93;(79) 99687-4924;Viúvo(a);8300.00;;;Av. Fictícia, 130 · Luzia · Aracaju/SE
+CT-1058;Antônio Martins Mendes;099.270.825-76;(79) 98343-2830;Casado(a);10240.00;Daniela Vieira Mendes;399.052.835-10;Rua Exemplo, 276 · Suissa · Aracaju/SE
+CT-1059;Leonardo Oliveira Bezerra;279.911.785-60;(79) 99482-0579;Viúvo(a);6830.00;;;Travessa Teste, 759 · Grageru · Aracaju/SE
+CT-1060;José Moura Costa;718.628.865-04;(79) 99490-8646;Solteiro(a);13250.00;;;Rua Modelo, 814 · Centro · Aracaju/SE
+CT-1062;Lucas Silva Lima;490.130.485-28;(79) 99560-9555;Casado(a);5040.00;Elisa Martins Lima;038.487.305-70;Rua Modelo, 36 · Coroa do Meio · Aracaju/SE
+CT-1063;Helena Fernandes Lopes;271.502.975-60;(79) 98469-2002;Casado(a);10110.00;Marcelo Monteiro Lopes;087.998.785-50;Travessa Teste, 517 · Inácio Barbosa · Aracaju/SE
+CT-1064;Vítor Lima Soares;303.076.415-03;(79) 98186-8878;Divorciado(a);7310.00;;;Rua Exemplo, 370 · Centro · Aracaju/SE
+CT-1065;Gabriela Mendes Moraes;720.893.145-32;(79) 98621-1564;Casado(a);14610.00;João Pinto Moraes;;Av. Fictícia, 458 · Coroa do Meio · Aracaju/SE
+CT-1066;Isabela Vasconcelos Pereira;186.916.345-10;(79) 99042-4449;União estável;9350.00;Marcelo Rocha Pereira;997.281.015-11;Travessa Teste, 765 · Inácio Barbosa · Aracaju/SE
+CT-1067;Rafael Oliveira Freitas;352.889.925-50;(79) 98803-1644;Solteiro(a);14110.00;;;Rua Modelo, 320 · Grageru · Aracaju/SE
+CT-1068;Caio Gomes Oliveira;976.081.825-63;(79) 98461-9172;Solteiro(a);13230.00;;;Av. Fictícia, 161 · Farolândia · Aracaju/SE
+CT-1069;José Rodrigues Santos;916.334.675-38;(79) 99896-5332;Casado(a);7440.00;Natália Prado Santos;071.441.685-17;Rua Exemplo, 696 · Inácio Barbosa · Aracaju/SE
+CT-1070;Marina Santana Pinto;952.704.495-28;(79) 98124-6789;Casado(a);12760.00;Rodrigo Monteiro Pinto;;Rua Modelo, 493 · Salgado Filho · Aracaju/SE
+CT-1071;Clara Cavalcante Dias;849.708.235-45;(79) 99229-5021;Solteiro(a);7500.00;;;Rua Exemplo, 541 · Centro · Aracaju/SE
+CT-1073;Renata Vasconcelos Santana;175.786.915-89;(79) 99850-0421;Solteiro(a);7540.00;;;Av. Fictícia, 827 · Coroa do Meio · Aracaju/SE
+CT-1074;Igor Vieira Bezerra;857.692.845-01;(79) 98646-3723;União estável;16850.00;Gabriela Carvalho Bezerra;855.132.545-06;Rua Exemplo, 192 · Coroa do Meio · Aracaju/SE
+CT-1075;Igor Andrade Moura;842.424.435-44;(79) 98622-2296;Casado(a);11790.00;Jéssica Teixeira Moura;607.430.995-75;Rua Exemplo, 29 · Inácio Barbosa · Aracaju/SE
+CT-1076;Henrique Souza Dias;453.393.225-80;(79) 99583-1377;Solteiro(a);10860.00;;;Travessa Teste, 527 · Centro · Aracaju/SE
+CT-1077;Lucas Andrade Machado;134.115.265-05;(79) 99238-4280;Divorciado(a);7930.00;;;Rua Modelo, 415 · Centro · Aracaju/SE
+CT-1078;Gustavo Nunes Lima;603.637.845-94;(79) 99296-8311;Casado(a);8550.00;Fernanda Martins Lima;303.574.375-43;Rua Exemplo, 169 · Suissa · Aracaju/SE
+CT-1079;Antônio Machado Rezende;487.796.475-45;(79) 99521-4574;Casado(a);5640.00;Eduarda Nascimento Rezende;592.841.425-04;Rua Exemplo, 625 · Suissa · Aracaju/SE
+CT-1080;Tatiana Castro Cavalcante;047.575.315-16;(79) 99663-4672;União estável;10010.00;Ricardo Rezende Cavalcante;;Rua Modelo, 93 · Suissa · Aracaju/SE
+CT-1081;Camila Pinto Duarte;341.291.495-98;(79) 99459-3402;Casado(a);6160.00;Mateus Bezerra Duarte;;Rua Exemplo, 519 · Inácio Barbosa · Aracaju/SE
+CT-1082;Gustavo Batista Araújo;879.431.015-70;(79) 99118-5449;Solteiro(a);10840.00;;;Travessa Teste, 715 · Inácio Barbosa · Aracaju/SE
+CT-1084;Fernanda Andrade Dias;177.030.345-68;(79) 99078-0882;Casado(a);7540.00;Bruno Monteiro Dias;236.680.565-95;Rua Modelo, 765 · Centro · Aracaju/SE
+CT-1085;Carlos Pinto Monteiro;636.898.385-09;(79) 99383-7883;Viúvo(a);10640.00;;;Rua Exemplo, 842 · Coroa do Meio · Aracaju/SE
+CT-1086;André Silva Oliveira;172.049.805-90;(79) 99859-4530;Casado(a);6180.00;Helena Bezerra Oliveira;280.090.955-24;Av. Fictícia, 541 · Centro · Aracaju/SE
+CT-1087;Débora Costa Souza;571.607.225-90;(79) 98345-1115;Casado(a);9720.00;Mateus Moura Souza;786.682.985-34;Av. Fictícia, 351 · Coroa do Meio · Aracaju/SE
+CT-1088;Elisa Nascimento Vieira;330.089.255-45;(79) 98709-0353;Casado(a);13200.00;Bruno Monteiro Vieira;980.555.655-70;Rua Exemplo, 601 · Coroa do Meio · Aracaju/SE
+CT-1089;Juliana Teixeira Fernandes;077.388.965-58;(79) 98762-9449;Divorciado(a);12680.00;;;Rua Exemplo, 408 · Salgado Filho · Aracaju/SE
+CT-1090;Daniel Dias Pereira;745.513.605-62;(79) 98228-4937;Divorciado(a);4320.00;;;Rua Modelo, 873 · Grageru · Aracaju/SE
+CT-1091;Vinícius Ramos Farias;324.502.435-50;(79) 98984-4263;Solteiro(a);10580.00;;;Rua Exemplo, 763 · Luzia · Aracaju/SE
+CT-1092;Yasmin Silva Nascimento;999.299.015-58;(79) 99308-6168;Casado(a);8220.00;Diego Lima Nascimento;;Av. Fictícia, 187 · Inácio Barbosa · Aracaju/SE
+CT-1093;Sabrina Moura Cavalcante;233.590.645-34;(79) 99100-7236;Solteiro(a);13720.00;;;Rua Modelo, 703 · Centro · Aracaju/SE
+CT-1095;Sabrina Castro Ramos;554.359.825-45;(79) 98985-9942;Viúvo(a);7700.00;;;Travessa Teste, 804 · Farolândia · Aracaju/SE
+CT-1096;Hugo Duarte Prado;583.548.295-70;(79) 99222-4022;Casado(a);11970.00;Juliana Melo Prado;885.286.775-91;Travessa Teste, 856 · Inácio Barbosa · Aracaju/SE
+CT-1097;Jéssica Rezende Santana;350.000.595-06;(79) 99325-2079;Divorciado(a);5570.00;;;Rua Modelo, 670 · Salgado Filho · Aracaju/SE
+CT-1098;Camila Carvalho Castro;532.347.835-78;(79) 98966-0048;Solteiro(a);7630.00;;;Rua Modelo, 450 · Centro · Aracaju/SE
+CT-1099;Sofia Monteiro Souza;234.123.595-64;(79) 99866-1329;Casado(a);5940.00;Diego Dias Souza;;Rua Exemplo, 824 · Grageru · Aracaju/SE
+CT-1100;Letícia Fernandes Ramos;061.727.795-83;(79) 99314-1392;Casado(a);7170.00;Rafael Andrade Ramos;;Rua Exemplo, 315 · Farolândia · Aracaju/SE
+CT-1101;Lívia Bezerra Soares;576.400.985-56;(79) 99599-1012;Casado(a);9850.00;Carlos Duarte Soares;773.104.515-38;Rua Exemplo, 384 · Farolândia · Aracaju/SE
+CT-1102;Jéssica Santos Freitas;998.351.105-30;(79) 99468-8524;Divorciado(a);12510.00;;;Rua Exemplo, 356 · Suissa · Aracaju/SE
+CT-1103;Marcos Santana Cardoso;382.447.815-30;(79) 98522-0594;Casado(a);11810.00;Letícia Rocha Cardoso;533.722.385-24;Travessa Teste, 592 · Farolândia · Aracaju/SE
+CT-1104;André Ribeiro Andrade;781.831.265-02;(79) 98315-6689;Casado(a);10510.00;Fernanda Vasconcelos Andrade;887.485.905-84;Travessa Teste, 630 · Centro · Aracaju/SE
+CT-1106;Fernanda Cardoso Silva;072.018.935-72;(79) 99813-5753;Divorciado(a);9280.00;;;Av. Fictícia, 160 · Farolândia · Aracaju/SE
+CT-1107;Isabela Lima Souza;767.691.205-93;(79) 99805-5888;Divorciado(a);9730.00;;;Travessa Teste, 688 · Farolândia · Aracaju/SE
+CT-1108;Camila Souza Costa;051.605.415-51;(79) 98425-0464;União estável;7450.00;Marcelo Duarte Costa;256.750.655-12;Rua Exemplo, 365 · Centro · Aracaju/SE
+CT-1109;Marina Rodrigues Pinto;335.464.595-47;(79) 99086-3348;Casado(a);10400.00;Sérgio Prado Pinto;;Rua Modelo, 197 · Salgado Filho · Aracaju/SE
+CT-1110;Sabrina Barbosa Carvalho;966.061.995-22;(79) 98506-6744;Divorciado(a);10100.00;;;Travessa Teste, 905 · Centro · Aracaju/SE
