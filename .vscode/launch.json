@@ -7,6 +7,16 @@
       "request": "launch",
       "mainClass": "br.org.fmc.Launcher",
       "vmArgs": "--enable-native-access=ALL-UNNAMED"
+    },
+    {
+      "type": "java",
+      "name": "Rodar com dados de teste (apaga tudo e recarrega)",
+      "request": "launch",
+      "mainClass": "br.org.fmc.Launcher",
+      "vmArgs": "--enable-native-access=ALL-UNNAMED",
+      "env": {
+        "FMC_DADOS_TESTE": "recarregar"
+      }
     }
   ]
 }

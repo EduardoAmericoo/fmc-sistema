@@ -74,6 +74,22 @@ Para criar uma tabela nova, acrescente um `CREATE TABLE IF NOT EXISTS ...` em `s
 
 ⚠️ Nunca use nomes ou CPFs reais da Fundação como dados de teste.
 
+## Dados de teste
+
+Para testar ou apresentar o sistema com dados fictícios (124 imóveis, 110 inquilinos e usuários de teste):
+
+- **No VS Code:** em Run and Debug, escolha **"Rodar com dados de teste (apaga tudo e recarrega)"** e aperte ▶.
+- **No terminal (Windows):** `$env:FMC_DADOS_TESTE="recarregar"; .\mvnw.cmd javafx:run`
+- **No terminal (Mac/Linux):** `FMC_DADOS_TESTE=recarregar ./mvnw javafx:run`
+
+⚠️ Essa opção **apaga todos os dados** do seu banco local e carrega os de teste do zero. Use a configuração normal ("Rodar o sistema") no dia a dia.
+
+Usuários de teste (senha `teste123`): `secretaria@exemplo.org` (Secretaria), `financeiro@exemplo.org` (Financeiro) e
+`aprendiz@exemplo.org` (Secretaria que não pode cadastrar inquilino novo). O Administrador continua `admin@fmc.org`.
+
+Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os arquivos de
+contratos, fiadores e cauções já estão prontos e passam a ser carregados quando o cadastro de contratos (BOARD-36/57) existir.
+
 ## Visual das telas (design system)
 
 O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):
