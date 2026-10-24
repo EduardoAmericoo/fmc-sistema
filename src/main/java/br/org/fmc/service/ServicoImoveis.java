@@ -26,10 +26,8 @@ public class ServicoImoveis {
         if (repositorio.existeCodigo(imovel.getCodigo(), imovel.getId())) {
             throw new IllegalArgumentException("Já existe um imóvel com este código de identificação.");
         }
-        if (imovel.getUnidade() == null || imovel.getUnidade().isBlank()) {
-            throw new IllegalArgumentException("Informe a unidade do imóvel.");
-        }
-        if (repositorio.existeUnidade(imovel.getUnidade(), imovel.getId())) {
+        // A unidade é opcional; se for informada, não pode se repetir.
+        if (imovel.getUnidade() != null && repositorio.existeUnidade(imovel.getUnidade(), imovel.getId())) {
             throw new IllegalArgumentException("Já existe um imóvel cadastrado com esta unidade. Informe uma unidade diferente.");
         }
         try {
@@ -46,16 +44,8 @@ public class ServicoImoveis {
     public void salvarFormulario(Long id, String codigo, String unidade, TipoImovel tipo, String endereco,
             String bairro, String grupo, String aluguel, String luz, String iptu,
             SituacaoImovel situacao) throws SQLException {
-        salvarFormulario(id, codigo, unidade, tipo, endereco, bairro, grupo, aluguel, luz, iptu,
-                situacao, null, null);
-    }
-
-    public void salvarFormulario(Long id, String codigo, String unidade, TipoImovel tipo, String endereco,
-            String bairro, String grupo, String aluguel, String luz, String iptu,
-            SituacaoImovel situacao, String inquilino, java.time.LocalDate contratoAte) throws SQLException {
         Sessao.exigir(id == null ? Acao.CRIAR_IMOVEL : Acao.EDITAR_IMOVEL);
         List<String> erros = new ArrayList<>();
-        if (unidade == null || unidade.isBlank()) erros.add("Informe a unidade do imóvel.");
         if (codigo == null || codigo.isBlank()) erros.add("Informe o código de identificação do imóvel.");
         if (tipo == null) erros.add("Selecione o tipo do imóvel.");
         if (endereco == null || endereco.isBlank()) erros.add("Informe o endereço.");
@@ -76,8 +66,6 @@ public class ServicoImoveis {
         imovel.setTaxaLuz(taxaLuz);
         imovel.setValorIptu(valorIptu);
         imovel.setSituacao(situacao);
-        imovel.setNomeInquilino(inquilino);
-        imovel.setContratoAte(contratoAte);
         salvar(imovel);
     }
 

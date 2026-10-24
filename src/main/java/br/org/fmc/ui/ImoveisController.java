@@ -36,14 +36,12 @@ public class ImoveisController {
         HBox topo = new HBox(16, textos, novo);
         topo.setAlignment(Pos.CENTER_LEFT);
         coluna("Código", Imovel::getCodigo, 95);
-        coluna("Unidade", Imovel::getUnidade, 200);
+        coluna("Unidade", i -> i.getUnidade() == null ? "—" : i.getUnidade(), 200);
         coluna("Endereço", Imovel::getEndereco, 230);
         coluna("Bairro", Imovel::getBairro, 110);
         coluna("Aluguel", i -> Formatos.moeda(i.getValorAluguel()), 120);
         coluna("Taxa de luz", i -> Formatos.moeda(i.getTaxaLuz()), 110);
-        coluna("Situação", i -> i.getSituacao().toString(), 100);
-        coluna("Inquilino", i -> i.getNomeInquilino() == null ? "—" : i.getNomeInquilino(), 190);
-        coluna("Contrato até", i -> Formatos.data(i.getContratoAte()), 120);
+        coluna("Situação", i -> i.getSituacao().toString(), 130);
         tabela.getStyleClass().add("tabela-fmc");
         tabela.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         tabela.setPlaceholder(new Label("Nenhum imóvel cadastrado."));
@@ -111,17 +109,6 @@ public class ImoveisController {
         TextField unidade = new TextField(original == null ? "" : original.getUnidade());
         TextField endereco = new TextField(original == null ? "" : original.getEndereco());
         TextField bairro = new TextField(original == null ? "" : original.getBairro());
-        TextField inquilino = new TextField(original == null ? "" : original.getNomeInquilino());
-        DatePicker contratoAte = new DatePicker(original == null ? null : original.getContratoAte());
-        contratoAte.setPromptText("dd/MM/aaaa");
-        contratoAte.setConverter(new javafx.util.StringConverter<java.time.LocalDate>() {
-            private final java.time.format.DateTimeFormatter formato = java.time.format.DateTimeFormatter
-                    .ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT);
-            public String toString(java.time.LocalDate data) { return data == null ? "" : formato.format(data); }
-            public java.time.LocalDate fromString(String texto) {
-                return texto == null || texto.isBlank() ? null : java.time.LocalDate.parse(texto.trim(), formato);
-            }
-        });
         TextField aluguel = new TextField(original == null ? "" : Formatos.numero(original.getValorAluguel()));
         TextField luz = new TextField(original == null ? "" : Formatos.numero(original.getTaxaLuz()));
         TextField iptu = new TextField(original == null ? "" : Formatos.numero(original.getValorIptu()));
@@ -144,15 +131,14 @@ public class ImoveisController {
             campos.getColumnConstraints().add(coluna);
         }
         campo(campos, "Código *", codigo, 0, 0, 1);
-        campo(campos, "Unidade *", unidade, 1, 0, 1);
+        campo(campos, "Unidade", unidade, 1, 0, 1);
         campo(campos, "Endereço *", endereco, 0, 1, 2);
         campo(campos, "Bairro", bairro, 0, 2, 2);
-        campo(campos, "Aluguel (R$) *", aluguel, 0, 3, 1);
-        campo(campos, "Taxa de luz (R$)", luz, 1, 3, 1);
-        campo(campos, "Situação", situacao, 0, 4, 1);
-        campo(campos, "Inquilino", inquilino, 1, 4, 1);
-        campo(campos, "Contrato até", contratoAte, 0, 5, 1);
-        campo(campos, "Tipo de imóvel *", tipo, 1, 5, 1);
+        campo(campos, "Tipo de imóvel *", tipo, 0, 3, 1);
+        campo(campos, "Situação *", situacao, 1, 3, 1);
+        campo(campos, "Aluguel (R$) *", aluguel, 0, 4, 1);
+        campo(campos, "Taxa de luz (R$)", luz, 1, 4, 1);
+        campo(campos, "IPTU (R$)", iptu, 0, 5, 1);
         Label erro = new Label();
         erro.setWrapText(true);
         erro.getStyleClass().add("aviso-erro");
@@ -199,16 +185,10 @@ public class ImoveisController {
         });
         salvar.setOnAction(e -> {
             try {
-                java.time.LocalDate dataContrato;
-                try {
-                    dataContrato = contratoAte.getConverter().fromString(contratoAte.getEditor().getText());
-                } catch (java.time.format.DateTimeParseException ex) {
-                    throw new IllegalArgumentException("Informe Contrato até com uma data válida no formato dd/MM/aaaa.");
-                }
                 servico.salvarFormulario(original == null ? null : original.getId(),
                         codigo.getText(), unidade.getText(), tipo.getValue(), endereco.getText(), bairro.getText(),
                         original == null ? null : original.getGrupo(), aluguel.getText(), luz.getText(),
-                        iptu.getText(), situacao.getValue(), inquilino.getText(), dataContrato);
+                        iptu.getText(), situacao.getValue());
                 Navegador.fecharJanela(veu);
                 carregar();
                 mensagem.setText("Imóvel salvo: " + codigo.getText().trim());

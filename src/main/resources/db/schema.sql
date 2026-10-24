@@ -13,22 +13,6 @@ CREATE TABLE IF NOT EXISTS sistema (
 
 INSERT OR IGNORE INTO sistema (chave, valor) VALUES ('versao_schema', '1');
 
-CREATE TABLE IF NOT EXISTS imovel (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    codigo TEXT NOT NULL UNIQUE,
-    unidade TEXT,
-    nome_inquilino TEXT,
-    contrato_ate TEXT,
-    tipo TEXT NOT NULL,
-    endereco TEXT NOT NULL,
-    bairro TEXT,
-    grupo TEXT,
-    valor_aluguel TEXT NOT NULL,
-    taxa_luz TEXT NOT NULL,
-    valor_iptu TEXT NOT NULL,
-    situacao TEXT NOT NULL
-);
-
 -- BOARD-33 · Login: quem pode entrar no sistema.
 -- A senha nunca é guardada: só o hash (ver util/SenhaUtil.java).
 CREATE TABLE IF NOT EXISTS usuario (
@@ -67,4 +51,22 @@ CREATE TABLE IF NOT EXISTS inquilino (
     conjuge_nome   TEXT,
     conjuge_cpf    TEXT,
     conjuge_renda  TEXT
+);
+
+-- BOARD-34 · Imóveis da Fundação.
+-- O código é a identificação e não pode se repetir. A unidade é opcional
+-- (ex.: "Apto 101 · Bloco A"), mas, se for informada, também não se repete (regra no service).
+-- Valores em dinheiro ficam como texto (ex.: "1500.00") para não perder centavos.
+CREATE TABLE IF NOT EXISTS imovel (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo        TEXT NOT NULL UNIQUE,
+    unidade       TEXT,
+    tipo          TEXT NOT NULL,
+    endereco      TEXT NOT NULL,
+    bairro        TEXT,
+    grupo         TEXT,
+    valor_aluguel TEXT NOT NULL,
+    taxa_luz      TEXT NOT NULL DEFAULT '0',
+    valor_iptu    TEXT NOT NULL DEFAULT '0',
+    situacao      TEXT NOT NULL
 );

@@ -44,8 +44,8 @@ public class ImovelRepository {
     public void salvar(Imovel i) throws SQLException {
         boolean novo = i.getId() == null;
         String sql = novo
-                ? "INSERT INTO imovel (codigo,tipo,endereco,bairro,grupo,valor_aluguel,taxa_luz,valor_iptu,situacao,unidade,nome_inquilino,contrato_ate) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-                : "UPDATE imovel SET codigo=?,tipo=?,endereco=?,bairro=?,grupo=?,valor_aluguel=?,taxa_luz=?,valor_iptu=?,situacao=?,unidade=?,nome_inquilino=?,contrato_ate=? WHERE id=?";
+                ? "INSERT INTO imovel (codigo,tipo,endereco,bairro,grupo,valor_aluguel,taxa_luz,valor_iptu,situacao,unidade) VALUES (?,?,?,?,?,?,?,?,?,?)"
+                : "UPDATE imovel SET codigo=?,tipo=?,endereco=?,bairro=?,grupo=?,valor_aluguel=?,taxa_luz=?,valor_iptu=?,situacao=?,unidade=? WHERE id=?";
         try (Connection c = Database.conectar();
              PreparedStatement s = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             s.setString(1, i.getCodigo());
@@ -58,9 +58,7 @@ public class ImovelRepository {
             s.setString(8, i.getValorIptu().toPlainString());
             s.setString(9, i.getSituacao().name());
             s.setString(10, i.getUnidade());
-            s.setString(11, i.getNomeInquilino());
-            s.setString(12, i.getContratoAte() == null ? null : i.getContratoAte().toString());
-            if (!novo) s.setLong(13, i.getId());
+            if (!novo) s.setLong(11, i.getId());
             if (s.executeUpdate() != 1) throw new SQLException("Imóvel não encontrado.");
             if (novo) try (ResultSet keys = s.getGeneratedKeys()) {
                 if (keys.next()) i.setId(keys.getLong(1));
@@ -83,11 +81,7 @@ public class ImovelRepository {
                     default -> new Imovel(codigo, tipo, endereco, aluguel);
                 };
                 i.setId(r.getLong("id"));
-                i.setNomeInquilino(r.getString("nome_inquilino"));
-                String ate = r.getString("contrato_ate");
-                i.setContratoAte(ate == null ? null : java.time.LocalDate.parse(ate));
-                String unidade = r.getString("unidade");
-                if (unidade != null && !unidade.isBlank()) i.setUnidade(unidade);
+                i.setUnidade(r.getString("unidade"));
                 i.setBairro(r.getString("bairro"));
                 i.setGrupo(r.getString("grupo"));
                 i.setTaxaLuz(new BigDecimal(r.getString("taxa_luz")));

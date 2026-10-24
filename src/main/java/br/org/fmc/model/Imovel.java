@@ -8,13 +8,6 @@ public class Imovel {
     private Long id;
     private String codigo;
     private String unidade;
-    private String nomeInquilino;
-    private java.time.LocalDate contratoAte;
-
-    public String getNomeInquilino() { return nomeInquilino; }
-    public void setNomeInquilino(String nome) { nomeInquilino = Valida.textoOpcional(nome); }
-    public java.time.LocalDate getContratoAte() { return contratoAte; }
-    public void setContratoAte(java.time.LocalDate data) { contratoAte = data; }
     private TipoImovel tipo;
     private String endereco;
     private String bairro;
@@ -61,12 +54,13 @@ public class Imovel {
         return codigo;
     }
 
+    /** Pode ser nulo. Ex.: "Apto 101 · Bloco A". Se for informada, não pode se repetir. */
     public String getUnidade() {
         return unidade;
     }
 
     public void setUnidade(String unidade) {
-        this.unidade = Valida.textoObrigatorio(unidade, "a unidade do imóvel");
+        this.unidade = Valida.textoOpcional(unidade);
     }
 
     public void setCodigo(String codigo) {

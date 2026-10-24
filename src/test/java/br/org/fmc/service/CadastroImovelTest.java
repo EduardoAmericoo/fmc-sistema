@@ -26,10 +26,20 @@ class CadastroImovelTest {
     @Test void informaTodosOsObrigatoriosSemGravar() throws Exception {
         var e = assertThrows(IllegalArgumentException.class, () -> servico.salvarFormulario(
                 null, "  ", "", null, "", "", "", "", "", "", null));
-        for (String campo : new String[]{"código", "unidade", "tipo", "endereço", "aluguel", "situação"}) {
+        for (String campo : new String[]{"código", "tipo", "endereço", "aluguel", "situação"}) {
             assertTrue(e.getMessage().contains(campo));
         }
+        assertFalse(e.getMessage().contains("unidade")); // a unidade é opcional
         assertTrue(servico.listar().isEmpty());
+    }
+
+    @Test void unidadeOpcionalPodeFicarVaziaEmVariosImoveis() throws Exception {
+        servico.salvarFormulario(null, "01", "", TipoImovel.CASA, "Rua A", "", "", "1000", "", "",
+                SituacaoImovel.VAGO);
+        servico.salvarFormulario(null, "02", "  ", TipoImovel.CASA, "Rua B", "", "", "1000", "", "",
+                SituacaoImovel.VAGO);
+        assertEquals(2, servico.listar().size());
+        assertTrue(servico.listar().stream().allMatch(i -> i.getUnidade() == null));
     }
 
     @Test void rejeitaAluguelZeroNegativoOuInvalido() {
