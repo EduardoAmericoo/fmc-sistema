@@ -74,8 +74,6 @@ public class ContratosController {
     @FXML
     private TableColumn<Contrato, Contrato> colunaVigencia;
     @FXML
-    private TableColumn<Contrato, Contrato> colunaVencimento;
-    @FXML
     private TableColumn<Contrato, Contrato> colunaGarantia;
     @FXML
     private TableColumn<Contrato, Contrato> colunaSituacao;
@@ -200,21 +198,15 @@ public class ContratosController {
     private void montarTabela() {
         colunaNumero.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaNumero.setCellFactory(c -> celula(ct -> rotulo(ct.getNumero(), "celula-nome")));
-        // Imóvel: código e, embaixo, o endereço.
+        // Imóvel: código e, embaixo, a unidade (ou o endereço, se não tiver unidade).
         colunaImovel.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaImovel.setCellFactory(c -> celula(ct -> duasLinhas(
-                ct.getImovel().getCodigo() + (ct.getImovel().getUnidade() == null ? "" : " · " + ct.getImovel().getUnidade()),
-                ct.getImovel().getEndereco())));
-        // Inquilino: iniciais, nome e, embaixo, o CPF.
+                ct.getImovel().getCodigo(),
+                ct.getImovel().getUnidade() != null ? ct.getImovel().getUnidade() : ct.getImovel().getEndereco())));
+        // Inquilino: nome e, embaixo, o CPF.
         colunaInquilino.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        colunaInquilino.setCellFactory(c -> celula(ct -> {
-            Label avatar = new Label(Iniciais.de(ct.getInquilino().getNome()));
-            avatar.getStyleClass().add("avatar");
-            HBox caixa = new HBox(12, avatar,
-                    duasLinhas(ct.getInquilino().getNome(), ct.getInquilino().getCpf().formatado()));
-            caixa.setAlignment(Pos.CENTER_LEFT);
-            return caixa;
-        }));
+        colunaInquilino.setCellFactory(c -> celula(ct -> duasLinhas(ct.getInquilino().getNome(),
+                ct.getInquilino().getCpf().formatado())));
         colunaAluguel.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaAluguel.setCellFactory(c -> {
             TableCell<Contrato, Contrato> celula = celula(ct -> new Label(Formatos.moeda(ct.getValorAluguel())));
@@ -224,9 +216,7 @@ public class ContratosController {
         colunaVigencia.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaVigencia.setCellFactory(c -> celula(ct -> duasLinhas(
                 Formatos.data(ct.getDataEntregaChaves()) + " a " + Formatos.data(ct.getDataTermino()),
-                ct.getPrazo().toString())));
-        colunaVencimento.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        colunaVencimento.setCellFactory(c -> celula(ct -> new Label("Dia " + ct.getDiaVencimento())));
+                ct.getPrazo() + " · vence dia " + ct.getDiaVencimento())));
         colunaGarantia.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaGarantia.setCellFactory(c -> celula(ct -> {
             Label selo = selo(ct.getGarantia() instanceof Caucao ? "Caução" : "Fiador", "selo-neutro");
@@ -254,7 +244,10 @@ public class ContratosController {
             return selo("Encerrado", "selo-neutro");
         }
         if (c.getDataTermino().isBefore(LocalDate.now())) {
-            return selo("Vencido · prorrogado", "selo-alerta");
+            Label selo = selo("Prorrogado", "selo-alerta");
+            selo.setTooltip(new Tooltip("O prazo venceu em " + Formatos.data(c.getDataTermino())
+                    + ", mas o contrato segue valendo (vencido e prorrogado)."));
+            return selo;
         }
         return selo("Ativo", "selo-sucesso");
     }
