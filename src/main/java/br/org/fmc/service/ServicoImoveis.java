@@ -6,7 +6,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import br.org.fmc.repository.ImovelRepository;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 
 public class ServicoImoveis {
     private final ImovelRepository repositorio = new ImovelRepository();
@@ -19,6 +21,27 @@ public class ServicoImoveis {
     public List<Imovel> listar() throws SQLException {
         Sessao.exigir(Acao.VER_IMOVEIS);
         return repositorio.listarTodos();
+    }
+
+    /**
+     * Filtra a lista da tela (BOARD-55). Situação nula = todas. A busca ignora
+     * maiúsculas e acentos e procura no código, na unidade, no endereço e no bairro.
+     */
+    public static List<Imovel> filtrar(List<Imovel> imoveis, SituacaoImovel situacao, String busca) {
+        String termo = normalizar(busca);
+        return imoveis.stream()
+                .filter(i -> situacao == null || i.getSituacao() == situacao)
+                .filter(i -> termo.isEmpty() || normalizar(i.getCodigo()).contains(termo)
+                        || normalizar(i.getUnidade()).contains(termo)
+                        || normalizar(i.getEndereco()).contains(termo)
+                        || normalizar(i.getBairro()).contains(termo))
+                .toList();
+    }
+
+    private static String normalizar(String texto) {
+        if (texto == null) return "";
+        return Normalizer.normalize(texto.trim(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
     }
 
     public void salvar(Imovel imovel) throws SQLException {
