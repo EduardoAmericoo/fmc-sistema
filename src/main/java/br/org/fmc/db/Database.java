@@ -54,6 +54,21 @@ public final class Database {
                     st.execute(comando);
                 }
             }
+            // Atualiza somente a tabela de imóveis dos bancos criados antes de Unidade.
+            boolean temUnidade = false;
+            try (var colunas = st.executeQuery("PRAGMA table_info(imovel)")) {
+                while (colunas.next()) {
+                    if ("unidade".equals(colunas.getString("name"))) temUnidade = true;
+                }
+            }
+            if (!temUnidade) st.execute("ALTER TABLE imovel ADD COLUMN unidade TEXT");
+            java.util.Set<String> existentes = new java.util.HashSet<>();
+            try (var colunas = st.executeQuery("PRAGMA table_info(imovel)")) {
+                while (colunas.next()) existentes.add(colunas.getString("name"));
+            }
+            for (String coluna : new String[]{"nome_inquilino", "contrato_ate"}) {
+                if (!existentes.contains(coluna)) st.execute("ALTER TABLE imovel ADD COLUMN " + coluna + " TEXT");
+            }
         }
     }
 

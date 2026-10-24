@@ -13,6 +13,22 @@ CREATE TABLE IF NOT EXISTS sistema (
 
 INSERT OR IGNORE INTO sistema (chave, valor) VALUES ('versao_schema', '1');
 
+CREATE TABLE IF NOT EXISTS imovel (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo TEXT NOT NULL UNIQUE,
+    unidade TEXT,
+    nome_inquilino TEXT,
+    contrato_ate TEXT,
+    tipo TEXT NOT NULL,
+    endereco TEXT NOT NULL,
+    bairro TEXT,
+    grupo TEXT,
+    valor_aluguel TEXT NOT NULL,
+    taxa_luz TEXT NOT NULL,
+    valor_iptu TEXT NOT NULL,
+    situacao TEXT NOT NULL
+);
+
 -- BOARD-33 · Login: quem pode entrar no sistema.
 -- A senha nunca é guardada: só o hash (ver util/SenhaUtil.java).
 CREATE TABLE IF NOT EXISTS usuario (
