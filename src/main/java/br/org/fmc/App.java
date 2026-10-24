@@ -5,6 +5,7 @@ import br.org.fmc.service.ServicoAcesso;
 import br.org.fmc.service.ServicoDadosTeste;
 import br.org.fmc.ui.Navegador;
 import br.org.fmc.ui.Tema;
+import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
@@ -13,9 +14,12 @@ import javafx.stage.Stage;
  * Ponto de entrada do sistema: prepara o banco, garante que existe um
  * Administrador e abre a tela de login.
  *
- * Com a variável de ambiente FMC_DADOS_TESTE=recarregar, o sistema apaga os dados
- * e carrega os dados de teste antes de abrir (BOARD-52). No VS Code é a
- * configuração "Rodar com dados de teste"; ver README, seção "Dados de teste".
+ * Dados de teste (BOARD-52), pela variável de ambiente FMC_DADOS_TESTE:
+ * - não definida: se o banco estiver vazio (primeira vez), carrega os dados de teste sozinho;
+ * - "recarregar": apaga tudo e carrega os dados de teste do zero (configuração
+ *   "Rodar com dados de teste" do VS Code);
+ * - "nao": nunca carrega dados de teste (usar na versão entregue à Fundação).
+ * Ver README, seção "Dados de teste".
  */
 public class App extends Application {
 
@@ -30,20 +34,33 @@ public class App extends Application {
         Navegador.mostrarLogin();
         stage.show();
 
-        if ("recarregar".equalsIgnoreCase(System.getenv("FMC_DADOS_TESTE"))) {
-            recarregarDadosDeTeste(stage);
+        String opcao = System.getenv("FMC_DADOS_TESTE");
+        if ("recarregar".equalsIgnoreCase(opcao)) {
+            carregarDadosDeTeste(stage, true);
+        } else if (!"nao".equalsIgnoreCase(opcao)) {
+            carregarDadosDeTeste(stage, false);
         }
     }
 
-    /** Apaga os dados e carrega os de teste, avisando o resultado numa janelinha. */
-    private void recarregarDadosDeTeste(Stage stage) {
+    /**
+     * Carrega os dados de teste e avisa o resultado numa janelinha.
+     * Sem "doZero", só carrega se o banco estiver vazio (e aí não mostra nada se já tinha dados).
+     */
+    private void carregarDadosDeTeste(Stage stage, boolean doZero) {
         Alert aviso;
         try {
-            ServicoDadosTeste.Resumo resumo = new ServicoDadosTeste().recarregarDoZero();
-            aviso = new Alert(Alert.AlertType.INFORMATION, "Carregados: " + resumo
+            ServicoDadosTeste dados = new ServicoDadosTeste();
+            Optional<ServicoDadosTeste.Resumo> resumo = doZero
+                    ? Optional.of(dados.recarregarDoZero())
+                    : dados.carregarSeBancoVazio();
+            if (resumo.isEmpty()) {
+                return; // o banco já tinha dados: abre normalmente
+            }
+            aviso = new Alert(Alert.AlertType.INFORMATION, "Carregados: " + resumo.get()
                     + "\n\nUsuários de teste: secretaria@exemplo.org, financeiro@exemplo.org e aprendiz@exemplo.org"
                     + ", senha " + ServicoDadosTeste.SENHA_TESTE + ".");
-            aviso.setHeaderText("Dados de teste recarregados do zero");
+            aviso.setHeaderText(doZero ? "Dados de teste recarregados do zero"
+                    : "Banco vazio: dados de teste carregados");
         } catch (Exception e) {
             aviso = new Alert(Alert.AlertType.ERROR, e.getMessage());
             aviso.setHeaderText("Não foi possível carregar os dados de teste");

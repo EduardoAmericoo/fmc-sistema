@@ -80,6 +80,28 @@ class DadosTesteTest {
     }
 
     @Test
+    void bancoVazioCarregaSozinho() throws Exception {
+        assertTrue(dados.carregarSeBancoVazio().isPresent());
+        entrarComoAdministrador();
+        assertEquals(124, new ServicoImoveis().listar().size());
+    }
+
+    @Test
+    void bancoComDadosNaoEhMexido() throws Exception {
+        acesso.garantirAdministradorInicial();
+        entrarComoAdministrador();
+        new ServicoImoveis().salvarFormulario(null, "MEU-1", "", TipoImovel.CASA, "Rua Minha, 1", "", "",
+                "1000", "", "", SituacaoImovel.VAGO);
+        acesso.sair();
+
+        assertTrue(dados.carregarSeBancoVazio().isEmpty());
+
+        entrarComoAdministrador();
+        assertEquals(1, new ServicoImoveis().listar().size());
+        assertEquals(1, acesso.listarUsuarios().size());
+    }
+
+    @Test
     void usuariosDeTesteEntramComAsPermissoesCertas() throws Exception {
         dados.recarregarDoZero();
 

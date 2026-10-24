@@ -23,6 +23,20 @@ public class SistemaRepository {
      * para recarregar os dados de teste (BOARD-52). As tabelas continuam existindo.
      * Cuidado: é irreversível. Só é chamado pela carga de dados de teste.
      */
+    /**
+     * O banco está "novo"? Sem imóveis, sem inquilinos e, no máximo, o Administrador inicial.
+     * Usado para carregar os dados de teste sozinho na primeira vez que o sistema abre.
+     */
+    public boolean bancoSemDados() throws SQLException {
+        String sql = "SELECT (SELECT COUNT(*) FROM imovel) + (SELECT COUNT(*) FROM inquilino) AS cadastros, "
+                + "(SELECT COUNT(*) FROM usuario) AS usuarios";
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement(sql);
+             ResultSet rs = st.executeQuery()) {
+            return rs.next() && rs.getInt("cadastros") == 0 && rs.getInt("usuarios") <= 1;
+        }
+    }
+
     public void apagarTodosOsDados() throws SQLException {
         try (Connection conexao = Database.conectar(); Statement st = conexao.createStatement()) {
             st.execute("PRAGMA foreign_keys = OFF"); // apaga em qualquer ordem, sem esbarrar nas ligações

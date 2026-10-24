@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -45,6 +46,19 @@ public class ServicoDadosTeste {
     }
 
     private final SistemaRepository sistema = new SistemaRepository();
+
+    /**
+     * Se o banco estiver vazio (primeira vez que o sistema abre), carrega os dados de teste.
+     * Se já houver qualquer cadastro, não mexe em nada.
+     *
+     * @return o que foi carregado, ou vazio se o banco já tinha dados
+     */
+    public Optional<Resumo> carregarSeBancoVazio() throws SQLException {
+        if (!sistema.bancoSemDados()) {
+            return Optional.empty();
+        }
+        return Optional.of(recarregarDoZero());
+    }
 
     /**
      * Apaga todos os dados do banco e carrega os dados de teste do zero.
