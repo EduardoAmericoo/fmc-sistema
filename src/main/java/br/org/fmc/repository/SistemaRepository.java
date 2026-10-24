@@ -19,11 +19,6 @@ import java.util.Optional;
 public class SistemaRepository {
 
     /**
-     * Apaga os dados de todas as tabelas (menos a "sistema"), deixando o banco vazio
-     * para recarregar os dados de teste (BOARD-52). As tabelas continuam existindo.
-     * Cuidado: é irreversível. Só é chamado pela carga de dados de teste.
-     */
-    /**
      * O banco está "novo"? Sem imóveis, sem inquilinos e, no máximo, o Administrador inicial.
      * Usado para carregar os dados de teste sozinho na primeira vez que o sistema abre.
      */
@@ -37,6 +32,11 @@ public class SistemaRepository {
         }
     }
 
+    /**
+     * Apaga os dados de todas as tabelas (menos a "sistema"), deixando o banco vazio
+     * para recarregar os dados de teste (BOARD-52). As tabelas continuam existindo.
+     * Cuidado: é irreversível. Só é chamado pela carga de dados de teste.
+     */
     public void apagarTodosOsDados() throws SQLException {
         try (Connection conexao = Database.conectar(); Statement st = conexao.createStatement()) {
             st.execute("PRAGMA foreign_keys = OFF"); // apaga em qualquer ordem, sem esbarrar nas ligações

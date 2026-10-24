@@ -126,6 +126,16 @@ public class Contrato {
         return valorAluguel;
     }
 
+    /**
+     * Usado pelo repositório ao carregar um contrato do banco: volta os valores
+     * do dia do cadastro (o imóvel pode ter sido reajustado depois).
+     */
+    public void setValores(BigDecimal valorAluguel, BigDecimal taxaLuz, BigDecimal valorIptu) {
+        this.valorAluguel = Valida.positivo(valorAluguel, "o valor do aluguel");
+        this.taxaLuz = Valida.naoNegativo(taxaLuz, "a taxa de luz");
+        this.valorIptu = Valida.naoNegativo(valorIptu, "o IPTU");
+    }
+
     public BigDecimal getTaxaLuz() {
         return taxaLuz;
     }
