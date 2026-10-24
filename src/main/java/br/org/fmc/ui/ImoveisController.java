@@ -5,6 +5,7 @@ import br.org.fmc.service.ServicoImoveis;
 import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Function;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -20,6 +21,10 @@ public class ImoveisController {
     private final ServicoImoveis servico = new ServicoImoveis();
     private final TableView<Imovel> tabela = new TableView<>();
     private final Label mensagem = new Label();
+    private final ComboBox<SituacaoImovel> filtroSituacao = new ComboBox<>();
+    private final TextField busca = new TextField();
+    private final Label vazio = new Label();
+    private List<Imovel> todos = List.of();
 
     @FXML
     private void initialize() {
@@ -44,7 +49,24 @@ public class ImoveisController {
         coluna("Situação", i -> i.getSituacao().toString(), 130);
         tabela.getStyleClass().add("tabela-fmc");
         tabela.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        tabela.setPlaceholder(new Label("Nenhum imóvel cadastrado."));
+        tabela.setPlaceholder(vazio);
+        // Filtro por situação (null = todas) e busca por identificação ou endereço.
+        filtroSituacao.getItems().setAll(SituacaoImovel.values());
+        filtroSituacao.setPromptText("Todas as situações");
+        filtroSituacao.setButtonCell(celulaSituacao());
+        filtroSituacao.setCellFactory(l -> celulaSituacao());
+        busca.setPromptText("Buscar por código, unidade, endereço ou bairro");
+        busca.setAccessibleText("Buscar imóvel");
+        HBox.setHgrow(busca, Priority.ALWAYS);
+        Button limpar = new Button("Limpar filtros");
+        limpar.setOnAction(e -> {
+            filtroSituacao.setValue(null);
+            busca.clear();
+        });
+        HBox filtros = new HBox(12, busca, filtroSituacao, limpar);
+        filtros.setAlignment(Pos.CENTER_LEFT);
+        filtroSituacao.valueProperty().addListener((o, a, b) -> aplicarFiltro());
+        busca.textProperty().addListener((o, a, b) -> aplicarFiltro());
         Button editar = new Button("Editar imóvel selecionado");
         Permissoes.mostrarSe(editar, Acao.EDITAR_IMOVEL);
         editar.disableProperty().bind(tabela.getSelectionModel().selectedItemProperty().isNull());
@@ -57,7 +79,7 @@ public class ImoveisController {
         cartao.getStyleClass().add("cartao-tabela");
         VBox.setVgrow(tabela, Priority.ALWAYS);
         VBox.setVgrow(cartao, Priority.ALWAYS);
-        pagina.getChildren().setAll(topo, cartao, new HBox(12, editar, excluir));
+        pagina.getChildren().setAll(topo, filtros, cartao, new HBox(12, editar, excluir));
         carregar();
     }
 
@@ -95,13 +117,35 @@ public class ImoveisController {
         }
     }
 
+    /** Mostra "Todas as situações" quando nada está escolhido, em vez de uma célula vazia. */
+    private ListCell<SituacaoImovel> celulaSituacao() {
+        return new ListCell<>() {
+            @Override
+            protected void updateItem(SituacaoImovel item, boolean vazia) {
+                super.updateItem(item, vazia);
+                setText(vazia || item == null ? "Todas as situações" : item.toString());
+            }
+        };
+    }
+
     private void carregar() {
         try {
-            tabela.getItems().setAll(servico.listar());
-            mensagem.setText(tabela.getItems().size() + " imóvel(is) cadastrado(s)");
+            todos = servico.listar();
+            aplicarFiltro();
         } catch (SQLException | RuntimeException e) {
             mensagem.setText("Não foi possível carregar os imóveis: " + e.getMessage());
         }
+    }
+
+    private void aplicarFiltro() {
+        List<Imovel> filtrados = ServicoImoveis.filtrar(todos, filtroSituacao.getValue(), busca.getText());
+        tabela.getItems().setAll(filtrados);
+        boolean filtrando = filtroSituacao.getValue() != null || !busca.getText().isBlank();
+        vazio.setText(todos.isEmpty() ? "Nenhum imóvel cadastrado."
+                : "Nenhum imóvel encontrado com esses filtros.");
+        mensagem.setText(filtrando
+                ? filtrados.size() + " de " + todos.size() + " imóvel(is)"
+                : todos.size() + " imóvel(is) cadastrado(s)");
     }
 
     private void formulario(Imovel original) {
