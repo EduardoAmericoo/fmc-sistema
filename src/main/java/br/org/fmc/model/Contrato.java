@@ -1,5 +1,6 @@
 package br.org.fmc.model;
 
+import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -51,8 +52,10 @@ public class Contrato {
     public List<String> validar() {
         List<String> erros = new ArrayList<>();
         if (!atendeRegraRenda()) {
-            erros.add("A renda familiar do inquilino precisa ser pelo menos "
-                    + RegrasNegocio.MULTIPLO_RENDA + " vezes o aluguel.");
+            BigDecimal minimo = valorAluguel.multiply(BigDecimal.valueOf(RegrasNegocio.MULTIPLO_RENDA));
+            erros.add("A renda familiar do inquilino (" + Formatos.moeda(inquilino.rendaConsiderada())
+                    + ") precisa ser pelo menos " + RegrasNegocio.MULTIPLO_RENDA + " vezes o aluguel ("
+                    + Formatos.moeda(minimo) + ").");
         }
         erros.addAll(garantia.validar(this));
         return erros;
