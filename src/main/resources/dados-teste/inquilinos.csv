@@ -1,111 +1,111 @@
 nome;cpf;celular;email;estado_civil;profissao;local_trabalho;renda;outras_rendas;conjuge;cpf_conjuge;renda_conjuge
-Sofia Melo Costa;884.570.565-06;(79) 98693-7101;sofia.costa75@exemplo.com;Viúvo(a);Nutricionista;;5790.00;800.00;;;0.00
-Priscila Nascimento Siqueira;576.673.435-27;(79) 99957-8821;priscila.siqueira89@exemplo.com;Casado(a);Comerciante;Escritório Exemplo;9620.00;0.00;César Moraes Siqueira;369.188.405-92;0.00
-Daniel Souza Rezende;009.813.725-54;(79) 98843-4969;daniel.rezende24@exemplo.com;Solteiro(a);Nutricionista;Banco Exemplo;4700.00;650.00;;;0.00
-Felipe Vieira Pinto;997.214.425-93;(79) 98743-9130;felipe.pinto86@exemplo.com;Divorciado(a);Aposentada;;7680.00;0.00;;;0.00
-Yasmin Oliveira Barbosa;985.571.765-11;(79) 99596-5861;yasmin.barbosa96@exemplo.com;Viúvo(a);Aposentado;;7700.00;0.00;;;0.00
-Bruno Freitas Pinto;651.111.155-52;(79) 99872-3410;bruno.pinto70@exemplo.com;Solteiro(a);Farmacêutica;Clínica Exemplo;4790.00;660.00;;;0.00
-Cecília Martins Oliveira;443.867.095-09;(79) 99409-6447;cecilia.oliveira91@exemplo.com;Casado(a);Técnico de enfermagem;Universidade Exemplo;5030.00;0.00;Fábio Carvalho Oliveira;144.352.135-32;0.00
-Paula Santana Rocha;547.031.075-20;(79) 99171-9748;paula.rocha36@exemplo.com;Casado(a);Bancário;Empresa Exemplo Ltda;9020.00;0.00;Igor Martins Rocha;825.296.215-78;0.00
-Murilo Dias Mendes;366.017.795-47;(79) 99479-9777;;Casado(a);Servidor público;;7090.00;0.00;Vanessa Fernandes Mendes;044.259.865-39;0.00
-Caio Lopes Martins;596.394.315-91;(79) 99574-0998;caio.martins95@exemplo.com;Divorciado(a);Analista administrativo;Prefeitura de Aracaju;7410.00;0.00;;;0.00
-Samuel Ramos Duarte;917.871.725-62;(79) 98537-2086;samuel.duarte46@exemplo.com;Solteiro(a);Analista administrativo;Prefeitura de Aracaju;5410.00;0.00;;;0.00
-Gabriel Silva Moraes;504.815.515-73;(79) 98913-0733;gabriel.moraes71@exemplo.com;Casado(a);Eletricista;Escritório Exemplo;10250.00;1400.00;Luana Rocha Moraes;514.001.425-47;0.00
-Larissa Dias Fernandes;958.315.815-19;(79) 98187-3874;larissa.fernandes42@exemplo.com;Solteiro(a);Professor;Prefeitura de Aracaju;6480.00;0.00;;;0.00
-Natália Pinto Soares;606.412.055-03;(79) 99310-9437;natalia.soares25@exemplo.com;Casado(a);Farmacêutica;Universidade Exemplo;6510.00;0.00;Gabriel Teixeira Soares;;0.00
-Clara Duarte Andrade;787.759.075-00;(79) 98104-7734;clara.andrade55@exemplo.com;Divorciado(a);Advogada;Clínica Exemplo;6210.00;0.00;;;0.00
-Jéssica Siqueira Rezende;964.209.865-24;(79) 99651-0816;jessica.rezende89@exemplo.com;União estável;Nutricionista;Comércio próprio;6010.00;0.00;César Rodrigues Rezende;708.102.085-20;0.00
-Eduardo Cavalcante Melo;345.850.685-38;(79) 98294-5597;;Divorciado(a);Vendedora;Empresa Exemplo Ltda;7770.00;0.00;;;0.00
-Aline Batista Pinto;060.554.055-12;(79) 98875-1522;aline.pinto49@exemplo.com;Casado(a);Bancário;Farmácia Exemplo;4560.00;0.00;Paulo Rodrigues Pinto;;2470.00
-Marcos Costa Vasconcelos;352.011.415-10;(79) 99057-5629;marcos.vasconcelos31@exemplo.com;Divorciado(a);Enfermeira;Supermercado Exemplo;6070.00;0.00;;;0.00
-Samuel Batista Vasconcelos;042.195.065-00;(79) 99832-6588;samuel.vasconcelos13@exemplo.com;União estável;Motorista;Comércio próprio;4940.00;0.00;Eduarda Rocha Vasconcelos;312.807.295-70;2660.00
-Thiago Carvalho Silva;677.536.935-22;(79) 98764-8496;thiago.silva92@exemplo.com;Casado(a);Autônomo;;10750.00;0.00;Helena Nascimento Silva;896.595.635-82;0.00
-Jéssica Santos Prado;686.082.445-00;(79) 99564-8079;;Casado(a);Enfermeira;Banco Exemplo;9280.00;1270.00;Pedro Pereira Prado;897.347.455-30;0.00
-Gabriel Nascimento Prado;224.461.325-96;(79) 99822-0847;gabriel.prado18@exemplo.com;Casado(a);Servidora pública;Hospital Exemplo;3320.00;0.00;Karina Araújo Prado;130.766.785-66;1790.00
-Gabriela Bezerra Duarte;396.923.745-99;(79) 99762-3481;gabriela.duarte79@exemplo.com;Viúvo(a);Contadora;Clínica Exemplo;8070.00;0.00;;;0.00
-Joana Batista Oliveira;129.594.255-02;(79) 98883-8477;joana.oliveira10@exemplo.com;Casado(a);Nutricionista;Hospital Exemplo;8180.00;0.00;Mateus Castro Oliveira;207.474.325-46;4410.00
-Isabela Martins Castro;011.438.925-00;(79) 98345-6025;isabela.castro47@exemplo.com;Casado(a);Nutricionista;Empresa Exemplo Ltda;6680.00;0.00;Gabriel Vieira Castro;;0.00
-Larissa Costa Fernandes;202.439.165-66;(79) 99642-6267;larissa.fernandes69@exemplo.com;Divorciado(a);Professora;Farmácia Exemplo;6590.00;0.00;;;0.00
-Raquel Rocha Soares;927.638.675-02;(79) 98232-0741;;Viúvo(a);Professor;Comércio próprio;9110.00;0.00;;;0.00
-Mateus Santana Dias;250.806.025-97;(79) 98284-0553;;Divorciado(a);Servidor público;Escola Estadual Exemplo;10730.00;0.00;;;0.00
-Vinícius Nascimento Souza;903.790.145-05;(79) 99448-7656;;Casado(a);Enfermeira;Clínica Exemplo;3620.00;0.00;Gabriela Siqueira Souza;637.532.985-06;1950.00
-Vítor Souza Bezerra;745.973.885-91;(79) 99011-2921;vitor.bezerra22@exemplo.com;Solteiro(a);Advogada;Farmácia Exemplo;4640.00;0.00;;;0.00
-Diego Lopes Soares;771.080.655-41;(79) 99013-1901;;Viúvo(a);Cabeleireira;Supermercado Exemplo;6500.00;890.00;;;0.00
-Clara Vieira Cardoso;993.538.245-16;(79) 99098-0097;clara.cardoso24@exemplo.com;Casado(a);Autônomo;;12160.00;0.00;Marcelo Andrade Cardoso;961.202.445-65;0.00
-Vanessa Gomes Oliveira;328.077.495-00;(79) 99063-8745;vanessa.oliveira51@exemplo.com;Viúvo(a);Aposentada;;11690.00;1600.00;;;0.00
-Sofia Farias Andrade;321.923.445-38;(79) 98536-8863;sofia.andrade80@exemplo.com;União estável;Auxiliar administrativo;Comércio próprio;3390.00;0.00;Thiago Santana Andrade;648.895.045-24;1830.00
-Marcos Vasconcelos Siqueira;788.610.435-85;(79) 98479-7388;marcos.siqueira87@exemplo.com;Divorciado(a);Autônomo;;11180.00;0.00;;;0.00
-Henrique Souza Soares;499.202.235-90;(79) 98224-8788;henrique.soares60@exemplo.com;Solteiro(a);Técnico em informática;;8690.00;0.00;;;0.00
-Daniela Vieira Pinto;702.580.725-71;(79) 98344-1401;daniela.pinto24@exemplo.com;Casado(a);Professor;Supermercado Exemplo;9860.00;0.00;Igor Vieira Pinto;153.166.115-78;0.00
-Murilo Moraes Costa;163.141.745-20;(79) 98250-3747;murilo.costa41@exemplo.com;União estável;Professora;Supermercado Exemplo;7200.00;0.00;Sofia Cavalcante Costa;;0.00
-Igor Rodrigues Almeida;984.322.555-48;(79) 99562-8404;igor.almeida77@exemplo.com;Solteiro(a);Cabeleireira;;7680.00;0.00;;;0.00
-Mariana Souza Nascimento;035.587.355-95;(79) 99351-2513;mariana.nascimento56@exemplo.com;Casado(a);Autônomo;;4040.00;0.00;Rafael Moura Nascimento;747.803.625-20;2190.00
-Tatiana Teixeira Machado;017.460.415-79;(79) 98264-3112;tatiana.machado97@exemplo.com;Divorciado(a);Eletricista;Universidade Exemplo;5640.00;780.00;;;0.00
-Renata Oliveira Castro;408.551.495-40;(79) 98879-4897;renata.castro19@exemplo.com;Casado(a);Nutricionista;Prefeitura de Aracaju;4180.00;570.00;Gabriel Rodrigues Castro;568.754.335-08;2560.00
-Rodrigo Andrade Souza;047.190.725-18;(79) 99964-2045;;Casado(a);Analista administrativo;Escola Estadual Exemplo;3190.00;0.00;Patrícia Araújo Souza;576.174.515-12;1730.00
-Renato Pinto Dias;533.414.755-16;(79) 98790-4744;renato.dias24@exemplo.com;Divorciado(a);Farmacêutica;;5980.00;0.00;;;0.00
-Eduarda Siqueira Almeida;106.685.715-60;(79) 99245-7020;;Casado(a);Assistente social;Hospital Exemplo;10270.00;0.00;Ricardo Batista Almeida;;0.00
-Sérgio Pinto Freitas;643.149.185-86;(79) 98256-3076;sergio.freitas28@exemplo.com;Casado(a);Assistente social;;7460.00;0.00;Paula Ribeiro Freitas;;0.00
-Natália Nunes Vasconcelos;430.509.745-16;(79) 99010-9569;natalia.vasconcelos78@exemplo.com;Solteiro(a);Técnico de enfermagem;Escritório Exemplo;4830.00;660.00;;;0.00
-Larissa Nascimento Melo;199.645.425-00;(79) 98488-4762;larissa.melo44@exemplo.com;Casado(a);Engenheiro civil;Supermercado Exemplo;6780.00;0.00;Diego Cardoso Melo;836.656.815-61;0.00
-Clara Siqueira Fernandes;288.581.605-84;(79) 99237-5616;clara.fernandes32@exemplo.com;União estável;Auxiliar administrativo;Clínica Exemplo;13370.00;0.00;Samuel Batista Fernandes;660.461.555-33;0.00
-Valéria Silva Ramos;654.721.005-77;(79) 99064-2916;valeria.ramos22@exemplo.com;Solteiro(a);Farmacêutica;Banco Exemplo;11850.00;1620.00;;;0.00
-Fábio Ramos Cavalcante;151.395.975-19;(79) 98674-4658;;Solteiro(a);Vendedora;Escritório Exemplo;9470.00;1300.00;;;0.00
-Bruno Nascimento Lima;822.945.785-97;(79) 99401-3665;bruno.lima17@exemplo.com;Viúvo(a);Motorista;Hospital Exemplo;8940.00;0.00;;;0.00
-Yasmin Pereira Duarte;552.239.695-45;(79) 98525-6790;;Solteiro(a);Recepcionista;Escola Estadual Exemplo;8810.00;0.00;;;0.00
-André Andrade Nunes;432.291.655-43;(79) 99742-9757;andre.nunes35@exemplo.com;Casado(a);Eletricista;Supermercado Exemplo;5350.00;0.00;Joana Monteiro Nunes;;0.00
-Priscila Rezende Duarte;117.289.555-48;(79) 98544-9070;priscila.duarte25@exemplo.com;Solteiro(a);Nutricionista;Hospital Exemplo;11110.00;0.00;;;0.00
-Raquel Vasconcelos Carvalho;498.357.885-45;(79) 98384-5497;raquel.carvalho50@exemplo.com;União estável;Auxiliar administrativo;Escritório Exemplo;11140.00;0.00;Henrique Ribeiro Carvalho;054.935.295-30;0.00
-Patrícia Farias Carvalho;704.133.135-06;(79) 99397-4860;;Viúvo(a);Servidor público;Clínica Exemplo;9110.00;0.00;;;0.00
-Antônio Machado Teixeira;455.411.735-90;(79) 99177-7637;antonio.teixeira47@exemplo.com;Divorciado(a);Bancário;Escritório Exemplo;5230.00;720.00;;;0.00
-Marcelo Nunes Oliveira;957.723.415-10;(79) 99311-8943;marcelo.oliveira73@exemplo.com;Casado(a);Motorista;Empresa Exemplo Ltda;9180.00;0.00;Tatiana Bezerra Oliveira;;0.00
-Camila Vasconcelos Ribeiro;328.679.915-79;(79) 99873-8656;;Viúvo(a);Nutricionista;Farmácia Exemplo;4810.00;0.00;;;0.00
-Ana Lopes Oliveira;432.437.115-68;(79) 98290-2246;ana.oliveira30@exemplo.com;União estável;Comerciante;Escritório Exemplo;6160.00;0.00;Felipe Almeida Oliveira;726.691.705-01;0.00
-Fernando Batista Lopes;984.704.625-55;(79) 98233-0987;fernando.lopes29@exemplo.com;Divorciado(a);Técnico em informática;Hospital Exemplo;8170.00;0.00;;;0.00
-Thiago Lima Vasconcelos;850.498.575-03;(79) 99301-4549;thiago.vasconcelos56@exemplo.com;União estável;Advogada;Prefeitura de Aracaju;7420.00;0.00;Patrícia Batista Vasconcelos;746.568.805-15;0.00
-Felipe Nunes Souza;352.841.615-72;(79) 99889-8922;;Divorciado(a);Autônomo;;9030.00;0.00;;;0.00
-Daniela Martins Ramos;471.481.195-96;(79) 99121-7675;daniela.ramos64@exemplo.com;União estável;Farmacêutica;;5870.00;0.00;Lucas Gomes Ramos;601.082.675-63;0.00
-Mariana Pinto Souza;447.185.185-39;(79) 99041-4798;mariana.souza48@exemplo.com;Viúvo(a);Técnico de enfermagem;Empresa Exemplo Ltda;10640.00;0.00;;;0.00
-Camila Oliveira Batista;651.170.465-36;(79) 98593-2576;camila.batista73@exemplo.com;Casado(a);Eletricista;Supermercado Exemplo;7080.00;970.00;Igor Araújo Batista;825.616.595-26;0.00
-Helena Rodrigues Araújo;831.853.015-28;(79) 98517-4555;helena.araujo31@exemplo.com;União estável;Bancário;Escola Estadual Exemplo;6970.00;0.00;César Mendes Araújo;698.435.765-94;0.00
-Renata Soares Teixeira;246.244.015-14;(79) 98093-8194;renata.teixeira30@exemplo.com;União estável;Auxiliar administrativo;;5270.00;0.00;Paulo Prado Teixeira;;2840.00
-Vinícius Pinto Farias;268.264.135-07;(79) 99564-5241;vinicius.farias59@exemplo.com;Divorciado(a);Eletricista;;6890.00;0.00;;;0.00
-Lívia Moraes Lopes;461.565.425-15;(79) 99133-0982;;União estável;Farmacêutica;Prefeitura de Aracaju;3910.00;0.00;Murilo Pinto Lopes;;2110.00
-Bruno Moraes Bezerra;380.951.585-00;(79) 99164-3335;bruno.bezerra84@exemplo.com;Viúvo(a);Aposentada;;6920.00;0.00;;;0.00
-Sabrina Cavalcante Martins;859.559.665-44;(79) 99427-1292;sabrina.martins29@exemplo.com;União estável;Contadora;Empresa Exemplo Ltda;5890.00;0.00;Marcos Monteiro Martins;195.821.985-16;3180.00
-Karina Santana Costa;419.234.555-24;(79) 99428-2737;karina.costa88@exemplo.com;Casado(a);Enfermeira;Prefeitura de Aracaju;8260.00;0.00;Paulo Pereira Costa;270.831.465-35;4460.00
-Murilo Teixeira Duarte;411.441.125-91;(79) 98676-7379;murilo.duarte26@exemplo.com;Viúvo(a);Vendedora;Universidade Exemplo;7160.00;0.00;;;0.00
-Valéria Rocha Bezerra;299.246.145-85;(79) 99006-4295;valeria.bezerra66@exemplo.com;Solteiro(a);Advogada;Escola Estadual Exemplo;8300.00;0.00;;;0.00
-Gustavo Soares Santana;398.836.015-57;(79) 99261-0981;gustavo.santana95@exemplo.com;Solteiro(a);Técnico em informática;Farmácia Exemplo;5430.00;0.00;;;0.00
-Natália Rezende Mendes;663.140.525-48;(79) 98834-5078;natalia.mendes89@exemplo.com;Divorciado(a);Analista administrativo;Escritório Exemplo;4330.00;0.00;;;0.00
-Mariana Cardoso Nunes;444.685.315-50;(79) 99519-2242;mariana.nunes36@exemplo.com;Casado(a);Técnico em informática;;9390.00;0.00;Otávio Bezerra Nunes;526.226.165-54;0.00
-Priscila Silva Monteiro;560.894.905-63;(79) 99531-6550;priscila.monteiro53@exemplo.com;União estável;Vendedora;Empresa Exemplo Ltda;3230.00;0.00;Alexandre Oliveira Monteiro;109.298.825-47;1740.00
-José Castro Melo;577.075.215-79;(79) 98665-4207;jose.melo96@exemplo.com;Casado(a);Assistente social;Comércio próprio;9240.00;1260.00;Ana Nunes Melo;713.916.225-53;0.00
-Fernando Pereira Barbosa;686.053.835-00;(79) 99032-4958;fernando.barbosa36@exemplo.com;Casado(a);Contadora;Universidade Exemplo;9190.00;0.00;Raquel Oliveira Barbosa;933.692.825-26;0.00
-Juliana Machado Fernandes;060.010.075-86;(79) 99495-0871;;Casado(a);Recepcionista;Escola Estadual Exemplo;3260.00;450.00;Marcos Araújo Fernandes;;2010.00
-Gabriela Dias Rezende;989.394.815-00;(79) 98294-8872;gabriela.rezende79@exemplo.com;Viúvo(a);Assistente social;Comércio próprio;4980.00;690.00;;;0.00
-Vinícius Martins Araújo;988.627.485-90;(79) 99244-4288;vinicius.araujo49@exemplo.com;União estável;Enfermeira;Escola Estadual Exemplo;5390.00;0.00;Cecília Lopes Araújo;627.648.345-19;2910.00
-Fábio Pinto Siqueira;961.715.275-48;(79) 99162-9956;fabio.siqueira77@exemplo.com;Casado(a);Autônomo;;6040.00;0.00;Raquel Duarte Siqueira;359.216.065-61;0.00
-Alexandre Moura Vieira;095.966.585-49;(79) 98412-8635;alexandre.vieira41@exemplo.com;União estável;Servidor público;Escritório Exemplo;6280.00;0.00;Ana Silva Vieira;;0.00
-Juliana Gomes Vieira;404.450.165-31;(79) 98151-8004;juliana.vieira88@exemplo.com;Divorciado(a);Bancário;Banco Exemplo;11560.00;0.00;;;0.00
-Sabrina Lopes Bezerra;430.309.385-81;(79) 99283-7605;sabrina.bezerra13@exemplo.com;Viúvo(a);Comerciante;Comércio próprio;3620.00;500.00;;;0.00
-Bianca Freitas Vasconcelos;093.196.495-45;(79) 98677-4468;bianca.vasconcelos98@exemplo.com;Solteiro(a);Professora;Escritório Exemplo;9530.00;0.00;;;0.00
-Ricardo Rodrigues Pereira;753.352.945-66;(79) 99695-4775;ricardo.pereira13@exemplo.com;União estável;Servidor público;Comércio próprio;7670.00;0.00;Carla Barbosa Pereira;239.459.125-04;0.00
-Eduarda Lopes Duarte;078.866.605-36;(79) 98529-6464;eduarda.duarte13@exemplo.com;Casado(a);Advogada;Escola Estadual Exemplo;4520.00;0.00;Carlos Cardoso Duarte;;2440.00
-Camila Lopes Moura;431.808.685-20;(79) 99316-9737;camila.moura80@exemplo.com;União estável;Aposentada;;4640.00;0.00;Marcos Pereira Moura;;2510.00
-Carlos Carvalho Moura;548.691.575-60;(79) 99087-0829;;Casado(a);Professor;Supermercado Exemplo;3720.00;0.00;Eduarda Gomes Moura;;2010.00
-Beatriz Martins Prado;743.204.645-08;(79) 98151-2565;beatriz.prado91@exemplo.com;Viúvo(a);Cabeleireira;Comércio próprio;9400.00;0.00;;;0.00
-Carla Silva Cardoso;276.024.935-24;(79) 98598-1902;carla.cardoso88@exemplo.com;Divorciado(a);Professor;Comércio próprio;8110.00;0.00;;;0.00
-Eduarda Barbosa Teixeira;261.874.785-25;(79) 98967-9138;;União estável;Enfermeira;Empresa Exemplo Ltda;6640.00;910.00;Marcos Farias Teixeira;;0.00
-Sabrina Dias Araújo;937.113.255-80;(79) 99078-6699;sabrina.araujo59@exemplo.com;União estável;Servidor público;Banco Exemplo;6090.00;0.00;Carlos Soares Araújo;709.681.725-55;3290.00
-Gustavo Nascimento Dias;183.806.015-48;(79) 98796-6398;;Casado(a);Recepcionista;Banco Exemplo;6440.00;0.00;Ana Ribeiro Dias;;0.00
-Renata Andrade Rodrigues;318.985.945-03;(79) 99943-2650;renata.rodrigues45@exemplo.com;Solteiro(a);Cabeleireira;Empresa Exemplo Ltda;9240.00;0.00;;;0.00
-João Cavalcante Rocha;337.446.425-42;(79) 98172-2547;joao.rocha66@exemplo.com;Divorciado(a);Farmacêutica;Escola Estadual Exemplo;7230.00;0.00;;;0.00
-Carlos Ramos Oliveira;313.981.005-95;(79) 98085-7642;;Viúvo(a);Advogada;Universidade Exemplo;7830.00;0.00;;;0.00
-Sérgio Almeida Machado;087.004.885-69;(79) 99144-9507;sergio.machado58@exemplo.com;União estável;Enfermeira;Empresa Exemplo Ltda;8820.00;0.00;Patrícia Fernandes Machado;121.966.445-60;0.00
-Gustavo Prado Ramos;569.635.635-43;(79) 98796-5780;gustavo.ramos34@exemplo.com;Solteiro(a);Bancário;Prefeitura de Aracaju;6780.00;0.00;;;0.00
-Valéria Ribeiro Vieira;676.941.615-82;(79) 98357-9214;;Solteiro(a);Técnico de enfermagem;Empresa Exemplo Ltda;9850.00;0.00;;;0.00
-Igor Barbosa Melo;359.165.555-47;(79) 99103-2026;;União estável;Fisioterapeuta;Hospital Exemplo;5440.00;750.00;Elisa Monteiro Melo;023.373.045-15;0.00
-Gabriela Barbosa Duarte;706.538.435-77;(79) 99056-4476;gabriela.duarte71@exemplo.com;União estável;Servidora pública;Prefeitura de Aracaju;3990.00;0.00;Alexandre Ribeiro Duarte;061.115.325-45;2150.00
-Mateus Ribeiro Farias;289.648.715-88;(79) 98331-9365;mateus.farias86@exemplo.com;União estável;Eletricista;Banco Exemplo;8330.00;0.00;Elisa Siqueira Farias;;0.00
-Mateus Farias Machado;921.778.635-70;(79) 99647-5914;mateus.machado50@exemplo.com;Casado(a);Eletricista;Empresa Exemplo Ltda;5610.00;770.00;Letícia Prado Machado;709.290.335-15;3440.00
+Sofia Melo Costa;884.570.565-06;(79) 98693-7101;sofia.costa75@exemplo.com;Viúvo(a);Assistente social;;5790.00;800.00;;;0.00
+Priscila Nascimento Siqueira;576.673.435-27;(79) 99957-8821;priscila.siqueira89@exemplo.com;Casado(a);Auxiliar administrativa;Escritório Exemplo;9620.00;0.00;César Moraes Siqueira;369.188.405-92;0.00
+Daniel Souza Rezende;009.813.725-54;(79) 98843-4969;daniel.rezende24@exemplo.com;Solteiro(a);Eletricista;Banco Exemplo;4700.00;650.00;;;0.00
+Felipe Vieira Pinto;972.144.285-20;(79) 99686-7749;felipe.pinto68@exemplo.com;Divorciado(a);Eletricista;Prefeitura de Aracaju;7680.00;0.00;;;0.00
+Priscila Santana Machado;086.730.855-94;(79) 98084-7227;priscila.machado24@exemplo.com;Casado(a);Motorista;Supermercado Exemplo;7550.00;0.00;Gustavo Ribeiro Machado;296.359.225-66;0.00
+Sérgio Lopes Martins;352.131.915-68;(79) 98441-0304;sergio.martins71@exemplo.com;Divorciado(a);Recepcionista;Hospital Exemplo;6150.00;0.00;;;0.00
+José Castro Vasconcelos;445.656.305-24;(79) 98302-5218;jose.vasconcelos42@exemplo.com;União estável;Bancário;Prefeitura de Aracaju;3630.00;0.00;Cecília Prado Vasconcelos;;1960.00
+Sofia Vasconcelos Farias;024.822.285-65;(79) 98470-3261;sofia.farias69@exemplo.com;Casado(a);Eletricista;Comércio próprio;8870.00;0.00;Otávio Monteiro Farias;343.064.065-20;0.00
+Ana Costa Bezerra;749.048.955-50;(79) 98959-6316;ana.bezerra69@exemplo.com;Casado(a);Professora;Banco Exemplo;3630.00;0.00;Rodrigo Cavalcante Bezerra;242.788.975-02;1960.00
+Valéria Carvalho Monteiro;072.949.835-26;(79) 99056-5525;valeria.monteiro37@exemplo.com;Casado(a);Autônoma;;6810.00;0.00;Gabriel Rodrigues Monteiro;506.616.915-60;3670.00
+Murilo Pereira Duarte;342.997.075-08;(79) 99482-5773;murilo.duarte77@exemplo.com;Casado(a);Contador;Escritório Exemplo;4160.00;0.00;Renata Nascimento Duarte;815.513.855-03;2250.00
+Vinícius Prado Ramos;743.150.185-46;(79) 99918-0343;vinicius.ramos55@exemplo.com;Casado(a);Técnico de enfermagem;Supermercado Exemplo;8440.00;0.00;Vanessa Siqueira Ramos;;4550.00
+Eduarda Duarte Pinto;125.273.175-29;(79) 98007-4147;eduarda.pinto48@exemplo.com;Casado(a);Enfermeira;;3990.00;0.00;Rodrigo Soares Pinto;258.381.185-12;2160.00
+Henrique Rezende Carvalho;754.913.475-82;(79) 98510-7297;henrique.carvalho52@exemplo.com;Casado(a);Professor;Clínica Exemplo;3470.00;0.00;Lívia Rocha Carvalho;862.648.805-07;1870.00
+Mateus Cavalcante Mendes;726.431.385-97;(79) 98863-1534;mateus.mendes77@exemplo.com;Viúvo(a);Engenheiro civil;Empresa Exemplo Ltda;5790.00;800.00;;;0.00
+Marcelo Moraes Bezerra;040.944.425-10;(79) 98148-8184;;Casado(a);Farmacêutico;Escritório Exemplo;5630.00;770.00;Isabela Rocha Bezerra;;0.00
+Lívia Mendes Ramos;416.657.405-15;(79) 98949-7331;livia.ramos60@exemplo.com;Casado(a);Técnica em informática;Empresa Exemplo Ltda;5170.00;0.00;Mateus Moura Ramos;064.784.915-10;0.00
+Felipe Vieira Lopes;847.691.865-84;(79) 99742-1199;felipe.lopes51@exemplo.com;Casado(a);Autônomo;;5670.00;0.00;Jéssica Castro Lopes;803.251.235-78;3060.00
+Valéria Araújo Prado;212.732.485-46;(79) 98156-3163;valeria.prado61@exemplo.com;Casado(a);Assistente social;Clínica Exemplo;7500.00;0.00;Sérgio Souza Prado;773.310.035-69;0.00
+Letícia Freitas Mendes;129.556.415-70;(79) 98470-2898;leticia.mendes51@exemplo.com;Casado(a);Bancária;Supermercado Exemplo;5810.00;0.00;André Castro Mendes;;3130.00
+Natália Martins Castro;599.157.225-91;(79) 98359-5159;natalia.castro28@exemplo.com;Solteiro(a);Eletricista;Clínica Exemplo;9090.00;0.00;;;0.00
+Gustavo Cardoso Santos;720.524.395-52;(79) 98365-7662;gustavo.santos32@exemplo.com;Divorciado(a);Vendedor;Clínica Exemplo;6360.00;0.00;;;0.00
+Beatriz Nunes Santana;948.387.905-11;(79) 98377-1258;beatriz.santana14@exemplo.com;Solteiro(a);Cabeleireira;;7240.00;0.00;;;0.00
+Joana Batista Oliveira;129.594.255-02;(79) 98883-8477;joana.oliveira10@exemplo.com;Casado(a);Enfermeira;Hospital Exemplo;8290.00;0.00;Mateus Castro Oliveira;207.474.325-46;4470.00
+Isabela Martins Castro;011.438.925-00;(79) 98345-6025;isabela.castro47@exemplo.com;Casado(a);Professora;Empresa Exemplo Ltda;12840.00;0.00;Gabriel Vieira Castro;;0.00
+Larissa Costa Fernandes;720.243.915-83;(79) 98316-9325;larissa.fernandes51@exemplo.com;Divorciado(a);Autônoma;;3840.00;0.00;;;0.00
+Helena Nascimento Costa;983.327.195-26;(79) 99483-2099;helena.costa36@exemplo.com;Casado(a);Recepcionista;Comércio próprio;10510.00;0.00;Mateus Prado Costa;;0.00
+Rodrigo Santos Araújo;316.824.285-32;(79) 98700-0651;rodrigo.araujo94@exemplo.com;Casado(a);Analista administrativo;Escritório Exemplo;7720.00;0.00;Jéssica Nunes Araújo;;0.00
+André Freitas Soares;686.903.795-76;(79) 99722-4565;andre.soares64@exemplo.com;Casado(a);Cabeleireiro;Escritório Exemplo;4810.00;0.00;Yasmin Nascimento Soares;900.763.755-01;2590.00
+Vinícius Carvalho Soares;281.745.975-06;(79) 98751-1007;;Casado(a);Analista administrativo;Hospital Exemplo;5920.00;0.00;Luana Andrade Soares;321.580.625-84;3190.00
+Hugo Rezende Barbosa;177.108.065-54;(79) 99437-2015;hugo.barbosa26@exemplo.com;Solteiro(a);Assistente social;Farmácia Exemplo;4130.00;0.00;;;0.00
+Priscila Cavalcante Siqueira;679.935.385-56;(79) 98199-5294;;União estável;Comerciante;Prefeitura de Aracaju;9060.00;0.00;Leonardo Araújo Siqueira;309.612.025-05;0.00
+Beatriz Almeida Gomes;328.077.495-00;(79) 99063-8745;beatriz.gomes51@exemplo.com;Divorciado(a);Comerciante;Banco Exemplo;8820.00;0.00;;;0.00
+Jéssica Andrade Cavalcante;950.474.375-74;(79) 98323-8788;;Divorciado(a);Fisioterapeuta;Supermercado Exemplo;9720.00;1330.00;;;0.00
+Igor Cardoso Castro;520.510.225-00;(79) 98748-2203;;União estável;Contador;Escola Estadual Exemplo;4250.00;0.00;Tatiana Cardoso Castro;684.767.915-85;2300.00
+Tatiana Castro Oliveira;849.920.225-02;(79) 98141-5384;tatiana.oliveira99@exemplo.com;Casado(a);Técnica em informática;Hospital Exemplo;4640.00;0.00;Carlos Moura Oliveira;686.648.625-40;2510.00
+Helena Silva Vieira;166.113.175-11;(79) 98062-8553;helena.vieira31@exemplo.com;Divorciado(a);Cabeleireira;Empresa Exemplo Ltda;6800.00;0.00;;;0.00
+Débora Gomes Lima;039.997.125-46;(79) 98765-4542;debora.lima43@exemplo.com;Casado(a);Cabeleireira;Clínica Exemplo;4930.00;0.00;Rodrigo Fernandes Lima;;2660.00
+Helena Santos Pereira;340.096.715-72;(79) 99261-6221;helena.pereira50@exemplo.com;Casado(a);Aposentada;;7910.00;0.00;André Lima Pereira;255.446.845-10;0.00
+João Barbosa Souza;803.625.285-60;(79) 98444-9617;joao.souza17@exemplo.com;Divorciado(a);Enfermeiro;Hospital Exemplo;11360.00;0.00;;;0.00
+Clara Barbosa Andrade;201.746.045-13;(79) 98816-0510;clara.andrade21@exemplo.com;Casado(a);Fisioterapeuta;Escola Estadual Exemplo;2990.00;0.00;Diego Teixeira Andrade;533.353.695-30;1620.00
+Vinícius Nascimento Vasconcelos;543.380.385-60;(79) 99447-5437;vinicius.vasconcelos36@exemplo.com;Casado(a);Técnico em informática;Comércio próprio;6560.00;0.00;Renata Oliveira Vasconcelos;;0.00
+Marcos Duarte Lima;015.761.745-90;(79) 99558-6313;marcos.lima10@exemplo.com;Divorciado(a);Professor;Banco Exemplo;8070.00;1110.00;;;0.00
+Luana Nascimento Duarte;341.475.945-49;(79) 99211-0683;luana.duarte54@exemplo.com;Casado(a);Professora;Prefeitura de Aracaju;3910.00;540.00;Diego Moraes Duarte;170.083.445-20;0.00
+Sérgio Lima Batista;106.685.715-60;(79) 99245-7020;sergio.batista82@exemplo.com;Viúvo(a);Analista administrativo;Hospital Exemplo;5090.00;0.00;;;0.00
+Sérgio Pinto Freitas;643.149.185-86;(79) 98256-3076;sergio.freitas28@exemplo.com;Casado(a);Recepcionista;;6980.00;0.00;Paula Ribeiro Freitas;;0.00
+Natália Nunes Vasconcelos;430.509.745-16;(79) 99010-9569;natalia.vasconcelos78@exemplo.com;Solteiro(a);Técnica de enfermagem;Escritório Exemplo;7720.00;1060.00;;;0.00
+Larissa Nascimento Melo;199.645.425-00;(79) 98488-4762;larissa.melo44@exemplo.com;Casado(a);Técnica em informática;Supermercado Exemplo;7100.00;0.00;Diego Cardoso Melo;836.656.815-61;0.00
+Clara Siqueira Fernandes;288.581.605-84;(79) 99237-5616;clara.fernandes32@exemplo.com;União estável;Enfermeira;Clínica Exemplo;7470.00;0.00;Samuel Batista Fernandes;660.461.555-33;0.00
+Sofia Cavalcante Moraes;659.790.545-88;(79) 98945-7791;sofia.moraes40@exemplo.com;Viúvo(a);Técnica em informática;Clínica Exemplo;9010.00;1230.00;;;0.00
+Patrícia Carvalho Lima;888.558.275-37;(79) 99153-5360;;União estável;Enfermeira;Empresa Exemplo Ltda;6680.00;0.00;Vinícius Teixeira Lima;;3610.00
+Raquel Nascimento Vieira;796.349.765-73;(79) 99495-2545;;Divorciado(a);Bancária;Universidade Exemplo;6620.00;910.00;;;0.00
+Camila Siqueira Ribeiro;396.983.415-52;(79) 99467-7542;camila.ribeiro25@exemplo.com;Solteiro(a);Vendedora;Banco Exemplo;11060.00;0.00;;;0.00
+João Nunes Batista;841.118.695-48;(79) 99901-1733;;Viúvo(a);Vendedor;Escola Estadual Exemplo;10670.00;1460.00;;;0.00
+Otávio Santana Vieira;401.172.895-07;(79) 99460-3425;otavio.vieira95@exemplo.com;Casado(a);Nutricionista;Supermercado Exemplo;5520.00;0.00;Daniela Silva Vieira;145.755.975-70;2980.00
+Larissa Bezerra Lima;054.935.295-30;(79) 98804-7280;larissa.lima12@exemplo.com;Solteiro(a);Bancária;Comércio próprio;11750.00;0.00;;;0.00
+Cecília Lopes Siqueira;682.671.955-05;(79) 99465-5020;cecilia.siqueira66@exemplo.com;Divorciado(a);Contadora;Supermercado Exemplo;9340.00;0.00;;;0.00
+Isabela Cavalcante Batista;082.869.025-13;(79) 98997-3037;isabela.batista19@exemplo.com;Casado(a);Enfermeira;Escola Estadual Exemplo;3700.00;0.00;Igor Rodrigues Batista;;2000.00
+Yasmin Pinto Ramos;365.397.235-39;(79) 98766-2142;;Divorciado(a);Nutricionista;Hospital Exemplo;5370.00;0.00;;;0.00
+Raquel Nascimento Lopes;208.511.345-13;(79) 99689-7683;raquel.lopes32@exemplo.com;Solteiro(a);Recepcionista;Escola Estadual Exemplo;7730.00;0.00;;;0.00
+Lucas Rezende Fernandes;432.437.115-68;(79) 98290-2246;lucas.fernandes30@exemplo.com;Solteiro(a);Enfermeiro;Escritório Exemplo;6400.00;0.00;;;0.00
+Alexandre Soares Vasconcelos;308.245.495-03;(79) 99205-7477;alexandre.vasconcelos54@exemplo.com;Divorciado(a);Comerciante;Hospital Exemplo;5790.00;0.00;;;0.00
+Vanessa Vasconcelos Araújo;358.932.275-65;(79) 99639-0308;vanessa.araujo58@exemplo.com;Casado(a);Comerciante;Empresa Exemplo Ltda;4060.00;0.00;Paulo Batista Araújo;916.460.935-93;2190.00
+Bruno Batista Soares;857.041.815-97;(79) 99744-9109;bruno.soares20@exemplo.com;Divorciado(a);Nutricionista;Prefeitura de Aracaju;7920.00;0.00;;;0.00
+Paula Castro Pinto;915.284.085-94;(79) 98659-4141;paula.pinto11@exemplo.com;Viúvo(a);Cabeleireira;Prefeitura de Aracaju;7890.00;1080.00;;;0.00
+Felipe Teixeira Santana;481.196.295-82;(79) 99579-3841;;Divorciado(a);Farmacêutico;Comércio próprio;6650.00;0.00;;;0.00
+Aline Cavalcante Vieira;818.164.435-22;(79) 99547-4923;aline.vieira89@exemplo.com;Casado(a);Engenheira civil;Hospital Exemplo;6020.00;0.00;André Bezerra Vieira;447.185.185-39;3250.00
+Carlos Santos Duarte;086.852.975-32;(79) 99532-8918;carlos.duarte15@exemplo.com;União estável;Engenheiro civil;Clínica Exemplo;8660.00;0.00;Daniela Rodrigues Duarte;651.170.465-36;0.00
+Priscila Mendes Lima;461.407.145-75;(79) 99386-2942;priscila.lima49@exemplo.com;Solteiro(a);Engenheira civil;Empresa Exemplo Ltda;4600.00;0.00;;;0.00
+Gabriela Nascimento Vasconcelos;995.270.445-37;(79) 99408-6469;gabriela.vasconcelos85@exemplo.com;Casado(a);Analista administrativa;Escola Estadual Exemplo;10980.00;1500.00;Henrique Lima Vasconcelos;364.347.805-40;0.00
+Marina Lima Mendes;560.886.335-65;(79) 99972-5761;marina.mendes83@exemplo.com;União estável;Aposentada;;4180.00;0.00;Sérgio Duarte Mendes;754.184.975-88;2260.00
+Luana Ramos Martins;679.421.175-02;(79) 98602-1898;luana.martins70@exemplo.com;Solteiro(a);Enfermeira;Prefeitura de Aracaju;6210.00;0.00;;;0.00
+Sérgio Nascimento Gomes;541.958.215-50;(79) 99787-3499;;Solteiro(a);Nutricionista;Hospital Exemplo;7050.00;0.00;;;0.00
+Samuel Barbosa Moraes;393.270.835-04;(79) 99113-7406;samuel.moraes17@exemplo.com;Casado(a);Contador;Escola Estadual Exemplo;8330.00;0.00;Yasmin Gomes Moraes;769.284.625-15;4490.00
+Joana Mendes Moraes;430.992.125-63;(79) 98701-8664;joana.moraes64@exemplo.com;Casado(a);Autônoma;;6290.00;0.00;Sérgio Mendes Moraes;099.067.775-32;3390.00
+Felipe Santos Lopes;204.605.295-10;(79) 98234-1696;felipe.lopes77@exemplo.com;União estável;Servidor público;Farmácia Exemplo;5520.00;0.00;Paula Rocha Lopes;393.225.795-28;2980.00
+Henrique Melo Almeida;779.511.395-80;(79) 99700-6474;henrique.almeida75@exemplo.com;Solteiro(a);Técnico de enfermagem;Comércio próprio;8420.00;0.00;;;0.00
+Marcelo Prado Nascimento;067.609.145-89;(79) 98760-2652;marcelo.nascimento24@exemplo.com;Casado(a);Comerciante;Escritório Exemplo;5720.00;0.00;Joana Costa Nascimento;;0.00
+Letícia Martins Prado;267.952.625-29;(79) 98797-1721;leticia.prado39@exemplo.com;Casado(a);Nutricionista;Prefeitura de Aracaju;6880.00;0.00;Pedro Moraes Prado;877.964.735-91;0.00
+Helena Lima Rezende;969.959.545-05;(79) 99261-5266;helena.rezende93@exemplo.com;União estável;Aposentada;;7820.00;0.00;Samuel Bezerra Rezende;362.047.575-04;0.00
+Mateus Mendes Pinto;381.638.415-32;(79) 99181-2792;mateus.pinto69@exemplo.com;União estável;Farmacêutico;Comércio próprio;5730.00;0.00;Jéssica Fernandes Pinto;109.234.125-06;0.00
+Sofia Santana Santos;104.645.735-72;(79) 98688-0266;sofia.santos85@exemplo.com;Viúvo(a);Vendedora;Clínica Exemplo;11480.00;0.00;;;0.00
+Mateus Monteiro Vasconcelos;489.064.485-70;(79) 99939-1883;mateus.vasconcelos54@exemplo.com;Solteiro(a);Vendedor;Escritório Exemplo;10020.00;0.00;;;0.00
+Sabrina Machado Pereira;616.236.685-57;(79) 99774-1960;sabrina.pereira59@exemplo.com;Viúvo(a);Técnica de enfermagem;Banco Exemplo;6050.00;830.00;;;0.00
+Mariana Lopes Teixeira;783.889.365-81;(79) 99940-1618;mariana.teixeira81@exemplo.com;Casado(a);Técnica de enfermagem;Banco Exemplo;7750.00;0.00;Thiago Machado Teixeira;;0.00
+Camila Oliveira Siqueira;089.456.435-83;(79) 99209-8714;camila.siqueira68@exemplo.com;Casado(a);Motorista;Clínica Exemplo;3720.00;0.00;João Pereira Siqueira;223.998.985-83;2010.00
+Gustavo Mendes Prado;169.617.155-59;(79) 99924-6327;gustavo.prado40@exemplo.com;Divorciado(a);Farmacêutico;Supermercado Exemplo;8030.00;1100.00;;;0.00
+Fernanda Oliveira Costa;614.048.155-46;(79) 99028-2135;fernanda.costa67@exemplo.com;Casado(a);Contadora;Comércio próprio;6190.00;0.00;José Fernandes Costa;;3340.00
+Juliana Batista Silva;925.011.805-85;(79) 99869-7278;juliana.silva60@exemplo.com;Solteiro(a);Contadora;;7560.00;0.00;;;0.00
+Otávio Araújo Rezende;017.565.835-87;(79) 99557-9174;otavio.rezende50@exemplo.com;Divorciado(a);Eletricista;Hospital Exemplo;5250.00;720.00;;;0.00
+Patrícia Vasconcelos Costa;931.964.975-85;(79) 99195-1780;patricia.costa36@exemplo.com;Divorciado(a);Professora;Prefeitura de Aracaju;9230.00;0.00;;;0.00
+Henrique Pereira Barbosa;912.312.715-58;(79) 98806-6885;henrique.barbosa49@exemplo.com;Viúvo(a);Recepcionista;Banco Exemplo;7510.00;0.00;;;0.00
+Diego Andrade Lopes;833.806.205-72;(79) 98378-7075;diego.lopes97@exemplo.com;Viúvo(a);Eletricista;;7390.00;0.00;;;0.00
+Juliana Ribeiro Vasconcelos;436.252.865-21;(79) 98117-4334;juliana.vasconcelos20@exemplo.com;Divorciado(a);Recepcionista;Comércio próprio;6520.00;0.00;;;0.00
+Eduardo Almeida Araújo;686.629.595-55;(79) 98720-7258;eduardo.araujo78@exemplo.com;Viúvo(a);Analista administrativo;Clínica Exemplo;5780.00;0.00;;;0.00
+Daniel Ramos Moura;435.982.945-06;(79) 98472-1515;daniel.moura72@exemplo.com;Divorciado(a);Motorista;Prefeitura de Aracaju;10530.00;0.00;;;0.00
+Pedro Fernandes Andrade;583.548.295-70;(79) 99222-4022;pedro.andrade24@exemplo.com;Viúvo(a);Autônomo;;5190.00;0.00;;;0.00
+Carla Rocha Siqueira;358.191.755-65;(79) 98861-4297;carla.siqueira33@exemplo.com;Divorciado(a);Assistente social;Clínica Exemplo;8200.00;1120.00;;;0.00
+Fábio Costa Batista;747.096.815-62;(79) 98087-1902;;União estável;Engenheiro civil;Hospital Exemplo;3910.00;0.00;Carla Gomes Batista;478.370.885-14;2110.00
+Priscila Araújo Nunes;312.329.105-70;(79) 98864-0148;priscila.nunes32@exemplo.com;União estável;Motorista;Comércio próprio;5710.00;0.00;Vítor Freitas Nunes;;0.00
+Alexandre Almeida Duarte;792.549.205-84;(79) 99676-9317;alexandre.duarte77@exemplo.com;Viúvo(a);Motorista;Escola Estadual Exemplo;10100.00;0.00;;;0.00
+Sabrina Souza Freitas;804.622.575-41;(79) 98697-2981;sabrina.freitas24@exemplo.com;Viúvo(a);Autônoma;;8660.00;0.00;;;0.00
+Tatiana Rodrigues Costa;511.056.985-13;(79) 98881-6733;tatiana.costa49@exemplo.com;Divorciado(a);Enfermeira;Universidade Exemplo;9250.00;0.00;;;0.00
+Renata Carvalho Prado;151.438.245-83;(79) 98387-1873;;Viúvo(a);Comerciante;Hospital Exemplo;6870.00;0.00;;;0.00
+Daniela Ramos Machado;816.022.485-08;(79) 99161-5378;daniela.machado60@exemplo.com;Viúvo(a);Comerciante;Hospital Exemplo;6200.00;850.00;;;0.00
+José Duarte Martins;653.518.825-66;(79) 99636-2912;jose.martins28@exemplo.com;Casado(a);Analista administrativo;Escola Estadual Exemplo;9610.00;0.00;Priscila Oliveira Martins;915.697.815-40;0.00
+Lívia Andrade Almeida;414.307.205-06;(79) 99257-8874;livia.almeida50@exemplo.com;Solteiro(a);Recepcionista;Universidade Exemplo;9020.00;0.00;;;0.00
+André Araújo Cardoso;187.676.915-79;(79) 99752-9483;andre.cardoso36@exemplo.com;União estável;Assistente social;Universidade Exemplo;3830.00;0.00;Sofia Farias Cardoso;655.541.305-00;2070.00
+Sérgio Castro Silva;000.532.205-79;(79) 98605-0873;;Solteiro(a);Técnico de enfermagem;;9520.00;0.00;;;0.00
+Vinícius Cardoso Fernandes;000.435.395-13;(79) 98751-7471;vinicius.fernandes44@exemplo.com;Casado(a);Fisioterapeuta;;8530.00;0.00;Tatiana Souza Fernandes;289.648.715-88;0.00
