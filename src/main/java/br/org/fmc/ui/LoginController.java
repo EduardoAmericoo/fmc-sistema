@@ -5,7 +5,12 @@ import br.org.fmc.service.FalhaLogin;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoAcesso;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.prefs.Preferences;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -32,6 +37,9 @@ public class LoginController {
 
     private final ServicoAcesso servico = new ServicoAcesso();
 
+    /** Contagem regressiva da pausa por senhas erradas; null quando não há pausa. */
+    private Timeline contagem;
+
     @FXML
     private TextField campoEmail;
     @FXML
@@ -49,6 +57,8 @@ public class LoginController {
     @FXML
     private Label erroSenha;
     @FXML
+    private Button botaoEntrar;
+    @FXML
     private HBox avisoGeral;
     @FXML
     private Label textoAvisoGeral;
@@ -63,10 +73,11 @@ public class LoginController {
         // O aviso de um campo some assim que a pessoa começa a corrigir.
         campoEmail.textProperty().addListener((obs, antes, agora) -> {
             limpar(campoEmail, erroEmail);
+            pararContagem(); // a pausa vale para um e-mail; outro e-mail pode tentar
             mostrar(avisoGeral, false);
         });
         campoSenha.textProperty().addListener((obs, antes, agora) -> {
-            if (!agora.isEmpty()) { // a senha errada é apagada pelo sistema: isso não conta como "corrigir"
+            if (!agora.isEmpty() && contagem == null) { // a senha errada é apagada pelo sistema: isso não conta como "corrigir"
                 limpar(campoSenha, erroSenha);
                 mostrar(avisoGeral, false);
             }
@@ -124,11 +135,47 @@ public class LoginController {
             campoSenha.clear(); // primeiro limpa (isso apagaria o aviso), depois marca
             marcar(campoSenha, erroSenha, senha);
         }
-        if (geral != null) {
+        if (e.getPausaAte() != null) {
+            iniciarContagem(e.getPausaAte());
+        } else if (geral != null) {
             mostrarGeral(geral);
         }
         // O cursor vai para o primeiro campo com problema.
         (email != null ? campoEmail : senhaAtual()).requestFocus();
+    }
+
+    /**
+     * Pausa por senhas erradas: mostra o tempo que falta diminuindo a cada segundo
+     * e deixa o botão Entrar desligado até a pausa acabar.
+     */
+    private void iniciarContagem(LocalDateTime ate) {
+        pararContagem();
+        botaoEntrar.setDisable(true);
+        contagem = new Timeline(new KeyFrame(javafx.util.Duration.seconds(1), e -> atualizarContagem(ate)));
+        contagem.setCycleCount(Animation.INDEFINITE);
+        atualizarContagem(ate);
+        contagem.play();
+    }
+
+    private void atualizarContagem(LocalDateTime ate) {
+        LocalDateTime agora = LocalDateTime.now();
+        if (!agora.isBefore(ate)) {
+            pararContagem();
+            mostrar(avisoGeral, false);
+            senhaAtual().requestFocus();
+            return;
+        }
+        long segundos = Duration.between(agora, ate).getSeconds() + 1; // arredonda para cima: começa em 2:00
+        mostrarGeral("Por segurança, o acesso está em pausa depois de " + ServicoAcesso.MAX_TENTATIVAS
+                + " senhas erradas.\nTente de novo em " + String.format("%d:%02d", segundos / 60, segundos % 60) + ".");
+    }
+
+    private void pararContagem() {
+        if (contagem != null) {
+            contagem.stop();
+            contagem = null;
+        }
+        botaoEntrar.setDisable(false);
     }
 
     /** Botão do olho: mostra ou esconde a senha. */

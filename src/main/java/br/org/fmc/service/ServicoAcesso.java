@@ -91,8 +91,9 @@ public class ServicoAcesso {
         LocalDateTime agora = LocalDateTime.now(relogio);
         TentativaLoginRepository.Tentativas antes = tentativas.buscar(chave).orElse(null);
         if (antes != null && antes.pausaAte() != null && agora.isBefore(antes.pausaAte())) {
-            throw new FalhaLogin(FalhaLogin.Campo.GERAL, "Acesso em pausa por segurança, depois de "
-                    + MAX_TENTATIVAS + " senhas erradas. Tente de novo " + quantoFalta(agora, antes.pausaAte()) + ".");
+            throw new FalhaLogin(Map.of(FalhaLogin.Campo.GERAL, "Acesso em pausa por segurança, depois de "
+                    + MAX_TENTATIVAS + " senhas erradas. Tente de novo " + quantoFalta(agora, antes.pausaAte()) + "."),
+                    antes.pausaAte());
         }
         Usuario usuario = encontrado.get();
         if (!SenhaUtil.confere(senha, usuario.getSenhaHash())) {
@@ -112,10 +113,11 @@ public class ServicoAcesso {
         // Depois de uma pausa que já acabou, a contagem recomeça.
         int erros = (antes == null || antes.pausaAte() != null ? 0 : antes.erros()) + 1;
         if (erros >= MAX_TENTATIVAS) {
-            tentativas.salvar(email, new TentativaLoginRepository.Tentativas(erros, agora.plus(PAUSA)));
+            LocalDateTime pausaAte = agora.plus(PAUSA);
+            tentativas.salvar(email, new TentativaLoginRepository.Tentativas(erros, pausaAte));
             throw new FalhaLogin(Map.of(FalhaLogin.Campo.SENHA, "Senha incorreta.",
                     FalhaLogin.Campo.GERAL, "Senha errada " + MAX_TENTATIVAS + " vezes seguidas. Por segurança, "
-                            + "o acesso fica em pausa por " + PAUSA.toMinutes() + " minutos."));
+                            + "o acesso fica em pausa por " + PAUSA.toMinutes() + " minutos."), pausaAte);
         }
         tentativas.salvar(email, new TentativaLoginRepository.Tentativas(erros, null));
         int restantes = MAX_TENTATIVAS - erros;
