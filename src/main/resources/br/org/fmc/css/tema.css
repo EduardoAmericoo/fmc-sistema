@@ -428,6 +428,27 @@
     -fx-text-fill: -fmc-sucesso;
 }
 
+.selo-alerta {
+    -fx-background-color: -fmc-alerta-fundo;
+    -fx-text-fill: -fmc-alerta;
+}
+
+/* Quadro azul-claro com um resumo calculado pelo sistema (ex.: fim do contrato) */
+.resumo-calculado {
+    -fx-background-color: -fmc-azul-claro;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14 12 14;
+}
+
+.resumo-calculado .label {
+    -fx-text-fill: -fmc-azul-escuro;
+}
+
+.resumo-calculado .ikonli-font-icon {
+    -fx-icon-color: -fmc-azul;
+    -fx-icon-size: 16px;
+}
+
 /* ===================== Janela (Dialog) ===================== */
 
 /* Véu escuro por trás da janela */

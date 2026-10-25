@@ -6,9 +6,10 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** Persistencia dos campos de Imovel, preservando suas subclasses. */
-public class ImovelRepository {
+public class ImovelRepository implements Repositorio<Imovel> {
     public void excluir(long id) throws SQLException {
         try (Connection c = Database.conectar();
              PreparedStatement s = c.prepareStatement("DELETE FROM imovel WHERE id = ?")) {
@@ -41,6 +42,7 @@ public class ImovelRepository {
         }
     }
 
+    @Override
     public void salvar(Imovel i) throws SQLException {
         boolean novo = i.getId() == null;
         String sql = novo
@@ -66,30 +68,47 @@ public class ImovelRepository {
         }
     }
 
+    @Override
+    public Optional<Imovel> buscarPorId(long id) throws SQLException {
+        try (Connection c = Database.conectar();
+             PreparedStatement s = c.prepareStatement("SELECT * FROM imovel WHERE id = ?")) {
+            s.setLong(1, id);
+            try (ResultSet r = s.executeQuery()) {
+                return r.next() ? Optional.of(montar(r)) : Optional.empty();
+            }
+        }
+    }
+
+    @Override
     public List<Imovel> listarTodos() throws SQLException {
         List<Imovel> itens = new ArrayList<>();
         try (Connection c = Database.conectar();
              PreparedStatement s = c.prepareStatement("SELECT * FROM imovel ORDER BY codigo");
              ResultSet r = s.executeQuery()) {
             while (r.next()) {
-                TipoImovel tipo = TipoImovel.valueOf(r.getString("tipo"));
-                String codigo = r.getString("codigo"), endereco = r.getString("endereco");
-                BigDecimal aluguel = new BigDecimal(r.getString("valor_aluguel"));
-                Imovel i = switch (tipo) {
-                    case CASA -> new Casa(codigo, endereco, aluguel);
-                    case APARTAMENTO -> new Apartamento(codigo, endereco, aluguel);
-                    default -> new Imovel(codigo, tipo, endereco, aluguel);
-                };
-                i.setId(r.getLong("id"));
-                i.setUnidade(r.getString("unidade"));
-                i.setBairro(r.getString("bairro"));
-                i.setGrupo(r.getString("grupo"));
-                i.setTaxaLuz(new BigDecimal(r.getString("taxa_luz")));
-                i.setValorIptu(new BigDecimal(r.getString("valor_iptu")));
-                i.setSituacao(SituacaoImovel.valueOf(r.getString("situacao")));
-                itens.add(i);
+                itens.add(montar(r));
             }
         }
         return itens;
+    }
+
+    /** Transforma uma linha do banco num objeto Imovel (Casa, Apartamento ou Imovel). */
+    private Imovel montar(ResultSet r) throws SQLException {
+        TipoImovel tipo = TipoImovel.valueOf(r.getString("tipo"));
+        String codigo = r.getString("codigo"), endereco = r.getString("endereco");
+        BigDecimal aluguel = new BigDecimal(r.getString("valor_aluguel"));
+        Imovel i = switch (tipo) {
+            case CASA -> new Casa(codigo, endereco, aluguel);
+            case APARTAMENTO -> new Apartamento(codigo, endereco, aluguel);
+            default -> new Imovel(codigo, tipo, endereco, aluguel);
+        };
+        i.setId(r.getLong("id"));
+        i.setUnidade(r.getString("unidade"));
+        i.setBairro(r.getString("bairro"));
+        i.setGrupo(r.getString("grupo"));
+        i.setTaxaLuz(new BigDecimal(r.getString("taxa_luz")));
+        i.setValorIptu(new BigDecimal(r.getString("valor_iptu")));
+        i.setSituacao(SituacaoImovel.valueOf(r.getString("situacao")));
+        return i;
     }
 }

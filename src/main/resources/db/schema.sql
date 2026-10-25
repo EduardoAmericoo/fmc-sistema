@@ -3,7 +3,8 @@
 -- "CREATE TABLE IF NOT EXISTS" para não apagar dados existentes.
 --
 -- Cada história do MVP acrescenta aqui as suas tabelas
--- (usuario, imovel, inquilino, fiador, contrato, garantia, aluguel, recibo).
+-- (usuario, imovel, inquilino, contrato, garantia, aluguel, recibo).
+-- O fiador fica dentro da tabela garantia.
 -- O pagamento fica registrado na própria tabela recibo.
 
 CREATE TABLE IF NOT EXISTS sistema (
@@ -69,4 +70,44 @@ CREATE TABLE IF NOT EXISTS imovel (
     taxa_luz      TEXT NOT NULL DEFAULT '0',
     valor_iptu    TEXT NOT NULL DEFAULT '0',
     situacao      TEXT NOT NULL
+);
+
+-- BOARD-36 · Contratos de locação. O contrato já nasce ativo.
+-- Os valores (aluguel, luz, IPTU) são copiados do imóvel no dia do cadastro,
+-- para um reajuste futuro no imóvel não mudar contratos antigos.
+-- O número (ex.: "CT-1001") é gerado pelo sistema a partir do id.
+-- Datas ficam como texto no formato AAAA-MM-DD (ex.: "2026-10-24").
+CREATE TABLE IF NOT EXISTS contrato (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero              TEXT    UNIQUE,
+    imovel_id           INTEGER NOT NULL REFERENCES imovel(id),
+    inquilino_id        INTEGER NOT NULL REFERENCES inquilino(id),
+    valor_aluguel       TEXT    NOT NULL,
+    taxa_luz            TEXT    NOT NULL DEFAULT '0',
+    valor_iptu          TEXT    NOT NULL DEFAULT '0',
+    prazo               TEXT    NOT NULL,
+    data_entrega_chaves TEXT    NOT NULL,
+    data_termino        TEXT    NOT NULL,
+    dia_vencimento      INTEGER NOT NULL,
+    status              TEXT    NOT NULL
+);
+
+-- BOARD-36/57 · Garantia do contrato: fiador ou caução (uma por contrato).
+-- tipo = 'FIADOR' usa as colunas fiador_*, tipo = 'CAUCAO' usa as colunas caucao_*.
+-- As colunas fiador_conjuge_* só são preenchidas para fiador casado(a) ou em união estável.
+CREATE TABLE IF NOT EXISTS garantia (
+    contrato_id          INTEGER PRIMARY KEY REFERENCES contrato(id) ON DELETE CASCADE,
+    tipo                 TEXT NOT NULL,
+    fiador_nome          TEXT,
+    fiador_cpf           TEXT,
+    fiador_telefone      TEXT,
+    fiador_estado_civil  TEXT,
+    fiador_renda         TEXT,
+    fiador_endereco      TEXT,
+    fiador_conjuge_nome  TEXT,
+    fiador_conjuge_cpf   TEXT,
+    caucao_valor         TEXT,
+    caucao_data          TEXT,
+    caucao_forma         TEXT,
+    caucao_recibo        TEXT
 );

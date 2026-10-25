@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import br.org.fmc.db.Database;
 import br.org.fmc.model.Acao;
+import br.org.fmc.model.Caucao;
+import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
+import br.org.fmc.model.Fianca;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.TipoImovel;
 import br.org.fmc.repository.UsuarioRepository;
@@ -56,11 +59,18 @@ class DadosTesteTest {
         assertEquals(124, resumo.imoveis());
         assertEquals(110, resumo.inquilinos());
         assertEquals(4, resumo.usuarios());
-        assertEquals(110, resumo.contratosAguardando());
+        assertEquals(110, resumo.contratos());
         entrarComoAdministrador();
         assertEquals(124, new ServicoImoveis().listar().size());
         assertEquals(110, new ServicoInquilinos().listar().size());
         assertEquals(5, acesso.listarUsuarios().size()); // Administrador inicial + 4 de teste
+        List<Contrato> contratos = new ServicoContratos().listar();
+        assertEquals(110, contratos.size());
+        assertEquals("CT-1001", contratos.get(0).getNumero());
+        assertEquals(100, contratos.stream().filter(c -> c.getGarantia() instanceof Fianca).count());
+        assertEquals(10, contratos.stream().filter(c -> c.getGarantia() instanceof Caucao).count());
+        // Todo imóvel com contrato ficou ocupado, e só eles.
+        assertEquals(110, new ServicoImoveis().listar().stream().filter(i -> i.getSituacao() == SituacaoImovel.OCUPADO).count());
     }
 
     @Test
@@ -141,7 +151,7 @@ class DadosTesteTest {
         assertTrue(vistos.add(cpf.replaceAll("\\D", "")), "CPF repetido: " + cpf);
     }
 
-    /** Os contratos ainda não são carregados, mas os arquivos já precisam estar certos para quando forem. */
+    /** Os arquivos de contratos precisam bater com os de imóveis e inquilinos. */
     @Test
     void contratosBatemComImoveisEInquilinos() {
         Map<String, String[]> imoveis = new HashMap<>();

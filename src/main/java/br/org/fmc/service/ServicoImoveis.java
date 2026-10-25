@@ -4,6 +4,7 @@ import br.org.fmc.model.*;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.ImovelRepository;
 import java.sql.SQLException;
 import java.text.Normalizer;
@@ -15,6 +16,9 @@ public class ServicoImoveis {
 
     public void excluir(long id) throws SQLException {
         Sessao.exigir(Acao.EXCLUIR_IMOVEL);
+        if (new ContratoRepository().existeNoImovel(id)) {
+            throw new RegraNegocioException("Este imóvel tem contrato cadastrado e não pode ser excluído.");
+        }
         repositorio.excluir(id);
     }
 

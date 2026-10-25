@@ -1,11 +1,18 @@
 package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
+import br.org.fmc.model.Contrato;
+import br.org.fmc.model.Cpf;
 import br.org.fmc.model.EstadoCivil;
+import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.Perfil;
+import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.TipoImovel;
 import br.org.fmc.model.Usuario;
+import br.org.fmc.repository.ImovelRepository;
+import br.org.fmc.repository.InquilinoRepository;
 import br.org.fmc.repository.SistemaRepository;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,23 +20,26 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Carga dos dados de teste (BOARD-52): imóveis, inquilinos e usuários fictícios
+ * Carga dos dados de teste (BOARD-52): imóveis, inquilinos, contratos e usuários fictícios
  * para testar e apresentar o sistema.
  *
  * Os dados ficam em resources/dados-teste/*.csv (exportados da planilha
  * "Dados de teste FMC"). Tudo é cadastrado pelos services, então passa pelas
  * mesmas validações da tela: se um dado estiver errado, a carga para e diz qual.
  *
- * Os arquivos contratos.csv, fiadores.csv e caucoes.csv já estão prontos, mas
- * só serão carregados quando o cadastro de contratos (BOARD-36/57) existir.
+ * Os contratos (contratos.csv, com fiadores.csv e caucoes.csv) também passam pelo
+ * ServicoContratos: os imóveis "Ocupado" entram vagos e ficam ocupados ao receber o contrato.
  */
 public class ServicoDadosTeste {
 
@@ -37,11 +47,11 @@ public class ServicoDadosTeste {
     public static final String SENHA_TESTE = "teste123";
 
     /** O que foi carregado, para mostrar ao usuário. */
-    public record Resumo(int usuarios, int imoveis, int inquilinos, int contratosAguardando) {
+    public record Resumo(int usuarios, int imoveis, int inquilinos, int contratos) {
         @Override
         public String toString() {
-            return imoveis + " imóveis, " + inquilinos + " inquilinos e " + usuarios + " usuários de teste. "
-                    + contratosAguardando + " contratos ficam para quando o cadastro de contratos existir.";
+            return imoveis + " imóveis, " + inquilinos + " inquilinos, " + contratos + " contratos e "
+                    + usuarios + " usuários de teste.";
         }
     }
 
@@ -74,7 +84,7 @@ public class ServicoDadosTeste {
             int usuarios = carregarUsuarios(acesso);
             int imoveis = carregarImoveis();
             int inquilinos = carregarInquilinos();
-            int contratos = ler("contratos.csv").size();
+            int contratos = carregarContratos();
             return new Resumo(usuarios, imoveis, inquilinos, contratos);
         } finally {
             acesso.sair();
@@ -107,8 +117,10 @@ public class ServicoDadosTeste {
         ServicoImoveis imoveis = new ServicoImoveis();
         List<String[]> linhas = ler("imoveis.csv");
         for (String[] c : linhas) {
+            // "Ocupado" entra como vago: quem ocupa o imóvel é o contrato, carregado depois.
+            SituacaoImovel situacao = situacao(c[8]) == SituacaoImovel.OCUPADO ? SituacaoImovel.VAGO : situacao(c[8]);
             try {
-                imoveis.salvarFormulario(null, c[0], c[1], tipo(c[2]), c[3], c[4], "", c[5], c[6], c[7], situacao(c[8]));
+                imoveis.salvarFormulario(null, c[0], c[1], tipo(c[2]), c[3], c[4], "", c[5], c[6], c[7], situacao);
             } catch (RuntimeException e) {
                 throw new IllegalStateException("Imóvel " + c[0] + " do imoveis.csv foi recusado: " + e.getMessage(), e);
             }
@@ -129,6 +141,50 @@ public class ServicoDadosTeste {
             }
         }
         return linhas.size();
+    }
+
+    /**
+     * Contratos na ordem do contratos.csv, cada um com a sua garantia (fiador ou caução).
+     * O sistema numera sozinho (CT-1001, CT-1002...), e a carga confere se bateu com a planilha.
+     */
+    private int carregarContratos() throws SQLException {
+        Map<String, String[]> fiadores = porContrato(ler("fiadores.csv"));
+        Map<String, String[]> caucoes = porContrato(ler("caucoes.csv"));
+        Map<String, Long> imoveis = new HashMap<>();
+        new ImovelRepository().listarTodos().forEach(i -> imoveis.put(i.getCodigo(), i.getId()));
+        InquilinoRepository inquilinos = new InquilinoRepository();
+        ServicoContratos contratos = new ServicoContratos();
+
+        List<String[]> linhas = ler("contratos.csv");
+        for (String[] c : linhas) {
+            String[] f = fiadores.get(c[0]);
+            String[] k = caucoes.get(c[0]);
+            DadosContrato.Fiador fiador = f == null ? null
+                    : new DadosContrato.Fiador(f[1], f[2], f[3], estadoCivil(f[4]), f[5], f[8], f[6], f[7]);
+            DadosContrato.Caucao caucao = k == null ? null
+                    : new DadosContrato.Caucao(k[1], LocalDate.parse(k[2]), formaPagamento(k[3]), k[4]);
+            Long inquilino = inquilinos.buscarPorCpf(new Cpf(c[2])).map(Inquilino::getId).orElse(null);
+            DadosContrato dados = new DadosContrato(imoveis.get(c[1]), inquilino, prazo(c[4]),
+                    LocalDate.parse(c[3]), fiador, caucao);
+            Contrato salvo;
+            try {
+                salvo = contratos.cadastrar(dados);
+            } catch (RegraNegocioException e) {
+                throw new IllegalStateException("Contrato " + c[0] + " do contratos.csv foi recusado: "
+                        + String.join(" ", e.getErros()), e);
+            }
+            if (!salvo.getNumero().equals(c[0])) {
+                throw new IllegalStateException("O contrato " + c[0] + " do contratos.csv ficou com o número "
+                        + salvo.getNumero() + ". Confira a ordem do arquivo.");
+            }
+        }
+        return linhas.size();
+    }
+
+    private static Map<String, String[]> porContrato(List<String[]> linhas) {
+        Map<String, String[]> mapa = new HashMap<>();
+        linhas.forEach(l -> mapa.put(l[0], l));
+        return mapa;
     }
 
     /** Lê um CSV de resources/dados-teste (separado por ";", primeira linha = cabeçalho). */
@@ -159,6 +215,16 @@ public class ServicoDadosTeste {
     private static SituacaoImovel situacao(String texto) {
         return Arrays.stream(SituacaoImovel.values()).filter(s -> s.getDescricao().equals(texto)).findFirst()
                 .orElseThrow(() -> new IllegalStateException("Situação desconhecida: " + texto));
+    }
+
+    private static PrazoContrato prazo(String meses) {
+        return Arrays.stream(PrazoContrato.values()).filter(p -> String.valueOf(p.getMeses()).equals(meses)).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Prazo desconhecido: " + meses));
+    }
+
+    private static FormaPagamento formaPagamento(String texto) {
+        return Arrays.stream(FormaPagamento.values()).filter(f -> f.getDescricao().equals(texto)).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Forma de pagamento desconhecida: " + texto));
     }
 
     private static EstadoCivil estadoCivil(String texto) {

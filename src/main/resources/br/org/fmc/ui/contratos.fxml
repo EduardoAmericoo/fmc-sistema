@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-36 · Tela "Contratos", no mesmo modelo da tela de Inquilinos.
+
+  Três camadas empilhadas (StackPane), de baixo para cima:
+  1. a página: cabeçalho (título + botão "Novo contrato") e a tabela num cartão;
+  2. o aviso rápido (toast) no canto de baixo, depois de cadastrar;
+  3. o véu escuro com a janela do formulário, que só aparece ao cadastrar.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.ContratosController">
+
+    <!-- 1. Página -->
+    <VBox styleClass="conteudo" spacing="24">
+        <HBox alignment="BOTTOM_LEFT" spacing="24">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Contratos" styleClass="titulo"/>
+                <Label fx:id="contagem" styleClass="texto"/>
+            </VBox>
+            <Button fx:id="botaoNovo" text="Novo contrato" onAction="#novo" styleClass="botao-primario">
+                <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colunaNumero" text="Contrato" prefWidth="95" minWidth="90"/>
+                    <TableColumn fx:id="colunaImovel" text="Imóvel" prefWidth="120" minWidth="110"/>
+                    <TableColumn fx:id="colunaInquilino" text="Inquilino" prefWidth="190" minWidth="150"/>
+                    <TableColumn fx:id="colunaAluguel" text="Aluguel" prefWidth="125" minWidth="125" styleClass="coluna-numero"/>
+                    <TableColumn fx:id="colunaVigencia" text="Vigência" prefWidth="215" minWidth="215"/>
+                    <TableColumn fx:id="colunaGarantia" text="Garantia" prefWidth="105" minWidth="105"/>
+                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="130" minWidth="130"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+                </columnResizePolicy>
+            </TableView>
+        </VBox>
+    </VBox>
+
+    <!-- 2. Aviso rápido depois de cadastrar -->
+    <HBox fx:id="toast" styleClass="toast" spacing="10" alignment="CENTER_LEFT"
+          StackPane.alignment="BOTTOM_RIGHT" maxWidth="-Infinity" maxHeight="-Infinity">
+        <StackPane.margin><Insets right="32" bottom="28"/></StackPane.margin>
+        <FontIcon iconLiteral="fth-check-circle"/>
+        <Label fx:id="textoToast"/>
+    </HBox>
+
+    <!-- 3. Janela do formulário, sobre um véu escuro -->
+    <StackPane fx:id="veu" styleClass="veu">
+        <VBox fx:id="janela" styleClass="janela" maxWidth="760" maxHeight="-Infinity">
+            <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+            <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Novo contrato" styleClass="janela-titulo"/>
+                    <Label text="O contrato já começa ativo e o imóvel passa a ocupado. Campos com * são obrigatórios."
+                           styleClass="janela-sub" wrapText="true"/>
+                </VBox>
+                <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                    <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+                </Button>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
+                <VBox styleClass="janela-corpo" spacing="20">
+
+                    <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                        <FontIcon iconLiteral="fth-alert-circle"/>
+                        <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <!-- Imóvel e inquilino -->
+                    <Label text="Imóvel e inquilino" styleClass="secao-formulario"/>
+                    <VBox spacing="14">
+                        <VBox spacing="6">
+                            <Label text="Imóvel (só aparecem os vagos) *" labelFor="$campoImovel" styleClass="rotulo"/>
+                            <ComboBox fx:id="campoImovel" maxWidth="Infinity" styleClass="campo"
+                                      promptText="Escolha o imóvel"/>
+                            <Label fx:id="dicaImovel" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Inquilino (só aparecem os que não têm contrato ativo) *"
+                                   labelFor="$campoInquilino" styleClass="rotulo"/>
+                            <ComboBox fx:id="campoInquilino" maxWidth="Infinity" styleClass="campo"
+                                      promptText="Escolha o inquilino"/>
+                            <Label fx:id="dicaRenda" wrapText="true" minHeight="-Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Prazo -->
+                    <Label text="Prazo" styleClass="secao-formulario"/>
+                    <GridPane hgap="16" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+                        <VBox spacing="6">
+                            <Label text="Entrega das chaves *" labelFor="$campoEntrega" styleClass="rotulo"/>
+                            <DatePicker fx:id="campoEntrega" maxWidth="Infinity" styleClass="campo"
+                                        promptText="dd/mm/aaaa"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1">
+                            <Label text="Prazo do contrato *" labelFor="$campoPrazo" styleClass="rotulo"/>
+                            <ComboBox fx:id="campoPrazo" maxWidth="Infinity" styleClass="campo"/>
+                        </VBox>
+                    </GridPane>
+                    <HBox fx:id="resumoPrazo" styleClass="resumo-calculado" spacing="10" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fth-calendar"/>
+                        <Label fx:id="textoResumoPrazo" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <!-- Garantia -->
+                    <VBox spacing="4">
+                        <Label text="Garantia *" styleClass="secao-formulario"/>
+                        <Label text="Toda locação precisa de fiador ou de caução de 3 aluguéis." styleClass="dica"/>
+                    </VBox>
+                    <HBox>
+                        <fx:define><ToggleGroup fx:id="grupoGarantia"/></fx:define>
+                        <ToggleButton fx:id="opcaoFiador" text="Fiador" toggleGroup="$grupoGarantia"
+                                      styleClass="left-pill" prefWidth="140">
+                            <graphic><FontIcon iconLiteral="fth-user-check"/></graphic>
+                        </ToggleButton>
+                        <ToggleButton fx:id="opcaoCaucao" text="Caução" toggleGroup="$grupoGarantia"
+                                      styleClass="right-pill" prefWidth="140">
+                            <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
+                        </ToggleButton>
+                    </HBox>
+
+                    <!-- Fiador -->
+                    <VBox fx:id="blocoFiador" spacing="14">
+                        <GridPane hgap="16" vgap="14">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+                            <VBox spacing="6" GridPane.columnSpan="2">
+                                <Label text="Nome do fiador *" labelFor="$campoFiadorNome" styleClass="rotulo"/>
+                                <TextField fx:id="campoFiadorNome" styleClass="campo"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="1">
+                                <Label text="CPF do fiador *" labelFor="$campoFiadorCpf" styleClass="rotulo"/>
+                                <TextField fx:id="campoFiadorCpf" promptText="Só os números" styleClass="campo"/>
+                                <Label fx:id="dicaFiadorCpf" wrapText="true" minHeight="-Infinity"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                                <Label text="Estado civil *" labelFor="$campoFiadorEstadoCivil" styleClass="rotulo"/>
+                                <ComboBox fx:id="campoFiadorEstadoCivil" maxWidth="Infinity" styleClass="campo"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="2">
+                                <Label text="Telefone" labelFor="$campoFiadorTelefone" styleClass="rotulo"/>
+                                <TextField fx:id="campoFiadorTelefone" promptText="DDD e número" styleClass="campo"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                                <Label text="Renda mensal (R$) *" labelFor="$campoFiadorRenda" styleClass="rotulo"/>
+                                <TextField fx:id="campoFiadorRenda" promptText="4.500,00" styleClass="campo"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                                <Label text="Endereço" labelFor="$campoFiadorEndereco" styleClass="rotulo"/>
+                                <TextField fx:id="campoFiadorEndereco" styleClass="campo"/>
+                            </VBox>
+                        </GridPane>
+                        <VBox fx:id="blocoConjugeFiador" spacing="14">
+                            <VBox spacing="4">
+                                <Label text="Cônjuge do fiador" styleClass="secao-formulario"/>
+                                <Label text="Fiador casado(a) ou em união estável: o cônjuge também assina."
+                                       styleClass="dica"/>
+                            </VBox>
+                            <GridPane hgap="16" vgap="14">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50"/>
+                                    <ColumnConstraints percentWidth="50"/>
+                                </columnConstraints>
+                                <VBox spacing="6">
+                                    <Label text="Nome do cônjuge *" labelFor="$campoConjugeNome" styleClass="rotulo"/>
+                                    <TextField fx:id="campoConjugeNome" styleClass="campo"/>
+                                </VBox>
+                                <VBox spacing="6" GridPane.columnIndex="1">
+                                    <Label text="CPF do cônjuge" labelFor="$campoConjugeCpf" styleClass="rotulo"/>
+                                    <TextField fx:id="campoConjugeCpf" promptText="Só os números" styleClass="campo"/>
+                                    <Label fx:id="dicaConjugeCpf" wrapText="true" minHeight="-Infinity"/>
+                                </VBox>
+                            </GridPane>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Caução -->
+                    <VBox fx:id="blocoCaucao" spacing="14">
+                        <GridPane hgap="16" vgap="14">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+                            <VBox spacing="6">
+                                <Label text="Valor da caução (R$) *" labelFor="$campoCaucaoValor" styleClass="rotulo"/>
+                                <TextField fx:id="campoCaucaoValor" styleClass="campo"/>
+                                <Label fx:id="dicaCaucao" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.columnIndex="1">
+                                <Label text="Recebida em *" labelFor="$campoCaucaoData" styleClass="rotulo"/>
+                                <DatePicker fx:id="campoCaucaoData" maxWidth="Infinity" styleClass="campo"
+                                            promptText="dd/mm/aaaa"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="1">
+                                <Label text="Forma de pagamento *" labelFor="$campoCaucaoForma" styleClass="rotulo"/>
+                                <ComboBox fx:id="campoCaucaoForma" maxWidth="Infinity" styleClass="campo"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                                <Label text="Número do recibo" labelFor="$campoCaucaoRecibo" styleClass="rotulo"/>
+                                <TextField fx:id="campoCaucaoRecibo" promptText="Opcional" styleClass="campo"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+
+            <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+                <Button text="Cadastrar contrato" onAction="#salvar" styleClass="botao-primario" defaultButton="true"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>
