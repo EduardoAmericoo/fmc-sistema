@@ -2,7 +2,7 @@
 
 <!--
   BOARD-33 · Tela de login. Primeira tela do sistema.
-  Tela dividida: à esquerda, o painel azul da Fundação com uma frase institucional (o único bloco azul da tela,
+  Tela dividida: à esquerda, o painel azul da Fundação com uma frase de boas-vindas (o único bloco azul da tela,
   como pede o design system); à direita, o formulário.
 
   Cada campo tem o seu aviso embaixo (e-mail e senha); o aviso "geral" (pausa por
@@ -45,15 +45,15 @@
             <Region styleClass="login-marca-linha" prefHeight="3" maxWidth="56">
                 <VBox.margin><Insets top="28" bottom="28"/></VBox.margin>
             </Region>
-            <Label text="Desde 1941, cuidando do patrimônio que mantém a obra da Fundação."
+            <Label text="Boas-vindas ao sistema de gestão da Fundação."
                    styleClass="login-marca-frase" wrapText="true" minHeight="-Infinity"/>
-            <Label text="Cada imóvel, contrato e recibo registrado com transparência."
+            <Label text="Imóveis, inquilinos, contratos e aluguéis em um só lugar, com segurança e organização."
                    styleClass="login-marca-item" wrapText="true" minHeight="-Infinity">
                 <VBox.margin><Insets top="10"/></VBox.margin>
             </Label>
         </VBox>
         <Region VBox.vgrow="ALWAYS"/>
-        <Label text="Aracaju/SE" styleClass="login-marca-rodape" maxWidth="440"/>
+        <Label text="Aracaju/SE · desde 1941" styleClass="login-marca-rodape" maxWidth="440"/>
     </VBox>
 
     <!-- Formulário -->
