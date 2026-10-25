@@ -613,6 +613,73 @@
     -fx-padding: 32;
 }
 
+/* Painel azul da tela de login: o único bloco azul da tela, como pede o design system */
+.login-marca {
+    -fx-background-color: -fmc-azul;
+    -fx-padding: 56 48 40 48;
+}
+
+.login-marca-titulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.login-marca-sub {
+    -fx-font-size: 17px;
+    -fx-text-fill: -fmc-azul-100;
+}
+
+.login-marca-item {
+    -fx-font-size: 15px;
+    -fx-text-fill: -fmc-azul-claro;
+    -fx-graphic-text-gap: 14;
+}
+
+.login-marca-item .ikonli-font-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 20px;
+}
+
+.login-marca-rodape {
+    -fx-font-size: 14px;
+    -fx-text-fill: #A9CDEE;
+}
+
+.login-formulario {
+    -fx-padding: 0 32 0 32;
+}
+
+/* Aviso embaixo de um campo (ex.: "Informe o e-mail.") */
+.aviso-campo {
+    -fx-text-fill: -fmc-erro;
+    -fx-font-size: 14px;
+    -fx-graphic-text-gap: 6;
+}
+
+.aviso-campo .ikonli-font-icon {
+    -fx-icon-color: -fmc-erro;
+    -fx-icon-size: 15px;
+}
+
+.aviso-campo.aviso-alerta {
+    -fx-text-fill: -fmc-alerta;
+}
+
+.aviso-campo.aviso-alerta .ikonli-font-icon {
+    -fx-icon-color: -fmc-alerta;
+}
+
+/* Campo de senha com o botão do olho por cima, à direita */
+.campo.campo-senha {
+    -fx-padding: 8 44 8 12;
+}
+
+.botao-olho .ikonli-font-icon {
+    -fx-icon-size: 18px;
+}
+
 .login-titulo {
     -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
     -fx-font-size: 24px;

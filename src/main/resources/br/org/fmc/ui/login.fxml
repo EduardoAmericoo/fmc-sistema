@@ -2,33 +2,111 @@
 
 <!--
   BOARD-33 · Tela de login. Primeira tela do sistema.
-  O campo de senha é um PasswordField: o que é digitado não aparece.
-  O botão Entrar é o botão padrão (defaultButton): apertar Enter também entra.
+  Tela dividida: à esquerda, o painel azul da Fundação (o único bloco azul da tela,
+  como pede o design system); à direita, o formulário.
+
+  Cada campo tem o seu aviso embaixo (e-mail e senha); o aviso "geral" (pausa por
+  tentativas, acesso bloqueado) fica embaixo do botão Entrar.
+  A senha tem duas caixas no mesmo lugar: a de pontinhos (PasswordField) e a de texto
+  aberto (TextField). O botão do olho mostra uma ou outra; as duas têm o mesmo texto.
 -->
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-           fx:controller="br.org.fmc.ui.LoginController" styleClass="login-fundo">
+<GridPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+          fx:controller="br.org.fmc.ui.LoginController" styleClass="login-fundo">
+    <columnConstraints>
+        <ColumnConstraints percentWidth="42"/>
+        <ColumnConstraints percentWidth="58"/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints vgrow="ALWAYS"/>
+    </rowConstraints>
 
-    <VBox styleClass="login-cartao" spacing="10" maxWidth="380" maxHeight="-Infinity">
-        <Label text="Fundação Manuel Cruz" styleClass="login-titulo"/>
-        <Label text="Entre com o e-mail e a senha criados pelo Administrador." styleClass="texto" wrapText="true"/>
+    <!-- Painel azul da Fundação -->
+    <VBox styleClass="login-marca" spacing="8" maxHeight="Infinity">
+        <Label text="Fundação Manuel Cruz" styleClass="login-marca-titulo" wrapText="true"/>
+        <Label text="Gestão de aluguéis" styleClass="login-marca-sub"/>
 
-        <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
-        <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
+        <VBox spacing="18" styleClass="login-marca-lista">
+            <VBox.margin><Insets top="48"/></VBox.margin>
+            <Label text="Imóveis e inquilinos num só lugar" styleClass="login-marca-item">
+                <graphic><FontIcon iconLiteral="fth-home"/></graphic>
+            </Label>
+            <Label text="Contratos com fiador ou caução" styleClass="login-marca-item">
+                <graphic><FontIcon iconLiteral="fth-file-text"/></graphic>
+            </Label>
+            <Label text="Aluguéis, encargos e recibos" styleClass="login-marca-item">
+                <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
+            </Label>
+            <Label text="Acesso por perfil e senha forte" styleClass="login-marca-item">
+                <graphic><FontIcon iconLiteral="fth-shield"/></graphic>
+            </Label>
+        </VBox>
 
-        <Label text="Senha" labelFor="$campoSenha" styleClass="rotulo"/>
-        <PasswordField fx:id="campoSenha" styleClass="campo"/>
-
-        <Label fx:id="mensagemErro" styleClass="erro" wrapText="true"/>
-
-        <Button fx:id="botaoEntrar" text="Entrar" onAction="#entrar" defaultButton="true"
-                styleClass="botao-primario" maxWidth="Infinity"/>
+        <Region VBox.vgrow="ALWAYS"/>
+        <Label text="Aracaju/SE · desde 1941" styleClass="login-marca-rodape"/>
     </VBox>
-</StackPane>
+
+    <!-- Formulário -->
+    <StackPane GridPane.columnIndex="1">
+        <VBox styleClass="login-formulario" spacing="6" maxWidth="400" maxHeight="-Infinity">
+            <Label text="Entrar" styleClass="login-titulo"/>
+            <Label text="Use o e-mail e a senha criados pelo Administrador." styleClass="texto" wrapText="true"/>
+
+            <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo">
+                <VBox.margin><Insets top="22"/></VBox.margin>
+            </Label>
+            <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
+            <Label fx:id="erroEmail" styleClass="aviso-campo" wrapText="true" minHeight="-Infinity">
+                <graphic><FontIcon iconLiteral="fth-alert-circle"/></graphic>
+            </Label>
+
+            <Label text="Senha" labelFor="$campoSenha" styleClass="rotulo">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Label>
+            <StackPane alignment="CENTER_RIGHT">
+                <PasswordField fx:id="campoSenha" styleClass="campo, campo-senha"/>
+                <TextField fx:id="campoSenhaVisivel" styleClass="campo, campo-senha"/>
+                <Button fx:id="botaoOlho" onAction="#alternarSenha" styleClass="botao-icone, botao-olho"
+                        focusTraversable="false" accessibleText="Mostrar senha">
+                    <graphic><FontIcon fx:id="iconeOlho" iconLiteral="fth-eye"/></graphic>
+                    <StackPane.margin><Insets right="4"/></StackPane.margin>
+                </Button>
+            </StackPane>
+            <Label fx:id="avisoCapsLock" text="Caps Lock está ligado" styleClass="aviso-campo, aviso-alerta">
+                <graphic><FontIcon iconLiteral="fth-alert-triangle"/></graphic>
+            </Label>
+            <Label fx:id="erroSenha" styleClass="aviso-campo" wrapText="true" minHeight="-Infinity">
+                <graphic><FontIcon iconLiteral="fth-alert-circle"/></graphic>
+            </Label>
+
+            <Button fx:id="botaoEntrar" text="Entrar" onAction="#entrar" defaultButton="true"
+                    styleClass="botao-primario" maxWidth="Infinity">
+                <VBox.margin><Insets top="18"/></VBox.margin>
+            </Button>
+            <HBox fx:id="avisoGeral" styleClass="aviso-erro" spacing="10">
+                <VBox.margin><Insets top="8"/></VBox.margin>
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoAvisoGeral" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <Label text="Esqueceu a senha? Peça uma senha provisória ao Administrador." styleClass="dica"
+                   wrapText="true" minHeight="-Infinity">
+                <VBox.margin><Insets top="14"/></VBox.margin>
+            </Label>
+        </VBox>
+    </StackPane>
+</GridPane>
