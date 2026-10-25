@@ -74,14 +74,14 @@ class ServicoAcessoTest {
     }
 
     @Test
-    void usuarioDesativadoNaoEntra() throws Exception {
+    void usuarioBloqueadoNaoEntra() throws Exception {
         Usuario u = new Usuario("Antiga", "antiga@fmc.org", Perfil.SECRETARIA);
         u.setSenhaHash(SenhaUtil.gerarHash("Senha123"));
         u.setAtivo(false);
         repo.salvar(u);
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
                 () -> servico.login("antiga@fmc.org", "Senha123"));
-        assertTrue(e.getMessage().contains("desativado"));
+        assertTrue(e.getMessage().contains("bloqueado"));
         assertFalse(Sessao.estaLogado());
     }
 }
