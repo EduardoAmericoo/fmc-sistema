@@ -72,6 +72,12 @@ public class PrincipalController {
         abrir((String) botao.getUserData());
     }
 
+    /** Botão da chave, no cartão do usuário: troca a própria senha (BOARD-62). */
+    @FXML
+    private void trocarSenha() {
+        Navegador.mostrarTrocaDeSenha(false);
+    }
+
     /** Botão Sair: encerra a sessão e volta para o login. */
     @FXML
     private void sair() {

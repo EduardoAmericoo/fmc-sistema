@@ -33,6 +33,14 @@ CREATE TABLE IF NOT EXISTS usuario_permissoes (
     acoes      TEXT    NOT NULL
 );
 
+-- BOARD-62 · Quem está com senha provisória (criada pelo Administrador) e precisa
+-- trocá-la no próximo acesso. Tem linha aqui só enquanto a senha é provisória:
+-- ao trocar, a linha é apagada.
+CREATE TABLE IF NOT EXISTS usuario_senha_provisoria (
+    usuario_id INTEGER PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
+    criada_em  TEXT    NOT NULL
+);
+
 -- BOARD-35 · Inquilinos, com os dados da proposta.
 -- O CPF é guardado só com os 11 dígitos e não pode se repetir.
 -- Valores em dinheiro ficam como texto (ex.: "2500.00") para não perder centavos.

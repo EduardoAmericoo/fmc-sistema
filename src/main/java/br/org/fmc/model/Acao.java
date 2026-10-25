@@ -30,7 +30,8 @@ public enum Acao {
 
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),
     CRIAR_USUARIO("Usuários", "Criar usuário novo", VER_USUARIOS),
-    EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS);
+    EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS),
+    GERENCIAR_ACESSO("Usuários", "Bloquear usuário e gerar senha provisória", VER_USUARIOS);
 
     private final String tela;
     private final String descricao;
