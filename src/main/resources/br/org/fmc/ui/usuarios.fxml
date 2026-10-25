@@ -46,7 +46,7 @@
                     <TableColumn fx:id="colunaNome" text="Usuário" prefWidth="320"/>
                     <TableColumn fx:id="colunaPerfil" text="Perfil" prefWidth="150"/>
                     <TableColumn fx:id="colunaPermissoes" text="Permissões" prefWidth="170"/>
-                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="130"/>
+                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="160" minWidth="150"/>
                     <TableColumn fx:id="colunaAcoes" prefWidth="140" maxWidth="140" minWidth="140" sortable="false"/>
                 </columns>
                 <columnResizePolicy>
