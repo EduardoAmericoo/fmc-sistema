@@ -428,6 +428,37 @@
     -fx-text-fill: -fmc-sucesso;
 }
 
+.selo-erro {
+    -fx-background-color: -fmc-erro-fundo;
+    -fx-text-fill: -fmc-erro;
+}
+
+/* Senha provisória em destaque, fácil de ler e ditar (BOARD-62) */
+.campo.senha-provisoria {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-azul-escuro;
+    -fx-background-color: -fmc-azul-claro;
+}
+
+/* Lista de itens da regra de senha forte, na troca de senha (BOARD-62) */
+.item-regra {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.item-regra .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-desligado;
+}
+
+.item-regra.ok {
+    -fx-text-fill: -fmc-sucesso;
+}
+
+.item-regra.ok .ikonli-font-icon {
+    -fx-icon-color: -fmc-sucesso;
+}
+
 .selo-alerta {
     -fx-background-color: -fmc-alerta-fundo;
     -fx-text-fill: -fmc-alerta;
