@@ -1,5 +1,6 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.Usuario;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoAcesso;
 import java.sql.SQLException;
@@ -35,8 +36,12 @@ public class LoginController {
     private void entrar() {
         esconderErro();
         try {
-            servico.login(campoEmail.getText(), campoSenha.getText());
-            Navegador.mostrarSistema();
+            Usuario usuario = servico.login(campoEmail.getText(), campoSenha.getText());
+            if (usuario.temSenhaProvisoria()) {
+                Navegador.mostrarTrocaDeSenha(true); // 1º acesso: precisa criar a própria senha (BOARD-62)
+            } else {
+                Navegador.mostrarSistema();
+            }
         } catch (RegraNegocioException e) {
             mostrarErro(e.getMessage());
             campoSenha.clear();

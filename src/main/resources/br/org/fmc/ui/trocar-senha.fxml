@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-62 · Troca de senha. No mesmo cartão da tela de login.
+  Aparece sozinha no 1º acesso (senha provisória) e também pelo botão
+  "Trocar minha senha" do menu. A lista "A senha precisa ter" fica verde
+  item a item enquanto a pessoa digita.
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.TrocarSenhaController" styleClass="login-fundo">
+
+    <VBox styleClass="login-cartao" spacing="10" maxWidth="420" maxHeight="-Infinity">
+        <Label fx:id="titulo" text="Trocar senha" styleClass="login-titulo"/>
+        <Label fx:id="explicacao" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
+
+        <Label fx:id="rotuloAtual" text="Senha atual" labelFor="$campoAtual" styleClass="rotulo"/>
+        <PasswordField fx:id="campoAtual" styleClass="campo"/>
+
+        <Label text="Senha nova" labelFor="$campoNova" styleClass="rotulo"/>
+        <PasswordField fx:id="campoNova" styleClass="campo"/>
+
+        <Label text="Repita a senha nova" labelFor="$campoConfirmacao" styleClass="rotulo"/>
+        <PasswordField fx:id="campoConfirmacao" styleClass="campo"/>
+
+        <Label text="A senha precisa ter:" styleClass="dica"/>
+        <VBox fx:id="itensRegra" spacing="4"/>
+
+        <Label fx:id="mensagemErro" styleClass="erro" wrapText="true" minHeight="-Infinity"/>
+
+        <Button text="Salvar senha nova" onAction="#salvar" defaultButton="true"
+                styleClass="botao-primario" maxWidth="Infinity"/>
+        <HBox alignment="CENTER">
+            <Button fx:id="botaoVoltar" onAction="#voltar" styleClass="botao-secundario" maxWidth="Infinity"
+                    HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </VBox>
+</StackPane>

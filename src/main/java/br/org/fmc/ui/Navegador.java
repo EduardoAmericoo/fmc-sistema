@@ -49,6 +49,23 @@ public final class Navegador {
         trocarCena("login");
     }
 
+    /** A troca de senha aberta agora é a obrigatória do 1º acesso? (lida pelo TrocarSenhaController) */
+    private static boolean trocaObrigatoria;
+
+    /**
+     * Mostra a tela de troca de senha (BOARD-62).
+     * Obrigatória: logo depois do login com senha provisória; a pessoa só sai dela trocando a senha ou saindo.
+     * Não obrigatória: quando a pessoa clica em "Trocar minha senha"; dá para cancelar e voltar.
+     */
+    public static void mostrarTrocaDeSenha(boolean obrigatoria) {
+        trocaObrigatoria = obrigatoria;
+        trocarCena("trocar-senha");
+    }
+
+    static boolean trocaObrigatoria() {
+        return trocaObrigatoria;
+    }
+
     /** Mostra o sistema (menu + telas), depois do login. */
     public static void mostrarSistema() {
         trocarCena("principal");
