@@ -41,6 +41,15 @@ CREATE TABLE IF NOT EXISTS usuario_senha_provisoria (
     criada_em  TEXT    NOT NULL
 );
 
+-- Senhas erradas seguidas no login, por e-mail (limite de tentativas).
+-- Depois de 5 erros, o e-mail fica em pausa até "pausa_ate" (data e hora).
+-- Ao entrar com a senha certa, a linha é apagada.
+CREATE TABLE IF NOT EXISTS tentativa_login (
+    email     TEXT PRIMARY KEY,
+    erros     INTEGER NOT NULL,
+    pausa_ate TEXT
+);
+
 -- BOARD-35 · Inquilinos, com os dados da proposta.
 -- O CPF é guardado só com os 11 dígitos e não pode se repetir.
 -- Valores em dinheiro ficam como texto (ex.: "2500.00") para não perder centavos.
