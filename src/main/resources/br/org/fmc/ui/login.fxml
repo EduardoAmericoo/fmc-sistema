@@ -2,7 +2,7 @@
 
 <!--
   BOARD-33 · Tela de login. Primeira tela do sistema.
-  Tela dividida: à esquerda, o painel azul da Fundação (o único bloco azul da tela,
+  Tela dividida: à esquerda, o painel azul da Fundação com uma frase institucional (o único bloco azul da tela,
   como pede o design system); à direita, o formulário.
 
   Cada campo tem o seu aviso embaixo (e-mail e senha); o aviso "geral" (pausa por
@@ -36,28 +36,24 @@
     </rowConstraints>
 
     <!-- Painel azul da Fundação -->
-    <VBox styleClass="login-marca" spacing="8" maxHeight="Infinity">
-        <Label text="Fundação Manuel Cruz" styleClass="login-marca-titulo" wrapText="true"/>
-        <Label text="Gestão de aluguéis" styleClass="login-marca-sub"/>
-
-        <VBox spacing="18" styleClass="login-marca-lista">
-            <VBox.margin><Insets top="48"/></VBox.margin>
-            <Label text="Imóveis e inquilinos num só lugar" styleClass="login-marca-item">
-                <graphic><FontIcon iconLiteral="fth-home"/></graphic>
-            </Label>
-            <Label text="Contratos com fiador ou caução" styleClass="login-marca-item">
-                <graphic><FontIcon iconLiteral="fth-file-text"/></graphic>
-            </Label>
-            <Label text="Aluguéis, encargos e recibos" styleClass="login-marca-item">
-                <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
-            </Label>
-            <Label text="Acesso por perfil e senha forte" styleClass="login-marca-item">
-                <graphic><FontIcon iconLiteral="fth-shield"/></graphic>
+    <!-- O texto fica num bloco de largura fixa, centralizado no painel; o rodapé fica embaixo. -->
+    <VBox styleClass="login-marca" alignment="CENTER" maxHeight="Infinity">
+        <Region VBox.vgrow="ALWAYS"/>
+        <VBox spacing="8" maxWidth="440">
+            <Label text="Fundação Manuel Cruz" styleClass="login-marca-titulo" wrapText="true"/>
+            <Label text="Gestão de aluguéis" styleClass="login-marca-sub"/>
+            <Region styleClass="login-marca-linha" prefHeight="3" maxWidth="56">
+                <VBox.margin><Insets top="28" bottom="28"/></VBox.margin>
+            </Region>
+            <Label text="Desde 1941, cuidando do patrimônio que mantém a obra da Fundação."
+                   styleClass="login-marca-frase" wrapText="true" minHeight="-Infinity"/>
+            <Label text="Cada imóvel, contrato e recibo registrado com transparência."
+                   styleClass="login-marca-item" wrapText="true" minHeight="-Infinity">
+                <VBox.margin><Insets top="10"/></VBox.margin>
             </Label>
         </VBox>
-
         <Region VBox.vgrow="ALWAYS"/>
-        <Label text="Aracaju/SE · desde 1941" styleClass="login-marca-rodape"/>
+        <Label text="Aracaju/SE" styleClass="login-marca-rodape" maxWidth="440"/>
     </VBox>
 
     <!-- Formulário -->

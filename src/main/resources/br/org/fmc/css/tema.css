@@ -631,15 +631,24 @@
     -fx-text-fill: -fmc-azul-100;
 }
 
-.login-marca-item {
-    -fx-font-size: 15px;
-    -fx-text-fill: -fmc-azul-claro;
-    -fx-graphic-text-gap: 14;
+/* Filete claro entre o nome e a frase */
+.login-marca-linha {
+    -fx-background-color: #A9CDEE;
+    -fx-background-radius: 2;
 }
 
-.login-marca-item .ikonli-font-icon {
-    -fx-icon-color: white;
-    -fx-icon-size: 20px;
+.login-marca-frase {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: 600;
+    -fx-text-fill: white;
+    -fx-line-spacing: 4;
+}
+
+.login-marca-item {
+    -fx-font-size: 16px;
+    -fx-text-fill: -fmc-azul-100;
+    -fx-line-spacing: 3;
 }
 
 .login-marca-rodape {
