@@ -1,124 +1,463 @@
 package br.org.fmc.ui;
 
-import br.org.fmc.model.*;
+import br.org.fmc.model.Acao;
+import br.org.fmc.model.Imovel;
+import br.org.fmc.model.SituacaoImovel;
+import br.org.fmc.model.TipoImovel;
+import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoImoveis;
 import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Function;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+import org.kordamp.ikonli.javafx.FontIcon;
 
-/** Lista e formulario dos atributos existentes de Imovel. */
+/**
+ * Controla a tela "Imóveis" (ui/imoveis.fxml), no mesmo modelo da tela de Inquilinos.
+ * Só cuida da tela: as regras (código repetido, situação pelo contrato, arquivar, excluir)
+ * ficam no ServicoImoveis.
+ */
 public class ImoveisController {
-    @FXML private VBox pagina;
+
     private final ServicoImoveis servico = new ServicoImoveis();
-    private final TableView<Imovel> tabela = new TableView<>();
-    private final Label mensagem = new Label();
-    private final ComboBox<SituacaoImovel> filtroSituacao = new ComboBox<>();
-    private final TextField busca = new TextField();
-    private final Label vazio = new Label();
+
+    /** Todos os imóveis carregados do banco; a tabela mostra só os que passam nos filtros. */
     private List<Imovel> todos = List.of();
+
+    /** Imóvel aberto no formulário; null quando é um cadastro novo. */
+    private Imovel emEdicao;
+
+    /** Imóvel que está sendo arquivado (janela "Arquivar imóvel"). */
+    private Imovel aArquivar;
+
+    @FXML
+    private Label contagem;
+    @FXML
+    private Button botaoNovo;
+    @FXML
+    private TextField campoBusca;
+    @FXML
+    private ComboBox<SituacaoImovel> filtroSituacao;
+    @FXML
+    private CheckBox verArquivados;
+    @FXML
+    private TableView<Imovel> tabela;
+    @FXML
+    private TableColumn<Imovel, Imovel> colunaImovel;
+    @FXML
+    private TableColumn<Imovel, Imovel> colunaEndereco;
+    @FXML
+    private TableColumn<Imovel, Imovel> colunaTipo;
+    @FXML
+    private TableColumn<Imovel, Imovel> colunaAluguel;
+    @FXML
+    private TableColumn<Imovel, Imovel> colunaSituacao;
+    @FXML
+    private TableColumn<Imovel, Imovel> colunaAcoes;
+
+    @FXML
+    private HBox toast;
+    @FXML
+    private Label textoToast;
+
+    @FXML
+    private StackPane veu;
+    @FXML
+    private Label tituloJanela;
+    @FXML
+    private Label subtituloJanela;
+    @FXML
+    private HBox avisoErros;
+    @FXML
+    private Label textoErros;
+    @FXML
+    private TextField campoCodigo;
+    @FXML
+    private TextField campoUnidade;
+    @FXML
+    private ComboBox<TipoImovel> campoTipo;
+    @FXML
+    private ComboBox<SituacaoImovel> campoSituacao;
+    @FXML
+    private Label dicaSituacao;
+    @FXML
+    private TextField campoEndereco;
+    @FXML
+    private TextField campoBairro;
+    @FXML
+    private TextField campoAluguel;
+    @FXML
+    private TextField campoLuz;
+    @FXML
+    private TextField campoIptu;
+    @FXML
+    private Button botaoSalvar;
+
+    @FXML
+    private StackPane veuArquivar;
+    @FXML
+    private Label tituloArquivar;
+    @FXML
+    private HBox avisoArquivar;
+    @FXML
+    private Label textoAvisoArquivar;
+    @FXML
+    private TextField campoMotivo;
 
     @FXML
     private void initialize() {
-        Label titulo = new Label("Imóveis");
-        titulo.getStyleClass().add("titulo");
-        mensagem.getStyleClass().add("texto");
-        mensagem.setWrapText(true);
-        VBox textos = new VBox(6, titulo, mensagem);
-        HBox.setHgrow(textos, Priority.ALWAYS);
-        Button novo = new Button("Novo imóvel");
-        novo.getStyleClass().add("botao-primario");
-        novo.setOnAction(e -> formulario(null));
-        Permissoes.mostrarSe(novo, Acao.CRIAR_IMOVEL);
-        HBox topo = new HBox(16, textos, novo);
-        topo.setAlignment(Pos.CENTER_LEFT);
-        coluna("Código", Imovel::getCodigo, 95);
-        coluna("Unidade", i -> i.getUnidade() == null ? "—" : i.getUnidade(), 200);
-        coluna("Endereço", Imovel::getEndereco, 230);
-        coluna("Bairro", Imovel::getBairro, 110);
-        coluna("Aluguel", i -> Formatos.moeda(i.getValorAluguel()), 120);
-        coluna("Taxa de luz", i -> Formatos.moeda(i.getTaxaLuz()), 110);
-        coluna("Situação", i -> i.getSituacao().toString(), 130);
-        tabela.getStyleClass().add("tabela-fmc");
-        tabela.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        tabela.setPlaceholder(vazio);
-        // Filtro por situação (null = todas) e busca por identificação ou endereço.
+        montarTabela();
+
+        Mascara.dinheiro(campoAluguel);
+        Mascara.dinheiro(campoLuz);
+        Mascara.dinheiro(campoIptu);
+        campoTipo.getItems().setAll(TipoImovel.values());
+
+        // Filtros: situação (vazio = todas), busca e arquivados.
         filtroSituacao.getItems().setAll(SituacaoImovel.values());
-        filtroSituacao.setPromptText("Todas as situações");
         filtroSituacao.setButtonCell(celulaSituacao());
         filtroSituacao.setCellFactory(l -> celulaSituacao());
-        busca.setPromptText("Buscar por código, unidade, endereço ou bairro");
-        busca.setAccessibleText("Buscar imóvel");
-        HBox.setHgrow(busca, Priority.ALWAYS);
-        Button limpar = new Button("Limpar filtros");
-        limpar.setOnAction(e -> {
-            filtroSituacao.setValue(null);
-            busca.clear();
+        filtroSituacao.valueProperty().addListener((obs, antes, agora) -> aplicarFiltros());
+        campoBusca.textProperty().addListener((obs, antes, agora) -> aplicarFiltros());
+        verArquivados.selectedProperty().addListener((obs, antes, agora) -> aplicarFiltros());
+        campoBusca.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                limparFiltros();
+            }
         });
-        HBox filtros = new HBox(12, busca, filtroSituacao, limpar);
-        filtros.setAlignment(Pos.CENTER_LEFT);
-        filtroSituacao.valueProperty().addListener((o, a, b) -> aplicarFiltro());
-        busca.textProperty().addListener((o, a, b) -> aplicarFiltro());
-        Button editar = new Button("Editar imóvel selecionado");
-        Permissoes.mostrarSe(editar, Acao.EDITAR_IMOVEL);
-        editar.disableProperty().bind(tabela.getSelectionModel().selectedItemProperty().isNull());
-        editar.setOnAction(e -> formulario(tabela.getSelectionModel().getSelectedItem()));
-        Button excluir = new Button("Excluir imóvel selecionado");
-        Permissoes.mostrarSe(excluir, Acao.EXCLUIR_IMOVEL);
-        excluir.disableProperty().bind(tabela.getSelectionModel().selectedItemProperty().isNull());
-        excluir.setOnAction(e -> excluirSelecionado());
-        VBox cartao = new VBox(tabela);
-        cartao.getStyleClass().add("cartao-tabela");
-        VBox.setVgrow(tabela, Priority.ALWAYS);
-        VBox.setVgrow(cartao, Priority.ALWAYS);
-        pagina.getChildren().setAll(topo, filtros, cartao, new HBox(12, editar, excluir));
-        carregar();
+
+        Permissoes.mostrarSe(botaoNovo, Acao.CRIAR_IMOVEL);
+        colunaAcoes.setVisible(Sessao.pode(Acao.EDITAR_IMOVEL) || Sessao.pode(Acao.ARQUIVAR_IMOVEL)
+                || Sessao.pode(Acao.EXCLUIR_IMOVEL));
+
+        veu.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                fechar();
+            }
+        });
+        veuArquivar.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                fecharArquivar();
+            }
+        });
+
+        esconder(veu);
+        esconder(veuArquivar);
+        esconder(toast);
+        carregarLista();
     }
 
-    private void coluna(String titulo, Function<Imovel, String> valor, double largura) {
-        TableColumn<Imovel, String> c = new TableColumn<>(titulo);
-        c.setPrefWidth(largura);
-        c.setMinWidth(largura);
-        c.setCellValueFactory(item -> new SimpleStringProperty(valor.apply(item.getValue())));
-        tabela.getColumns().add(c);
+    private void montarTabela() {
+        colunaImovel.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaImovel.setCellFactory(c -> celula(i -> duasLinhas(i.getCodigo(),
+                i.getUnidade() == null ? "—" : i.getUnidade())));
+        colunaEndereco.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaEndereco.setCellFactory(c -> celula(i -> duasLinhas(i.getEndereco(),
+                i.getBairro() == null ? "—" : i.getBairro())));
+        colunaTipo.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaTipo.setCellFactory(c -> celula(i -> new Label(i.getTipo().toString())));
+        colunaAluguel.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaAluguel.setCellFactory(c -> {
+            TableCell<Imovel, Imovel> celula = celula(i -> new Label(Formatos.moeda(i.getValorAluguel())));
+            celula.getStyleClass().add("celula-numero"); // valores alinhados à direita
+            return celula;
+        });
+        colunaSituacao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaSituacao.setCellFactory(c -> celula(ImoveisController::seloSituacao));
+        colunaAcoes.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaAcoes.setCellFactory(c -> celula(this::botoesDaLinha));
+
+        // Clicar na linha abre para editar (para quem pode; imóvel arquivado não se edita).
+        tabela.setRowFactory(t -> {
+            TableRow<Imovel> linha = new TableRow<>();
+            linha.setOnMouseClicked(e -> {
+                if (!linha.isEmpty() && Sessao.pode(Acao.EDITAR_IMOVEL) && !linha.getItem().estaArquivado()
+                        && !cliqueEmBotao(e.getTarget())) {
+                    abrirParaEditar(linha.getItem());
+                }
+            });
+            return linha;
+        });
     }
 
-    private void excluirSelecionado() {
-        Imovel imovel = tabela.getSelectionModel().getSelectedItem();
-        if (imovel == null) return;
-        Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmar.initOwner(pagina.getScene().getWindow());
-        confirmar.setTitle("Excluir imóvel");
-        confirmar.setHeaderText("Excluir o imóvel " + imovel.getCodigo() + "?");
-        confirmar.setContentText("Unidade: " + imovel.getUnidade() + "\nEndereço: " + imovel.getEndereco()
-                + "\nEsta exclusão é permanente.");
-        ButtonType sim = new ButtonType("Excluir", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        confirmar.getButtonTypes().setAll(sim, cancelar);
-        ((Button) confirmar.getDialogPane().lookupButton(cancelar)).setDefaultButton(true);
-        ((Button) confirmar.getDialogPane().lookupButton(sim)).setDefaultButton(false);
-        if (confirmar.showAndWait().orElse(cancelar) != sim) return;
+    /** Ocupado (rende aluguel), vago, em manutenção ou arquivado. */
+    private static Label seloSituacao(Imovel i) {
+        if (i.estaArquivado()) {
+            Label selo = selo("Arquivado", "selo-neutro");
+            selo.setTooltip(new Tooltip("Arquivado em " + Formatos.data(i.getArquivadoEm())
+                    + (i.getMotivoArquivamento() == null ? "" : " · " + i.getMotivoArquivamento())));
+            return selo;
+        }
+        return switch (i.getSituacao()) {
+            case OCUPADO -> selo("Ocupado", "selo-sucesso");
+            case VAGO -> selo("Vago", "selo-info");
+            case EM_MANUTENCAO -> selo("Em manutenção", "selo-alerta");
+        };
+    }
+
+    /** Botões da linha, cada um só para quem tem a permissão dele. */
+    private Node botoesDaLinha(Imovel i) {
+        HBox botoes = new HBox(4);
+        botoes.setAlignment(Pos.CENTER);
+        if (!i.estaArquivado()) {
+            if (Sessao.pode(Acao.EDITAR_IMOVEL)) {
+                botoes.getChildren().add(botaoIcone("fth-edit-2", "Editar " + i.getCodigo(), () -> abrirParaEditar(i)));
+            }
+            if (Sessao.pode(Acao.ARQUIVAR_IMOVEL)) {
+                botoes.getChildren().add(botaoIcone("fth-archive", "Arquivar " + i.getCodigo() + " (ex.: vendido)",
+                        () -> abrirArquivar(i)));
+            }
+        } else if (Sessao.pode(Acao.ARQUIVAR_IMOVEL)) {
+            botoes.getChildren().add(botaoIcone("fth-rotate-ccw", "Reativar " + i.getCodigo(), () -> reativar(i)));
+        }
+        if (Sessao.pode(Acao.EXCLUIR_IMOVEL)) {
+            botoes.getChildren().add(botaoIcone("fth-trash-2", "Excluir " + i.getCodigo() + " (cadastro por engano)",
+                    () -> excluir(i)));
+        }
+        return botoes;
+    }
+
+    /** Mostra só os imóveis que passam nos filtros e atualiza a contagem e a mensagem de lista vazia. */
+    private void aplicarFiltros() {
+        boolean arquivados = verArquivados.isSelected();
+        List<Imovel> filtrados = ServicoImoveis.filtrar(todos, filtroSituacao.getValue(), campoBusca.getText(),
+                arquivados);
+        tabela.getItems().setAll(filtrados);
+        long ativos = todos.stream().filter(i -> !i.estaArquivado()).count();
+        long totalArquivados = todos.size() - ativos;
+        boolean filtrando = filtroSituacao.getValue() != null || !campoBusca.getText().isBlank();
+        if (arquivados) {
+            contagem.setText(filtrando ? filtrados.size() + " de " + totalArquivados + " arquivados"
+                    : totalArquivados == 1 ? "1 imóvel arquivado" : totalArquivados + " imóveis arquivados");
+        } else {
+            contagem.setText(filtrando ? filtrados.size() + " de " + ativos + (ativos == 1 ? " imóvel" : " imóveis")
+                    : ativos == 1 ? "1 imóvel cadastrado" : ativos + " imóveis cadastrados");
+        }
+        tabela.setPlaceholder(vazio(
+                arquivados ? "fth-archive" : filtrando ? "fth-search" : "fth-home",
+                arquivados && !filtrando ? "Nenhum imóvel arquivado"
+                        : filtrando ? "Nenhum imóvel encontrado com esses filtros"
+                        : "Nenhum imóvel cadastrado ainda",
+                filtrando ? "Confira a busca ou clique em \"Limpar filtros\"."
+                        : arquivados ? "Imóveis vendidos ou fora de uso aparecem aqui."
+                        : Sessao.pode(Acao.CRIAR_IMOVEL) ? "Clique em \"Novo imóvel\" para começar."
+                        : "Os imóveis aparecem aqui."));
+    }
+
+    @FXML
+    private void limparFiltros() {
+        campoBusca.clear();
+        filtroSituacao.setValue(null);
+        verArquivados.setSelected(false);
+        campoBusca.requestFocus();
+    }
+
+    /** Botão "Novo imóvel": abre a janela vazia. */
+    @FXML
+    private void novo() {
+        emEdicao = null;
+        tituloJanela.setText("Novo imóvel");
+        subtituloJanela.setText("Campos com * são obrigatórios.");
+        botaoSalvar.setText("Cadastrar imóvel");
+        for (TextField campo : new TextField[] {campoCodigo, campoUnidade, campoEndereco, campoBairro, campoAluguel,
+            campoLuz, campoIptu}) {
+            campo.clear();
+        }
+        campoTipo.setValue(TipoImovel.APARTAMENTO);
+        prepararSituacao(SituacaoImovel.VAGO);
+        abrirJanela();
+    }
+
+    private void abrirParaEditar(Imovel i) {
+        emEdicao = i;
+        tituloJanela.setText("Editar " + i.getCodigo());
+        subtituloJanela.setText(i.getUnidade() == null ? i.getEndereco() : i.getUnidade() + " · " + i.getEndereco());
+        botaoSalvar.setText("Salvar alterações");
+        campoCodigo.setText(i.getCodigo());
+        campoUnidade.setText(textoOuVazio(i.getUnidade()));
+        campoEndereco.setText(i.getEndereco());
+        campoBairro.setText(textoOuVazio(i.getBairro()));
+        campoAluguel.setText(Formatos.numero(i.getValorAluguel()));
+        campoLuz.setText(valorOuVazio(i.getTaxaLuz()));
+        campoIptu.setText(valorOuVazio(i.getValorIptu()));
+        campoTipo.setValue(i.getTipo());
+        prepararSituacao(i.getSituacao());
+        abrirJanela();
+    }
+
+    /**
+     * "Ocupado" vem do contrato: imóvel ocupado não muda de situação à mão; os outros
+     * só podem ficar vagos ou em manutenção.
+     */
+    private void prepararSituacao(SituacaoImovel atual) {
+        boolean ocupado = atual == SituacaoImovel.OCUPADO;
+        campoSituacao.getItems().setAll(ocupado ? List.of(SituacaoImovel.OCUPADO)
+                : List.of(SituacaoImovel.VAGO, SituacaoImovel.EM_MANUTENCAO));
+        campoSituacao.setValue(atual);
+        campoSituacao.setDisable(ocupado);
+        dicaSituacao.setText(ocupado ? "Ocupado pelo contrato. Muda quando o contrato for encerrado."
+                : "\"Ocupado\" é definido pelo contrato, na tela Contratos.");
+    }
+
+    private void abrirJanela() {
+        esconder(avisoErros);
+        Navegador.mostrarJanela(veu);
+        campoCodigo.requestFocus();
+    }
+
+    @FXML
+    private void fechar() {
+        Navegador.fecharJanela(veu);
+        tabela.getSelectionModel().clearSelection();
+    }
+
+    /** Botão "Cadastrar imóvel" / "Salvar alterações". */
+    @FXML
+    private void salvar() {
         try {
-            servico.excluir(imovel.getId());
-            carregar();
-            mensagem.setText("Imóvel excluído: " + imovel.getCodigo());
-        } catch (SQLException | RuntimeException ex) {
-            Alert erro = new Alert(Alert.AlertType.ERROR, "Não foi possível excluir o imóvel: " + ex.getMessage());
-            erro.initOwner(pagina.getScene().getWindow());
-            erro.showAndWait();
+            boolean novo = emEdicao == null;
+            servico.salvarFormulario(novo ? null : emEdicao.getId(), campoCodigo.getText(), campoUnidade.getText(),
+                    campoTipo.getValue(), campoEndereco.getText(), campoBairro.getText(),
+                    novo ? null : emEdicao.getGrupo(), campoAluguel.getText(), campoLuz.getText(),
+                    campoIptu.getText(), campoSituacao.getValue());
+            fechar();
+            carregarLista();
+            mostrarToast((novo ? "Imóvel cadastrado: " : "Alterações salvas: ") + campoCodigo.getText().trim());
+        } catch (RegraNegocioException e) {
+            mostrarAviso(avisoErros, textoErros, String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            mostrarAviso(avisoErros, textoErros, "Não foi possível salvar no banco de dados. Tente de novo.");
         }
     }
 
-    /** Mostra "Todas as situações" quando nada está escolhido, em vez de uma célula vazia. */
-    private ListCell<SituacaoImovel> celulaSituacao() {
+    /** Botão da caixa: abre a janela "Arquivar imóvel", com o motivo. */
+    private void abrirArquivar(Imovel i) {
+        aArquivar = i;
+        tituloArquivar.setText("Arquivar " + i.getCodigo() + "?");
+        campoMotivo.clear();
+        esconder(avisoArquivar);
+        Navegador.mostrarJanela(veuArquivar);
+        campoMotivo.requestFocus();
+    }
+
+    @FXML
+    private void fecharArquivar() {
+        aArquivar = null;
+        Navegador.fecharJanela(veuArquivar);
+    }
+
+    @FXML
+    private void confirmarArquivar() {
+        if (aArquivar == null) {
+            return;
+        }
+        try {
+            Imovel arquivado = servico.arquivar(aArquivar.getId(), campoMotivo.getText());
+            fecharArquivar();
+            carregarLista();
+            mostrarToast("Imóvel arquivado: " + arquivado.getCodigo() + ". Veja em \"Ver arquivados\".");
+        } catch (RegraNegocioException e) {
+            mostrarAviso(avisoArquivar, textoAvisoArquivar, String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            mostrarAviso(avisoArquivar, textoAvisoArquivar, "Não foi possível arquivar no banco de dados. Tente de novo.");
+        }
+    }
+
+    /** Botão de reativar (na lista de arquivados). */
+    private void reativar(Imovel i) {
+        try {
+            servico.reativar(i.getId());
+            carregarLista();
+            mostrarToast("Imóvel reativado: " + i.getCodigo());
+        } catch (RegraNegocioException e) {
+            avisarErro(String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            avisarErro("Não foi possível reativar no banco de dados. Tente de novo.");
+        }
+    }
+
+    /** Botão da lixeira: exclui de verdade, só cadastro feito por engano (o service confere). */
+    private void excluir(Imovel i) {
+        ButtonType sim = new ButtonType("Excluir", ButtonBar.ButtonData.OK_DONE);
+        ButtonType nao = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION,
+                "Use só para cadastro feito por engano. Imóvel vendido ou fora de uso deve ser arquivado, "
+                        + "para o histórico ficar guardado. A exclusão não pode ser desfeita.", sim, nao);
+        confirmar.initOwner(tabela.getScene().getWindow());
+        confirmar.setTitle("Imóveis");
+        confirmar.setHeaderText("Excluir o imóvel " + i.getCodigo() + "?");
+        ((Button) confirmar.getDialogPane().lookupButton(nao)).setDefaultButton(true);
+        ((Button) confirmar.getDialogPane().lookupButton(sim)).setDefaultButton(false);
+        if (confirmar.showAndWait().orElse(nao) != sim) {
+            return;
+        }
+        try {
+            servico.excluir(i.getId());
+            carregarLista();
+            mostrarToast("Imóvel excluído: " + i.getCodigo());
+        } catch (RegraNegocioException e) {
+            avisarErro(String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            avisarErro("Não foi possível excluir no banco de dados. Tente de novo.");
+        }
+    }
+
+    private void carregarLista() {
+        try {
+            todos = servico.listar();
+            aplicarFiltros();
+        } catch (RegraNegocioException e) {
+            contagem.setText(String.join(" ", e.getErros()));
+        } catch (SQLException e) {
+            contagem.setText("Não foi possível carregar os imóveis do banco de dados.");
+        }
+    }
+
+    private void avisarErro(String texto) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING, texto);
+        alerta.initOwner(tabela.getScene().getWindow());
+        alerta.setTitle("Imóveis");
+        alerta.setHeaderText("Não foi possível concluir");
+        alerta.show();
+    }
+
+    /** Aviso rápido no canto da tela, que some sozinho depois de 4 segundos. */
+    private void mostrarToast(String texto) {
+        textoToast.setText(texto);
+        mostrar(toast, true);
+        PauseTransition espera = new PauseTransition(Duration.seconds(4));
+        espera.setOnFinished(e -> esconder(toast));
+        espera.play();
+    }
+
+    /** Mostra "Todas as situações" quando nada está escolhido no filtro. */
+    private static ListCell<SituacaoImovel> celulaSituacao() {
         return new ListCell<>() {
             @Override
             protected void updateItem(SituacaoImovel item, boolean vazia) {
@@ -128,134 +467,80 @@ public class ImoveisController {
         };
     }
 
-    private void carregar() {
-        try {
-            todos = servico.listar();
-            aplicarFiltro();
-        } catch (SQLException | RuntimeException e) {
-            mensagem.setText("Não foi possível carregar os imóveis: " + e.getMessage());
-        }
-    }
-
-    private void aplicarFiltro() {
-        List<Imovel> filtrados = ServicoImoveis.filtrar(todos, filtroSituacao.getValue(), busca.getText());
-        tabela.getItems().setAll(filtrados);
-        boolean filtrando = filtroSituacao.getValue() != null || !busca.getText().isBlank();
-        vazio.setText(todos.isEmpty() ? "Nenhum imóvel cadastrado."
-                : "Nenhum imóvel encontrado com esses filtros.");
-        mensagem.setText(filtrando
-                ? filtrados.size() + " de " + todos.size() + " imóvel(is)"
-                : todos.size() + " imóvel(is) cadastrado(s)");
-    }
-
-    private void formulario(Imovel original) {
-        TextField codigo = new TextField(original == null ? "" : original.getCodigo());
-        TextField unidade = new TextField(original == null ? "" : original.getUnidade());
-        TextField endereco = new TextField(original == null ? "" : original.getEndereco());
-        TextField bairro = new TextField(original == null ? "" : original.getBairro());
-        TextField aluguel = new TextField(original == null ? "" : Formatos.numero(original.getValorAluguel()));
-        TextField luz = new TextField(original == null ? "" : Formatos.numero(original.getTaxaLuz()));
-        TextField iptu = new TextField(original == null ? "" : Formatos.numero(original.getValorIptu()));
-        Mascara.dinheiro(aluguel);
-        Mascara.dinheiro(luz);
-        Mascara.dinheiro(iptu);
-        ComboBox<TipoImovel> tipo = new ComboBox<>();
-        tipo.getItems().setAll(TipoImovel.values());
-        tipo.setValue(original == null ? TipoImovel.CASA : original.getTipo());
-        ComboBox<SituacaoImovel> situacao = new ComboBox<>();
-        situacao.getItems().setAll(SituacaoImovel.values());
-        situacao.setValue(original == null ? SituacaoImovel.VAGO : original.getSituacao());
-        GridPane campos = new GridPane();
-        campos.setHgap(16);
-        campos.setVgap(18);
-        for (int n = 0; n < 2; n++) {
-            ColumnConstraints coluna = new ColumnConstraints();
-            coluna.setPercentWidth(50);
-            coluna.setHgrow(Priority.ALWAYS);
-            campos.getColumnConstraints().add(coluna);
-        }
-        campo(campos, "Código *", codigo, 0, 0, 1);
-        campo(campos, "Unidade", unidade, 1, 0, 1);
-        campo(campos, "Endereço *", endereco, 0, 1, 2);
-        campo(campos, "Bairro", bairro, 0, 2, 2);
-        campo(campos, "Tipo de imóvel *", tipo, 0, 3, 1);
-        campo(campos, "Situação *", situacao, 1, 3, 1);
-        campo(campos, "Aluguel (R$) *", aluguel, 0, 4, 1);
-        campo(campos, "Taxa de luz (R$)", luz, 1, 4, 1);
-        campo(campos, "IPTU (R$)", iptu, 0, 5, 1);
-        Label erro = new Label();
-        erro.setWrapText(true);
-        erro.getStyleClass().add("aviso-erro");
-        erro.setVisible(false);
-        erro.setManaged(false);
-        Label titulo = new Label(original == null ? "Novo imóvel" : "Editar " +
-                (original.getUnidade() == null ? original.getCodigo() : original.getUnidade()));
-        titulo.getStyleClass().add("janela-titulo");
-        Label dica = new Label(original == null ? "Campos com * são obrigatórios." :
-                original.getCodigo() + " · " + original.getEndereco());
-        dica.getStyleClass().add("janela-sub");
-        Button cancelar = new Button("Cancelar");
-        Button salvar = new Button(original == null ? "Cadastrar imóvel" : "Salvar alterações");
-        salvar.getStyleClass().add("botao-primario");
-        HBox botoes = new HBox(12, cancelar, salvar);
-        botoes.setAlignment(Pos.CENTER_RIGHT);
-        Button fechar = new Button("×");
-        fechar.getStyleClass().add("botao-icone");
-        fechar.setAccessibleText("Fechar");
-        VBox cabecalho = new VBox(6, titulo, dica);
-        HBox.setHgrow(cabecalho, Priority.ALWAYS);
-        HBox topo = new HBox(16, cabecalho, fechar);
-        topo.setAlignment(Pos.TOP_LEFT);
-        VBox corpo = new VBox(20, erro, campos);
-        corpo.setPadding(new Insets(24));
-        ScrollPane rolagem = new ScrollPane(corpo);
-        rolagem.setFitToWidth(true);
-        rolagem.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        topo.getStyleClass().add("janela-topo");
-        botoes.getStyleClass().add("janela-rodape");
-        botoes.setPadding(new Insets(16, 24, 16, 24));
-        VBox janela = new VBox(topo, rolagem, botoes);
-        janela.getStyleClass().add("janela");
-        janela.setMaxWidth(760);
-        janela.setMaxHeight(660);
-        VBox.setVgrow(rolagem, Priority.ALWAYS);
-        StackPane veu = new StackPane(janela);
-        veu.getStyleClass().add("veu");
-        veu.setPadding(new Insets(24));
-        cancelar.setOnAction(e -> Navegador.fecharJanela(veu));
-        fechar.setOnAction(e -> Navegador.fecharJanela(veu));
-        veu.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE) Navegador.fecharJanela(veu);
-        });
-        salvar.setOnAction(e -> {
-            try {
-                servico.salvarFormulario(original == null ? null : original.getId(),
-                        codigo.getText(), unidade.getText(), tipo.getValue(), endereco.getText(), bairro.getText(),
-                        original == null ? null : original.getGrupo(), aluguel.getText(), luz.getText(),
-                        iptu.getText(), situacao.getValue());
-                Navegador.fecharJanela(veu);
-                carregar();
-                mensagem.setText("Imóvel salvo: " + codigo.getText().trim());
-            } catch (SQLException ex) {
-                erro.setText("Não foi possível salvar no banco de dados.");
-                erro.setVisible(true);
-                erro.setManaged(true);
-            } catch (RuntimeException ex) {
-                erro.setText(ex.getMessage());
-                erro.setVisible(true);
-                erro.setManaged(true);
+    /** Célula de tabela que desenha um componente a partir do imóvel da linha. */
+    private static TableCell<Imovel, Imovel> celula(Function<Imovel, Node> desenho) {
+        return new TableCell<>() {
+            @Override
+            protected void updateItem(Imovel i, boolean vazio) {
+                super.updateItem(i, vazio);
+                setGraphic(vazio || i == null ? null : desenho.apply(i));
             }
-        });
-        Navegador.mostrarJanela(veu);
-        if (original == null) codigo.requestFocus(); else unidade.requestFocus();
+        };
     }
 
-    private void campo(GridPane grade, String texto, Control controle, int coluna, int linha, int largura) {
-        Label rotulo = new Label(texto);
-        rotulo.setLabelFor(controle);
-        controle.setMaxWidth(Double.MAX_VALUE);
-        VBox caixa = new VBox(8, rotulo, controle);
-        grade.add(caixa, coluna, linha, largura, 1);
-        GridPane.setHgrow(caixa, Priority.ALWAYS);
+    private static VBox duasLinhas(String principal, String detalhe) {
+        Label linha1 = new Label(principal);
+        linha1.getStyleClass().add("celula-nome");
+        Label linha2 = new Label(detalhe);
+        linha2.getStyleClass().add("celula-detalhe");
+        return new VBox(2, linha1, linha2);
+    }
+
+    private static Label selo(String texto, String tipo) {
+        Label selo = new Label(texto);
+        selo.getStyleClass().addAll("selo", tipo);
+        return selo;
+    }
+
+    private static Button botaoIcone(String icone, String dica, Runnable acao) {
+        Button botao = new Button(null, new FontIcon(icone));
+        botao.getStyleClass().add("botao-icone");
+        botao.setTooltip(new Tooltip(dica));
+        botao.setOnAction(e -> acao.run());
+        return botao;
+    }
+
+    /** O clique foi num dos botões da linha? (aí a linha não abre o formulário) */
+    private static boolean cliqueEmBotao(Object alvo) {
+        for (Node n = alvo instanceof Node no ? no : null; n != null; n = n.getParent()) {
+            if (n instanceof Button) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static VBox vazio(String icone, String titulo, String dica) {
+        Label rotulo = new Label(titulo);
+        rotulo.getStyleClass().add("tabela-vazia-titulo");
+        Label texto = new Label(dica);
+        texto.getStyleClass().add("texto");
+        VBox caixa = new VBox(8, new FontIcon(icone), rotulo, texto);
+        caixa.setAlignment(Pos.CENTER);
+        caixa.getStyleClass().add("tabela-vazia");
+        return caixa;
+    }
+
+    private static void mostrarAviso(HBox aviso, Label texto, String mensagem) {
+        texto.setText(mensagem);
+        mostrar(aviso, true);
+    }
+
+    private static void mostrar(Node componente, boolean visivel) {
+        componente.setVisible(visivel);
+        componente.setManaged(visivel);
+    }
+
+    private static void esconder(Node componente) {
+        mostrar(componente, false);
+    }
+
+    private static String textoOuVazio(String texto) {
+        return texto == null ? "" : texto;
+    }
+
+    /** Zero aparece como campo vazio, para não poluir o formulário. */
+    private static String valorOuVazio(BigDecimal valor) {
+        return valor == null || valor.signum() == 0 ? "" : Formatos.numero(valor);
     }
 }
