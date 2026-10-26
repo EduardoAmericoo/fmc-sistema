@@ -36,7 +36,7 @@
                 <Label fx:id="contagem" styleClass="texto"/>
             </VBox>
             <!-- BOARD-56 · Busca por nome ou CPF: filtra a lista enquanto a pessoa digita -->
-            <StackPane alignment="CENTER_LEFT" prefWidth="340" maxWidth="340">
+            <StackPane alignment="CENTER_LEFT" prefWidth="340" maxWidth="340" maxHeight="-Infinity">
                 <TextField fx:id="campoBusca" promptText="Buscar por nome ou CPF"
                            styleClass="campo, campo-busca" accessibleText="Buscar inquilino por nome ou CPF"/>
                 <FontIcon iconLiteral="fth-search" styleClass="icone-busca" mouseTransparent="true">
