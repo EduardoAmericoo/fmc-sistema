@@ -8,8 +8,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** Persistencia dos campos de Imovel, preservando suas subclasses. */
+/** Persistência dos imóveis, preservando as subclasses (Casa, Apartamento), e do arquivamento. */
 public class ImovelRepository implements Repositorio<Imovel> {
+    /** Junta o arquivamento: arquivado_em vem nulo para quem não está arquivado. */
+    private static final String SELECT = "SELECT i.*, a.arquivado_em, a.motivo FROM imovel i "
+            + "LEFT JOIN imovel_arquivado a ON a.imovel_id = i.id";
+
+    /** Grava se o imóvel está arquivado ou não (tabela imovel_arquivado). */
+    public void salvarArquivamento(Imovel imovel) throws SQLException {
+        try (Connection c = Database.conectar()) {
+            try (PreparedStatement s = c.prepareStatement("DELETE FROM imovel_arquivado WHERE imovel_id = ?")) {
+                s.setLong(1, imovel.getId());
+                s.executeUpdate();
+            }
+            if (imovel.estaArquivado()) {
+                try (PreparedStatement s = c.prepareStatement(
+                        "INSERT INTO imovel_arquivado (imovel_id, arquivado_em, motivo) VALUES (?, ?, ?)")) {
+                    s.setLong(1, imovel.getId());
+                    s.setString(2, imovel.getArquivadoEm().toString());
+                    s.setString(3, imovel.getMotivoArquivamento());
+                    s.executeUpdate();
+                }
+            }
+        }
+    }
+
     public void excluir(long id) throws SQLException {
         try (Connection c = Database.conectar();
              PreparedStatement s = c.prepareStatement("DELETE FROM imovel WHERE id = ?")) {
@@ -71,7 +94,7 @@ public class ImovelRepository implements Repositorio<Imovel> {
     @Override
     public Optional<Imovel> buscarPorId(long id) throws SQLException {
         try (Connection c = Database.conectar();
-             PreparedStatement s = c.prepareStatement("SELECT * FROM imovel WHERE id = ?")) {
+             PreparedStatement s = c.prepareStatement(SELECT + " WHERE i.id = ?")) {
             s.setLong(1, id);
             try (ResultSet r = s.executeQuery()) {
                 return r.next() ? Optional.of(montar(r)) : Optional.empty();
@@ -83,7 +106,7 @@ public class ImovelRepository implements Repositorio<Imovel> {
     public List<Imovel> listarTodos() throws SQLException {
         List<Imovel> itens = new ArrayList<>();
         try (Connection c = Database.conectar();
-             PreparedStatement s = c.prepareStatement("SELECT * FROM imovel ORDER BY codigo");
+             PreparedStatement s = c.prepareStatement(SELECT + " ORDER BY i.codigo");
              ResultSet r = s.executeQuery()) {
             while (r.next()) {
                 itens.add(montar(r));
@@ -109,6 +132,10 @@ public class ImovelRepository implements Repositorio<Imovel> {
         i.setTaxaLuz(new BigDecimal(r.getString("taxa_luz")));
         i.setValorIptu(new BigDecimal(r.getString("valor_iptu")));
         i.setSituacao(SituacaoImovel.valueOf(r.getString("situacao")));
+        String arquivadoEm = r.getString("arquivado_em");
+        if (arquivadoEm != null) {
+            i.arquivar(java.time.LocalDate.parse(arquivadoEm), r.getString("motivo"));
+        }
         return i;
     }
 }

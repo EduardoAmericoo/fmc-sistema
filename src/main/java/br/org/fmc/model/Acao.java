@@ -15,7 +15,8 @@ public enum Acao {
     VER_IMOVEIS("Imóveis", "Ver a lista de imóveis", null),
     CRIAR_IMOVEL("Imóveis", "Cadastrar imóvel novo", VER_IMOVEIS),
     EDITAR_IMOVEL("Imóveis", "Editar dados de imóvel", VER_IMOVEIS),
-    EXCLUIR_IMOVEL("Imóveis", "Excluir imóvel", VER_IMOVEIS),
+    ARQUIVAR_IMOVEL("Imóveis", "Arquivar e reativar imóvel (ex.: vendido)", VER_IMOVEIS),
+    EXCLUIR_IMOVEL("Imóveis", "Excluir imóvel cadastrado por engano", VER_IMOVEIS),
 
     VER_INQUILINOS("Inquilinos", "Ver a lista de inquilinos", null),
     CRIAR_INQUILINO("Inquilinos", "Cadastrar inquilino novo", VER_INQUILINOS),

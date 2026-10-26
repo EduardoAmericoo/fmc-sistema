@@ -1,6 +1,7 @@
 package br.org.fmc.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /** Um dos imóveis do patrimônio da Fundação. */
 public class Imovel {
@@ -17,6 +18,14 @@ public class Imovel {
     private BigDecimal valorIptu = BigDecimal.ZERO;
     private SituacaoImovel situacao = SituacaoImovel.VAGO;
 
+    /**
+     * Arquivado: o imóvel saiu do patrimônio (ex.: vendido) ou de uso. Some das listas do dia a dia
+     * e dos formulários, mas continua guardado com o histórico, e pode ser reativado.
+     * null = não está arquivado.
+     */
+    private LocalDate arquivadoEm;
+    private String motivoArquivamento;
+
     public Imovel(String codigo, TipoImovel tipo, String endereco, BigDecimal valorAluguel) {
         setCodigo(codigo);
         setTipo(tipo);
@@ -24,9 +33,33 @@ public class Imovel {
         setValorAluguel(valorAluguel);
     }
 
-    /** Pode receber um contrato novo: só se estiver vago. */
+    /** Pode receber um contrato novo: só se estiver vago e não arquivado. */
     public boolean estaDisponivel() {
-        return situacao == SituacaoImovel.VAGO;
+        return situacao == SituacaoImovel.VAGO && !estaArquivado();
+    }
+
+    public boolean estaArquivado() {
+        return arquivadoEm != null;
+    }
+
+    /** Arquiva o imóvel na data informada. O motivo é opcional (ex.: "Vendido"). */
+    public void arquivar(LocalDate data, String motivo) {
+        arquivadoEm = Valida.obrigatorio(data, "a data do arquivamento");
+        motivoArquivamento = Valida.textoOpcional(motivo);
+    }
+
+    /** Volta para as listas do dia a dia. */
+    public void reativar() {
+        arquivadoEm = null;
+        motivoArquivamento = null;
+    }
+
+    public LocalDate getArquivadoEm() {
+        return arquivadoEm;
+    }
+
+    public String getMotivoArquivamento() {
+        return motivoArquivamento;
     }
 
     /** Marca como ocupado. Usado quando um contrato é cadastrado. */
