@@ -1,0 +1,36 @@
+# Testes automáticos no GitHub (GitHub Actions).
+#
+# Toda vez que alguém abre ou atualiza um Pull Request para a main (e a cada merge
+# na main), um computador do GitHub baixa o projeto, instala o Java 21 e roda
+# todos os testes com o Maven. O resultado aparece dentro do PR:
+#   ✅ "All checks have passed": pode fazer o merge;
+#   ❌ "Some checks were not successful": algum teste quebrou; não faça o merge.
+# Clicando em "Details" dá para ver qual teste falhou e por quê.
+
+name: Testes
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  testes:
+    name: Rodar os testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar o projeto
+        uses: actions/checkout@v4
+
+      - name: Instalar o Java 21 (Temurin, o mesmo da equipe)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Rodar os testes
+        run: ./mvnw --batch-mode test
