@@ -46,7 +46,7 @@
         <HBox spacing="12" alignment="CENTER_LEFT">
             <TextField fx:id="campoBusca" promptText="Buscar por código, unidade, endereço ou bairro"
                        HBox.hgrow="ALWAYS" accessibleText="Buscar imóvel"/>
-            <ComboBox fx:id="filtroSituacao" prefWidth="190"/>
+            <ComboBox fx:id="filtroSituacao" prefWidth="190" promptText="Todas as situações"/>
             <CheckBox fx:id="verArquivados" text="Ver arquivados"/>
             <Button text="Limpar filtros" onAction="#limparFiltros"/>
         </HBox>
@@ -55,8 +55,8 @@
             <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colunaImovel" text="Imóvel" prefWidth="230" minWidth="160"/>
-                    <TableColumn fx:id="colunaEndereco" text="Endereço" prefWidth="300" minWidth="180"/>
-                    <TableColumn fx:id="colunaTipo" text="Tipo" prefWidth="130" minWidth="110"/>
+                    <TableColumn fx:id="colunaEndereco" text="Endereço" prefWidth="290" minWidth="170"/>
+                    <TableColumn fx:id="colunaTipo" text="Tipo" prefWidth="140" minWidth="130"/>
                     <TableColumn fx:id="colunaAluguel" text="Aluguel" prefWidth="130" minWidth="120"
                                  styleClass="coluna-numero"/>
                     <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="150" minWidth="140"/>
