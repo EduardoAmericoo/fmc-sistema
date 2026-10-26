@@ -704,13 +704,3 @@
     -fx-padding: 8 14 8 14;
     -fx-border-color: transparent transparent -fmc-borda transparent;
 }
-
-/* Campo de busca com a lupa à esquerda e o X à direita (BOARD-56) */
-.campo.campo-busca {
-    -fx-padding: 8 40 8 40;
-}
-
-.icone-busca {
-    -fx-icon-color: -fmc-texto-suave;
-    -fx-icon-size: 16px;
-}

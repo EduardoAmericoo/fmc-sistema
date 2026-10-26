@@ -64,8 +64,6 @@ public class InquilinosController {
     @FXML
     private TextField campoBusca;
     @FXML
-    private Button botaoLimparBusca;
-    @FXML
     private TableView<Inquilino> tabela;
     @FXML
     private TableColumn<Inquilino, Inquilino> colunaNome;
@@ -367,7 +365,6 @@ public class InquilinosController {
         String busca = campoBusca.getText();
         boolean buscando = !busca.isBlank();
         tabela.getItems().setAll(ServicoInquilinos.filtrar(todos, busca));
-        botaoLimparBusca.setVisible(buscando);
         int total = todos.size();
         int achados = tabela.getItems().size();
         if (buscando) {
@@ -380,7 +377,7 @@ public class InquilinosController {
         }
     }
 
-    /** Botão X da busca, "Limpar busca" e a tecla Esc. */
+    /** Botão "Limpar busca" (ao lado da busca e na lista vazia) e a tecla Esc. */
     @FXML
     private void limparBusca() {
         campoBusca.clear();

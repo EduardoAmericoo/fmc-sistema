@@ -4,7 +4,7 @@
   BOARD-35 · Tela "Inquilinos", no visual do design system da Fundação.
 
   Três camadas empilhadas (StackPane), de baixo para cima:
-  1. a página: cabeçalho (título, busca e botão "Novo inquilino") e a tabela num cartão;
+  1. a página: cabeçalho (título + botão "Novo inquilino"), a busca (como na tela de Imóveis) e a tabela num cartão;
   2. o aviso rápido (toast) no canto de baixo, depois de salvar;
   3. o véu escuro com a janela do formulário, que só aparece ao criar ou editar.
 -->
@@ -35,22 +35,17 @@
                 <Label text="Inquilinos" styleClass="titulo"/>
                 <Label fx:id="contagem" styleClass="texto"/>
             </VBox>
-            <!-- BOARD-56 · Busca por nome ou CPF: filtra a lista enquanto a pessoa digita -->
-            <StackPane alignment="CENTER_LEFT" prefWidth="340" maxWidth="340" maxHeight="-Infinity">
-                <TextField fx:id="campoBusca" promptText="Buscar por nome ou CPF"
-                           styleClass="campo, campo-busca" accessibleText="Buscar inquilino por nome ou CPF"/>
-                <FontIcon iconLiteral="fth-search" styleClass="icone-busca" mouseTransparent="true">
-                    <StackPane.margin><Insets left="12"/></StackPane.margin>
-                </FontIcon>
-                <Button fx:id="botaoLimparBusca" onAction="#limparBusca" styleClass="botao-icone"
-                        StackPane.alignment="CENTER_RIGHT" focusTraversable="false" accessibleText="Limpar busca">
-                    <graphic><FontIcon iconLiteral="fth-x"/></graphic>
-                    <StackPane.margin><Insets right="4"/></StackPane.margin>
-                </Button>
-            </StackPane>
             <Button fx:id="botaoNovo" text="Novo inquilino" onAction="#novo" styleClass="botao-primario">
                 <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
             </Button>
+        </HBox>
+
+        <!-- BOARD-56 · Busca por nome ou CPF, no mesmo lugar e formato da busca da tela de Imóveis:
+             filtra a lista enquanto a pessoa digita -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="campoBusca" promptText="Buscar por nome ou CPF" HBox.hgrow="ALWAYS"
+                       accessibleText="Buscar inquilino por nome ou CPF"/>
+            <Button text="Limpar busca" onAction="#limparBusca"/>
         </HBox>
 
         <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
