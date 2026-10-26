@@ -103,6 +103,8 @@ public class ServicoContratos {
         Imovel imovel = imoveis.buscarPorId(id).orElse(null);
         if (imovel == null) {
             erros.add("Imóvel não encontrado.");
+        } else if (imovel.estaArquivado()) {
+            erros.add("O imóvel " + imovel.getCodigo() + " está arquivado: reative-o na tela Imóveis antes de fazer contrato.");
         } else if (imovel.getSituacao() != SituacaoImovel.VAGO) {
             erros.add("O imóvel " + imovel.getCodigo() + " está " + imovel.getSituacao().getDescricao().toLowerCase()
                     + ": só imóvel vago pode receber contrato.");

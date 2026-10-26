@@ -128,3 +128,13 @@ CREATE TABLE IF NOT EXISTS garantia (
     caucao_forma         TEXT,
     caucao_recibo        TEXT
 );
+
+-- Imóveis arquivados: saíram do patrimônio (ex.: vendidos) ou de uso.
+-- Somem das listas do dia a dia, mas continuam guardados com o histórico
+-- (contratos, aluguéis, recibos) e podem ser reativados.
+-- Tem linha aqui só enquanto o imóvel está arquivado.
+CREATE TABLE IF NOT EXISTS imovel_arquivado (
+    imovel_id   INTEGER PRIMARY KEY REFERENCES imovel(id) ON DELETE CASCADE,
+    arquivado_em TEXT NOT NULL,
+    motivo      TEXT
+);
