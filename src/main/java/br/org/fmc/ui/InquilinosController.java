@@ -11,6 +11,7 @@ import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -26,6 +27,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -43,6 +46,14 @@ public class InquilinosController {
     /** Inquilino aberto na janela para editar; null quando é um cadastro novo. */
     private Inquilino emEdicao;
 
+    /** Todos os inquilinos carregados do banco; a tabela mostra só os que atendem à busca (BOARD-56). */
+    private List<Inquilino> todos = List.of();
+
+    /** O que a tabela mostra quando não há cadastro nenhum, e quando a busca não encontra ninguém. */
+    private VBox vazioSemCadastro;
+    private VBox vazioBusca;
+    private Label tituloVazioBusca;
+
     /** Quem está logado pode editar inquilinos? (mostra o lápis e abre a janela ao clicar na linha) */
     private boolean podeEditar;
 
@@ -50,6 +61,10 @@ public class InquilinosController {
     private Label contagem;
     @FXML
     private Button botaoNovo;
+    @FXML
+    private TextField campoBusca;
+    @FXML
+    private Button botaoLimparBusca;
     @FXML
     private TableView<Inquilino> tabela;
     @FXML
@@ -135,6 +150,20 @@ public class InquilinosController {
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
                 fechar();
+            }
+        });
+
+        // Busca: filtra enquanto a pessoa digita; Esc limpa; Ctrl+F leva o cursor para a busca.
+        campoBusca.textProperty().addListener((obs, antes, agora) -> aplicarBusca());
+        campoBusca.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                limparBusca();
+            }
+        });
+        campoBusca.sceneProperty().addListener((obs, antes, cena) -> {
+            if (cena != null) {
+                cena.getAccelerators().put(new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN),
+                        () -> campoBusca.requestFocus());
             }
         });
 
@@ -225,7 +254,20 @@ public class InquilinosController {
         VBox vazio = new VBox(8, icone, titulo, dica);
         vazio.setAlignment(Pos.CENTER);
         vazio.getStyleClass().add("tabela-vazia");
-        tabela.setPlaceholder(vazio);
+        vazioSemCadastro = vazio;
+
+        // Busca sem resultado: diz o que foi buscado e oferece limpar.
+        tituloVazioBusca = new Label();
+        tituloVazioBusca.getStyleClass().add("tabela-vazia-titulo");
+        Label dicaBusca = new Label("Confira se digitou certo. Dá para buscar por parte do nome ou do CPF.");
+        dicaBusca.getStyleClass().add("texto");
+        Button limpar = new Button("Limpar busca");
+        limpar.getStyleClass().add("botao-secundario");
+        limpar.setOnAction(e -> limparBusca());
+        vazioBusca = new VBox(8, new FontIcon("fth-search"), tituloVazioBusca, dicaBusca, limpar);
+        vazioBusca.setAlignment(Pos.CENTER);
+        vazioBusca.getStyleClass().add("tabela-vazia");
+        tabela.setPlaceholder(vazioSemCadastro);
     }
 
     /** Botão "Novo inquilino": abre a janela vazia. */
@@ -311,14 +353,38 @@ public class InquilinosController {
 
     private void carregarLista() {
         try {
-            tabela.getItems().setAll(servico.listar());
-            int total = tabela.getItems().size();
-            contagem.setText(total == 1 ? "1 inquilino cadastrado" : total + " inquilinos cadastrados");
+            todos = servico.listar();
+            aplicarBusca();
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
             contagem.setText("Erro no banco de dados: " + e.getMessage());
         }
+    }
+
+    /** Mostra na tabela só os inquilinos que atendem à busca e atualiza a contagem. */
+    private void aplicarBusca() {
+        String busca = campoBusca.getText();
+        boolean buscando = !busca.isBlank();
+        tabela.getItems().setAll(ServicoInquilinos.filtrar(todos, busca));
+        botaoLimparBusca.setVisible(buscando);
+        int total = todos.size();
+        int achados = tabela.getItems().size();
+        if (buscando) {
+            contagem.setText(achados + " de " + total + (total == 1 ? " inquilino" : " inquilinos"));
+            tituloVazioBusca.setText("Nenhum inquilino encontrado para \"" + busca.trim() + "\"");
+            tabela.setPlaceholder(vazioBusca);
+        } else {
+            contagem.setText(total == 1 ? "1 inquilino cadastrado" : total + " inquilinos cadastrados");
+            tabela.setPlaceholder(vazioSemCadastro);
+        }
+    }
+
+    /** Botão X da busca, "Limpar busca" e a tecla Esc. */
+    @FXML
+    private void limparBusca() {
+        campoBusca.clear();
+        campoBusca.requestFocus();
     }
 
     private void mostrarErros(String texto) {
