@@ -57,6 +57,22 @@ public class ServicoInquilinos {
         return inquilinos.listarTodos();
     }
 
+    /**
+     * Inquilinos que atendem à busca, por nome ou CPF (BOARD-56), em ordem de nome.
+     * Busca vazia devolve todos. Ver Inquilino.atendeBusca() para as regras.
+     */
+    public List<Inquilino> buscar(String busca) throws SQLException {
+        return filtrar(listar(), busca);
+    }
+
+    /**
+     * Filtra uma lista já carregada, sem ir ao banco: a tela usa isto para filtrar
+     * enquanto a pessoa digita.
+     */
+    public static List<Inquilino> filtrar(List<Inquilino> inquilinos, String busca) {
+        return inquilinos.stream().filter(i -> i.atendeBusca(busca)).toList();
+    }
+
     private Inquilino salvar(Long id, DadosInquilino d) throws SQLException {
         List<String> erros = new ArrayList<>();
 
