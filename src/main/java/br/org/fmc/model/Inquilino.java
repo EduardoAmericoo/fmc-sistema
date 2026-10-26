@@ -1,6 +1,8 @@
 package br.org.fmc.model;
 
+import br.org.fmc.util.TextoBusca;
 import java.math.BigDecimal;
+import java.util.List;
 
 /** Locatário: quem aluga o imóvel da Fundação. */
 public class Inquilino extends Pessoa {
@@ -21,6 +23,27 @@ public class Inquilino extends Pessoa {
             total = total.add(conjuge.getRenda());
         }
         return total;
+    }
+
+    /**
+     * Este inquilino aparece na busca por este texto? (BOARD-56)
+     * - pelo nome: todas as palavras digitadas, em qualquer ordem, sem ligar para acentos
+     *   ("silva maria" encontra "Maria da Silva");
+     * - pelo CPF: com ou sem pontos e traço, inteiro ou só um pedaço de pelo menos 3 números.
+     * Busca vazia: todos aparecem.
+     */
+    public boolean atendeBusca(String busca) {
+        List<String> palavras = TextoBusca.palavras(busca);
+        if (palavras.isEmpty()) {
+            return true;
+        }
+        String digitos = TextoBusca.digitos(busca);
+        boolean pareceCpf = digitos.length() >= 3 && busca.trim().matches("[\\d.\\-\\s]+");
+        if (pareceCpf) {
+            return cpf.getNumero().contains(digitos);
+        }
+        String nomeNormalizado = TextoBusca.normalizar(nome);
+        return palavras.stream().allMatch(nomeNormalizado::contains);
     }
 
     public String getProfissao() {
