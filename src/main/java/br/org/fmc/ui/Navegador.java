@@ -10,6 +10,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -27,21 +28,44 @@ import javafx.stage.Stage;
 public final class Navegador {
 
     private static final String CSS = "/br/org/fmc/css/tema.css";
-    private static final double LARGURA = 1100;
-    private static final double ALTURA = 700;
+    /** Tamanho quando a pessoa sai do tela cheia, e o menor tamanho permitido (as telas não cabem em menos). */
+    private static final double LARGURA = 1280;
+    private static final double ALTURA = 800;
+    private static final double LARGURA_MINIMA = 1024;
+    private static final double ALTURA_MINIMA = 680;
+
+    /** Ícone da janela e da barra de tarefas, em vários tamanhos (o Windows escolhe o melhor). */
+    private static final int[] TAMANHOS_ICONE = {16, 24, 32, 48, 64, 128, 256};
 
     private static Stage palco;
     private static BorderPane janela;
 
-    /** Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver). */
+    /**
+     * Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver).
+     * A cena é uma só a vida toda; trocar de tela troca só o que está dentro dela.
+     * Assim a janela não "reabre" nem volta ao tamanho pequeno a cada troca de tela.
+     */
     private static StackPane camadas;
 
     private Navegador() {
     }
 
-    /** Chamado uma vez pelo App, com a janela do sistema. */
+    /** Chamado uma vez pelo App, com a janela do sistema: monta a cena, o ícone e abre maximizada. */
     public static void iniciar(Stage stage) {
         palco = stage;
+        camadas = new StackPane();
+        Scene cena = new Scene(camadas, LARGURA, ALTURA);
+        cena.getStylesheets().add(Navegador.class.getResource(CSS).toExternalForm());
+        stage.setScene(cena);
+        stage.setMinWidth(LARGURA_MINIMA);
+        stage.setMinHeight(ALTURA_MINIMA);
+        for (int tamanho : TAMANHOS_ICONE) {
+            URL icone = Navegador.class.getResource("/br/org/fmc/icones/fmc-" + tamanho + ".png");
+            if (icone != null) {
+                stage.getIcons().add(new Image(icone.toExternalForm()));
+            }
+        }
+        stage.setMaximized(true);
     }
 
     /** Mostra a tela de login (ao abrir o sistema e ao sair). */
@@ -76,10 +100,7 @@ public final class Navegador {
             throw new IllegalStateException("Chame Navegador.iniciar(stage) antes.");
         }
         Parent raiz = (Parent) carregarFxml(Navegador.class.getResource("/br/org/fmc/ui/" + fxml + ".fxml"), fxml);
-        camadas = new StackPane(raiz);
-        Scene cena = new Scene(camadas, LARGURA, ALTURA);
-        cena.getStylesheets().add(Navegador.class.getResource(CSS).toExternalForm());
-        palco.setScene(cena);
+        camadas.getChildren().setAll(raiz); // troca a tela (e fecha qualquer janela que estivesse aberta)
     }
 
     /**
