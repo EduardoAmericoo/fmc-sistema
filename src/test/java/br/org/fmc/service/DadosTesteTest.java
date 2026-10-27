@@ -69,6 +69,14 @@ class DadosTesteTest {
         assertEquals("CT-1001", contratos.get(0).getNumero());
         assertEquals(100, contratos.stream().filter(c -> c.getGarantia() instanceof Fianca).count());
         assertEquals(10, contratos.stream().filter(c -> c.getGarantia() instanceof Caucao).count());
+        // Aluguéis de teste (BOARD-38): o mês passado tem pagos e em aberto, para a tela mostrar as situações.
+        assertTrue(resumo.alugueis() > 0);
+        ServicoAlugueis alugueis = new ServicoAlugueis();
+        java.time.YearMonth mesPassado = java.time.YearMonth.from(alugueis.hoje()).minusMonths(1);
+        List<br.org.fmc.model.SituacaoAluguel> situacoes = alugueis.listarDoMes(mesPassado).stream()
+                .map(a -> a.getSituacao(alugueis.hoje())).toList();
+        assertTrue(situacoes.contains(br.org.fmc.model.SituacaoAluguel.PAGO));
+        assertTrue(situacoes.stream().anyMatch(s -> s != br.org.fmc.model.SituacaoAluguel.PAGO));
         // Todo imóvel com contrato ficou ocupado, e só eles.
         assertEquals(110, new ServicoImoveis().listar().stream().filter(i -> i.getSituacao() == SituacaoImovel.OCUPADO).count());
     }

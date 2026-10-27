@@ -704,3 +704,36 @@
     -fx-padding: 8 14 8 14;
     -fx-border-color: transparent transparent -fmc-borda transparent;
 }
+
+/* Detalhe em vermelho embaixo de um valor da tabela (ex.: "12 dias de atraso"), BOARD-38 */
+.celula-detalhe-erro {
+    -fx-text-fill: -fmc-erro;
+    -fx-font-size: 13px;
+}
+
+/* Abas por situação no topo de um cartão de tabela (ex.: Em atraso · 3), BOARD-38 */
+.abas {
+    -fx-padding: 8 16 0 16;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.aba {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 10 12 10 12;
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.aba:hover {
+    -fx-text-fill: -fmc-texto;
+}
+
+.aba:selected {
+    -fx-text-fill: -fmc-azul;
+    -fx-border-color: transparent transparent -fmc-azul transparent;
+}
