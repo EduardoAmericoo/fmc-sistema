@@ -212,7 +212,7 @@ public class AlugueisController {
 
         boolean filtrando = situacao != null || !busca.isBlank();
         tabela.setPlaceholder(doMes.isEmpty()
-                ? vazio("fth-calendar", "Nenhum aluguel gerado para " + nome,
+                ? vazio("fth-calendar", "Nenhum aluguel gerado para " + mes.format(MES),
                         "Os aluguéis do mês aparecem aqui depois de gerados.")
                 : vazio(filtrando ? "fth-search" : "fth-check-circle",
                         filtrando ? "Nenhum aluguel com esses filtros" : "Nenhum aluguel",
