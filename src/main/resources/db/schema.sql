@@ -138,3 +138,21 @@ CREATE TABLE IF NOT EXISTS imovel_arquivado (
     arquivado_em TEXT NOT NULL,
     motivo      TEXT
 );
+
+-- BOARD-38 · Aluguéis: o aluguel de cada mês de cada contrato.
+-- Competência = o mês em que o aluguel vence, no formato AAAA-MM (ex.: "2026-10").
+-- Os valores são copiados do contrato quando o aluguel é gerado (BOARD-37).
+-- data_pagamento fica vazia enquanto o aluguel não for pago (o recebimento é a BOARD-39).
+-- Um contrato tem no máximo um aluguel por mês (UNIQUE): gerar duas vezes não duplica.
+CREATE TABLE IF NOT EXISTS aluguel (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id    INTEGER NOT NULL REFERENCES contrato(id),
+    competencia    TEXT    NOT NULL,
+    vencimento     TEXT    NOT NULL,
+    valor_aluguel  TEXT    NOT NULL,
+    taxa_luz       TEXT    NOT NULL DEFAULT '0',
+    valor_iptu     TEXT    NOT NULL DEFAULT '0',
+    outros         TEXT    NOT NULL DEFAULT '0',
+    data_pagamento TEXT,
+    UNIQUE (contrato_id, competencia)
+);
