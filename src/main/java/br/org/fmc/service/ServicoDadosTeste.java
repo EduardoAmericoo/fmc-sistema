@@ -1,6 +1,7 @@
 package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
+import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
 import br.org.fmc.model.EstadoCivil;
@@ -11,6 +12,8 @@ import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.TipoImovel;
 import br.org.fmc.model.Usuario;
+import br.org.fmc.repository.AluguelRepository;
+import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.ImovelRepository;
 import br.org.fmc.repository.InquilinoRepository;
 import br.org.fmc.repository.SistemaRepository;
@@ -21,6 +24,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -31,7 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Carga dos dados de teste (BOARD-52): imóveis, inquilinos, contratos e usuários fictícios
+ * Carga dos dados de teste (BOARD-52): imóveis, inquilinos, contratos, aluguéis e usuários fictícios
  * para testar e apresentar o sistema.
  *
  * Os dados ficam em resources/dados-teste/*.csv (exportados da planilha
@@ -47,11 +51,11 @@ public class ServicoDadosTeste {
     public static final String SENHA_TESTE = "teste123";
 
     /** O que foi carregado, para mostrar ao usuário. */
-    public record Resumo(int usuarios, int imoveis, int inquilinos, int contratos) {
+    public record Resumo(int usuarios, int imoveis, int inquilinos, int contratos, int alugueis) {
         @Override
         public String toString() {
-            return imoveis + " imóveis, " + inquilinos + " inquilinos, " + contratos + " contratos e "
-                    + usuarios + " usuários de teste.";
+            return imoveis + " imóveis, " + inquilinos + " inquilinos, " + contratos + " contratos, "
+                    + alugueis + " aluguéis dos últimos 3 meses e " + usuarios + " usuários de teste.";
         }
     }
 
@@ -85,7 +89,8 @@ public class ServicoDadosTeste {
             int imoveis = carregarImoveis();
             int inquilinos = carregarInquilinos();
             int contratos = carregarContratos();
-            return new Resumo(usuarios, imoveis, inquilinos, contratos);
+            int alugueis = carregarAlugueis(LocalDate.now());
+            return new Resumo(usuarios, imoveis, inquilinos, contratos, alugueis);
         } finally {
             acesso.sair();
         }
@@ -179,6 +184,44 @@ public class ServicoDadosTeste {
             }
         }
         return linhas.size();
+    }
+
+    /**
+     * Aluguéis de teste (BOARD-38): os dos 2 meses anteriores e do mês atual de cada contrato,
+     * para a tela de Aluguéis ter o que mostrar em todas as situações.
+     * Não é a geração do mês (BOARD-37): são gravados direto, como massa de teste.
+     *
+     * Os já vencidos ficam pagos, menos os que a coluna "situacao_financeira" do contratos.csv
+     * diz que estão em aberto: "1 mês em atraso" deixa o último vencido sem pagar,
+     * "2 meses em aberto" deixa os dois últimos.
+     */
+    int carregarAlugueis(LocalDate hoje) throws SQLException {
+        Map<String, String> financeira = new HashMap<>();
+        ler("contratos.csv").forEach(c -> financeira.put(c[0], c[9]));
+        AluguelRepository alugueis = new AluguelRepository();
+        YearMonth atual = YearMonth.from(hoje);
+        int total = 0;
+        for (Contrato contrato : new ContratoRepository().listarTodos()) {
+            String situacao = financeira.getOrDefault(contrato.getNumero(), "Em dia");
+            int emAberto = situacao.startsWith("2") ? 2 : situacao.startsWith("1") ? 1 : 0;
+            List<Aluguel> doContrato = new ArrayList<>();
+            for (YearMonth mes = atual.minusMonths(2); !mes.isAfter(atual); mes = mes.plusMonths(1)) {
+                if (contrato.cobreCompetencia(mes)) {
+                    doContrato.add(new Aluguel(contrato, mes));
+                }
+            }
+            List<Aluguel> vencidos = doContrato.stream().filter(a -> a.getVencimento().isBefore(hoje)).toList();
+            for (int i = 0; i < vencidos.size() - emAberto; i++) {
+                Aluguel a = vencidos.get(i);
+                // Paga no vencimento ou até 3 dias antes, variando de contrato para contrato.
+                a.registrarPagamento(a.getVencimento().minusDays(contrato.getId() % 4));
+            }
+            for (Aluguel a : doContrato) {
+                alugueis.salvar(a);
+                total++;
+            }
+        }
+        return total;
     }
 
     private static Map<String, String[]> porContrato(List<String[]> linhas) {
