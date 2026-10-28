@@ -21,6 +21,7 @@ public enum Acao {
     VER_INQUILINOS("Inquilinos", "Ver a lista de inquilinos", null),
     CRIAR_INQUILINO("Inquilinos", "Cadastrar inquilino novo", VER_INQUILINOS),
     EDITAR_INQUILINO("Inquilinos", "Editar dados de inquilino", VER_INQUILINOS),
+    ARQUIVAR_INQUILINO("Inquilinos", "Arquivar e reativar inquilino (ex.: saiu do imóvel)", VER_INQUILINOS),
 
     VER_CONTRATOS("Contratos", "Ver a lista de contratos", null),
     CRIAR_CONTRATO("Contratos", "Cadastrar contrato novo", VER_CONTRATOS),

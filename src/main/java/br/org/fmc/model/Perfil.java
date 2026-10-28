@@ -15,7 +15,7 @@ public enum Perfil {
     ADMINISTRADOR("Administrador", EnumSet.allOf(Acao.class)),
     SECRETARIA("Secretaria", EnumSet.of(
             Acao.VER_IMOVEIS, Acao.CRIAR_IMOVEL, Acao.EDITAR_IMOVEL, Acao.ARQUIVAR_IMOVEL, Acao.EXCLUIR_IMOVEL,
-            Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO,
+            Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO, Acao.ARQUIVAR_INQUILINO,
             Acao.VER_CONTRATOS, Acao.CRIAR_CONTRATO, Acao.PRORROGAR_CONTRATO, Acao.ENCERRAR_CONTRATO,
             Acao.VER_ALUGUEIS, Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL)),
     FINANCEIRO("Financeiro", EnumSet.of(
