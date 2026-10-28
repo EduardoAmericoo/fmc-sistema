@@ -3,6 +3,7 @@ package br.org.fmc.ui;
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.Tela;
 import br.org.fmc.service.RegraNegocioException;
@@ -238,8 +239,8 @@ public class PainelController {
             case ALUGUEIS_EM_ATRASO -> SituacaoAluguel.EM_ATRASO;
             case INQUILINOS_PARA_COBRANCA -> AlugueisController.Recorte.INQUILINOS_PARA_COBRANCA;
             case ALUGUEIS_EM_TOLERANCIA -> SituacaoAluguel.EM_TOLERANCIA;
-            case CONTRATOS_VENCIDOS -> ContratosController.Recorte.VENCIDOS;
-            case CONTRATOS_VENCENDO -> ContratosController.Recorte.VENCENDO;
+            case CONTRATOS_VENCIDOS -> SituacaoContrato.VENCIDO;
+            case CONTRATOS_VENCENDO -> SituacaoContrato.VENCENDO;
             case IMOVEIS_VAGOS -> SituacaoImovel.VAGO;
         };
     }

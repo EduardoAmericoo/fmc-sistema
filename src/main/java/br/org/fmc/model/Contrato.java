@@ -1,6 +1,7 @@
 package br.org.fmc.model;
 
 import br.org.fmc.util.Formatos;
+import br.org.fmc.util.TextoBusca;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -100,6 +101,27 @@ public class Contrato {
                     && !vencimento.isAfter(encerramento.getDataSaida());
         }
         return status == StatusContrato.ATIVO && depoisDoInicio && antesDoFim;
+    }
+
+    /**
+     * Este contrato atende à busca da tela (BOARD-59)? A busca ignora maiúsculas e acentos.
+     * Busca vazia: todos atendem. Se parece um CPF (só números, pontos e traço), compara com o
+     * CPF do inquilino ou com os números do contrato. Senão, cada palavra digitada precisa
+     * aparecer no número do contrato, no imóvel (código, unidade ou endereço) ou no nome do inquilino.
+     */
+    public boolean atendeBusca(String busca) {
+        List<String> palavras = TextoBusca.palavras(busca);
+        if (palavras.isEmpty()) {
+            return true;
+        }
+        String digitos = TextoBusca.digitos(busca);
+        if (digitos.length() >= 3 && busca.trim().matches("[\\d.\\-\\s]+")) {
+            return inquilino.getCpf().getNumero().contains(digitos)
+                    || TextoBusca.digitos(numero).contains(digitos);
+        }
+        String texto = TextoBusca.normalizar(String.join(" ", numero, imovel.getCodigo(),
+                imovel.getUnidade() == null ? "" : imovel.getUnidade(), imovel.getEndereco(), inquilino.getNome()));
+        return palavras.stream().allMatch(texto::contains);
     }
 
     public boolean estaVigente(LocalDate hoje) {

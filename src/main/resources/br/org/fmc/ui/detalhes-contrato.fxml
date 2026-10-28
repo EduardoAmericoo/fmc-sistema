@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-59 · Janela "Detalhes do contrato", aberta ao clicar numa linha da tela Contratos.
+  Só para consulta: mostra tudo do contrato sem precisar procurar o papel.
+  Fica num arquivo próprio, como as janelas de prorrogar e encerrar, para a tela de Contratos
+  continuar pequena. As seções são montadas pelo DetalhesContratoController.
+  Os botões de ação (ex.: Prorrogar, BOARD-169) podem entrar no rodapé desta janela depois.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.DetalhesContratoController">
+    <VBox styleClass="janela" maxWidth="680" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label fx:id="titulo" styleClass="janela-titulo" wrapText="true"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Label fx:id="seloSituacao"/>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
+            <VBox fx:id="corpo" styleClass="janela-corpo" spacing="22"/>
+        </ScrollPane>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="botaoFechar" text="Fechar" onAction="#fechar" styleClass="botao-secundario"
+                    defaultButton="true"/>
+        </HBox>
+    </VBox>
+</StackPane>

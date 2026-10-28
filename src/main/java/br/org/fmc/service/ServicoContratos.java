@@ -10,6 +10,7 @@ import br.org.fmc.model.Fianca;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
+import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.MotivoEncerramento;
 import br.org.fmc.model.PrazoContrato;
@@ -99,6 +100,18 @@ public class ServicoContratos {
     public List<Contrato> listar() throws SQLException {
         Sessao.exigir(Acao.VER_CONTRATOS);
         return contratos.listarTodos();
+    }
+
+    /**
+     * Filtra uma lista já carregada, sem ir ao banco (BOARD-59): a tela usa isto para filtrar
+     * enquanto a pessoa digita. Situação nula = todas; busca vazia = sem busca.
+     */
+    public static List<Contrato> filtrar(List<Contrato> contratos, SituacaoContrato situacao, String busca,
+            LocalDate hoje) {
+        return contratos.stream()
+                .filter(c -> situacao == null || SituacaoContrato.de(c, hoje) == situacao)
+                .filter(c -> c.atendeBusca(busca))
+                .toList();
     }
 
     /**
