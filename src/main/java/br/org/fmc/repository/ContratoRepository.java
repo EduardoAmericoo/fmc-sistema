@@ -5,6 +5,7 @@ import br.org.fmc.model.Caucao;
 import br.org.fmc.model.Conjuge;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
+import br.org.fmc.model.Encerramento;
 import br.org.fmc.model.EstadoCivil;
 import br.org.fmc.model.Fianca;
 import br.org.fmc.model.Fiador;
@@ -12,8 +13,10 @@ import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.MotivoEncerramento;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.Prorrogacao;
+import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -207,6 +210,7 @@ public class ContratoRepository implements Repositorio<Contrato> {
         inquilinos.listarTodos().forEach(i -> porInquilino.put(i.getId(), i));
 
         Map<Long, List<Prorrogacao>> porContrato = prorrogacoesPorContrato();
+        Map<Long, Encerramento> encerrados = encerramentosPorContrato();
 
         String sql = "SELECT c.*, g.* FROM contrato c JOIN garantia g ON g.contrato_id = c.id "
                 + filtro + " ORDER BY c.numero";
@@ -222,6 +226,7 @@ public class ContratoRepository implements Repositorio<Contrato> {
                     // O término gravado já inclui as prorrogações (BOARD-169).
                     c.restaurarProrrogacoes(LocalDate.parse(rs.getString("data_termino")),
                             porContrato.getOrDefault(c.getId(), List.of()));
+                    c.restaurarEncerramento(encerrados.get(c.getId())); // null se está ativo (BOARD-174)
                     lista.add(c);
                 }
             }
@@ -265,6 +270,59 @@ public class ContratoRepository implements Repositorio<Contrato> {
                 throw e;
             }
         }
+    }
+
+    /**
+     * Grava o encerramento (BOARD-174) numa transação: o registro do encerramento, o contrato
+     * "Encerrado" e o imóvel "Vago" entram juntos, ou nada muda.
+     */
+    public void salvarEncerramento(Contrato contrato) throws SQLException {
+        Encerramento e = contrato.getEncerramento();
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try {
+                String sql = "INSERT INTO contrato_encerramento (contrato_id, data_saida, motivo, observacao, "
+                        + "registrado_em, feito_por) VALUES (?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement st = conexao.prepareStatement(sql)) {
+                    st.setLong(1, contrato.getId());
+                    st.setString(2, e.getDataSaida().toString());
+                    st.setString(3, e.getMotivo().name());
+                    st.setString(4, e.getObservacao());
+                    st.setString(5, e.getRegistradoEm().toString());
+                    st.setString(6, e.getFeitoPor());
+                    st.executeUpdate();
+                }
+                try (PreparedStatement st = conexao.prepareStatement("UPDATE contrato SET status = ? WHERE id = ?")) {
+                    st.setString(1, StatusContrato.ENCERRADO.name());
+                    st.setLong(2, contrato.getId());
+                    st.executeUpdate();
+                }
+                try (PreparedStatement st = conexao.prepareStatement("UPDATE imovel SET situacao = ? WHERE id = ?")) {
+                    st.setString(1, SituacaoImovel.VAGO.name());
+                    st.setLong(2, contrato.getImovel().getId());
+                    st.executeUpdate();
+                }
+                conexao.commit();
+            } catch (SQLException | RuntimeException erro) {
+                conexao.rollback();
+                throw erro;
+            }
+        }
+    }
+
+    /** Os encerramentos, por contrato. */
+    private Map<Long, Encerramento> encerramentosPorContrato() throws SQLException {
+        Map<Long, Encerramento> mapa = new HashMap<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement("SELECT * FROM contrato_encerramento");
+             ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                mapa.put(rs.getLong("contrato_id"), new Encerramento(LocalDate.parse(rs.getString("data_saida")),
+                        MotivoEncerramento.valueOf(rs.getString("motivo")), rs.getString("observacao"),
+                        LocalDate.parse(rs.getString("registrado_em")), rs.getString("feito_por")));
+            }
+        }
+        return mapa;
     }
 
     /** Todas as prorrogações, agrupadas por contrato e em ordem de data. */
