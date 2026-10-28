@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleObjectProperty;
@@ -224,7 +225,16 @@ public class ContratosController {
             return selo;
         }));
         colunaSituacao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        colunaSituacao.setCellFactory(c -> celula(ContratosController::seloSituacao));
+        // Prorrogar (BOARD-169): o botão fica ao lado do selo, só onde dá para prorrogar e para quem tem a permissão.
+        colunaSituacao.setCellFactory(c -> celula(ct -> {
+            Label selo = seloSituacao(ct);
+            if (!Sessao.pode(Acao.PRORROGAR_CONTRATO) || !servico.podeProrrogar(ct)) {
+                return selo;
+            }
+            HBox caixa = new HBox(6, selo, botaoProrrogar(ct));
+            caixa.setAlignment(Pos.CENTER_LEFT);
+            return caixa;
+        }));
 
         FontIcon icone = new FontIcon("fth-file-text");
         Label titulo = new Label("Nenhum contrato cadastrado ainda");
@@ -238,18 +248,41 @@ public class ContratosController {
         tabela.setPlaceholder(vazio);
     }
 
-    /** Ativo; ativo com o prazo já vencido (segue valendo, prorrogado); ou encerrado. */
+    /**
+     * Ativo; vencendo (nos próximos 60 dias); vencido (não gera aluguel até ser prorrogado); ou encerrado.
+     * Decisão do PO (27/10): contrato vencido não continua gerando aluguel sozinho.
+     */
     private static Label seloSituacao(Contrato c) {
         if (c.getStatus() == StatusContrato.ENCERRADO) {
             return selo("Encerrado", "selo-neutro");
         }
-        if (c.getDataTermino().isBefore(LocalDate.now())) {
-            Label selo = selo("Prorrogado", "selo-alerta");
+        long dias = ChronoUnit.DAYS.between(LocalDate.now(), c.getDataTermino());
+        if (dias < 0) {
+            Label selo = selo("Vencido", "selo-erro");
             selo.setTooltip(new Tooltip("O prazo venceu em " + Formatos.data(c.getDataTermino())
-                    + ", mas o contrato segue valendo (vencido e prorrogado)."));
+                    + ". Não gera aluguel até ser prorrogado."));
+            return selo;
+        }
+        if (dias <= RegrasNegocio.DIAS_AVISO_VENCIMENTO) {
+            Label selo = selo("Vencendo", "selo-alerta");
+            selo.setTooltip(new Tooltip((dias == 0 ? "Termina hoje" : "Termina em " + Formatos.data(c.getDataTermino())
+                    + (dias == 1 ? " (amanhã)" : " (daqui a " + dias + " dias)")) + ". Já pode ser prorrogado."));
             return selo;
         }
         return selo("Ativo", "selo-sucesso");
+    }
+
+    private Button botaoProrrogar(Contrato c) {
+        Button botao = new Button(null, new FontIcon("fth-refresh-cw"));
+        botao.getStyleClass().addAll("botao-icone", "botao-prorrogar");
+        botao.setAccessibleText("Prorrogar");
+        botao.setTooltip(new Tooltip("Prorrogar o contrato " + c.getNumero() + " por 12, 24 ou 36 meses"));
+        botao.setOnAction(e -> ProrrogarContratoController.abrir(c, servico, prorrogado -> {
+            carregarLista();
+            mostrarToast("Contrato " + prorrogado.getNumero() + " prorrogado até "
+                    + Formatos.data(prorrogado.getDataTermino()) + ".");
+        }));
+        return botao;
     }
 
     /** Botão "Novo contrato": carrega as opções e abre a janela vazia. */
@@ -400,7 +433,12 @@ public class ContratosController {
             tabela.getItems().setAll(servico.listar());
             int total = tabela.getItems().size();
             long ativos = tabela.getItems().stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).count();
-            contagem.setText(total == 1 ? "1 contrato cadastrado" : total + " contratos cadastrados, " + ativos + " ativos");
+            long vencidos = tabela.getItems().stream()
+                    .filter(c -> c.getStatus() == StatusContrato.ATIVO && c.getDataTermino().isBefore(LocalDate.now()))
+                    .count();
+            contagem.setText((total == 1 ? "1 contrato cadastrado" : total + " contratos cadastrados, " + ativos + " ativos")
+                    + (vencidos == 0 ? "" : " · " + vencidos + (vencidos == 1 ? " vencido" : " vencidos")
+                            + ", sem gerar aluguel até serem prorrogados"));
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {

@@ -737,3 +737,27 @@
     -fx-text-fill: -fmc-azul;
     -fx-border-color: transparent transparent -fmc-azul transparent;
 }
+
+/* ===================== Prorrogar contrato (BOARD-169) ===================== */
+
+/* Botão Prorrogar na linha da tabela: ícone azul, para chamar a atenção nos contratos vencidos ou vencendo */
+.botao-prorrogar .ikonli-font-icon {
+    -fx-icon-color: -fmc-azul;
+}
+
+.botao-prorrogar:hover {
+    -fx-background-color: -fmc-azul-claro;
+}
+
+/* Uma prorrogação no histórico */
+.item-historico {
+    -fx-alignment: center-left;
+    -fx-background-color: -fmc-fundo;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12 10 12;
+}
+
+.item-historico .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-suave;
+    -fx-icon-size: 16;
+}

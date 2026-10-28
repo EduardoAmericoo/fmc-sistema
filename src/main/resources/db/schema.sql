@@ -156,3 +156,16 @@ CREATE TABLE IF NOT EXISTS aluguel (
     data_pagamento TEXT,
     UNIQUE (contrato_id, competencia)
 );
+
+-- BOARD-169 · Prorrogações de contrato: contrato vencido não gera aluguel. Para continuar,
+-- ele é prorrogado por 12, 24 ou 36 meses a partir do término anterior.
+-- Cada prorrogação fica no histórico, e a data_termino da tabela contrato passa a ser o novo término.
+CREATE TABLE IF NOT EXISTS contrato_prorrogacao (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id      INTEGER NOT NULL REFERENCES contrato(id) ON DELETE CASCADE,
+    data             TEXT    NOT NULL,
+    termino_anterior TEXT    NOT NULL,
+    novo_termino     TEXT    NOT NULL,
+    prazo            TEXT    NOT NULL,
+    feita_por        TEXT    NOT NULL
+);
