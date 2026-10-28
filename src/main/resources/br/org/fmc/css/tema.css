@@ -761,3 +761,15 @@
     -fx-icon-color: -fmc-texto-suave;
     -fx-icon-size: 16;
 }
+
+/* Botões de ícone dentro da tabela de Contratos (Prorrogar, Encerrar): menores, para caber ao lado do selo */
+.botao-tabela {
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
+}
+
+.botao-tabela .ikonli-font-icon {
+    -fx-icon-size: 16;
+}

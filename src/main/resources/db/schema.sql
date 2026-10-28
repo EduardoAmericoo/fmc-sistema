@@ -169,3 +169,15 @@ CREATE TABLE IF NOT EXISTS contrato_prorrogacao (
     prazo            TEXT    NOT NULL,
     feita_por        TEXT    NOT NULL
 );
+
+-- BOARD-174 · Encerramento de contrato: o inquilino devolveu as chaves e saiu do imóvel.
+-- Um por contrato. Ao encerrar, o status do contrato vira ENCERRADO e o imóvel volta a VAGO.
+-- O contrato encerrado não é apagado: ele é o histórico (contratos e recibos).
+CREATE TABLE IF NOT EXISTS contrato_encerramento (
+    contrato_id   INTEGER PRIMARY KEY REFERENCES contrato(id) ON DELETE CASCADE,
+    data_saida    TEXT    NOT NULL,
+    motivo        TEXT    NOT NULL,
+    observacao    TEXT,
+    registrado_em TEXT    NOT NULL,
+    feito_por     TEXT    NOT NULL
+);

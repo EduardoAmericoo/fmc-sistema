@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-174 · Janela "Encerrar contrato", aberta pelo botão Encerrar de cada linha da tela Contratos.
+  Fica num arquivo próprio, como a de prorrogar, para a tela de Contratos (BOARD-59) continuar pequena.
+
+  Pede o dia em que as chaves foram devolvidas e o motivo, e avisa o que acontece ao encerrar.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.EncerrarContratoController">
+    <VBox styleClass="janela" maxWidth="580" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label fx:id="titulo" styleClass="janela-titulo" wrapText="true"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="janela-corpo" spacing="16">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- O que acontece ao encerrar -->
+            <HBox styleClass="resumo-calculado" spacing="10" alignment="TOP_LEFT">
+                <FontIcon iconLiteral="fth-info"/>
+                <Label fx:id="consequencias" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <HBox spacing="16">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Chaves devolvidas em *" labelFor="$campoSaida" styleClass="rotulo"/>
+                    <DatePicker fx:id="campoSaida" maxWidth="Infinity" styleClass="campo" promptText="dd/mm/aaaa"/>
+                    <Label fx:id="dicaSaida" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Motivo *" labelFor="$campoMotivo" styleClass="rotulo"/>
+                    <ComboBox fx:id="campoMotivo" maxWidth="Infinity" styleClass="campo" promptText="Escolha"/>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="6">
+                <Label fx:id="rotuloObservacao" text="Observação" labelFor="$campoObservacao" styleClass="rotulo"/>
+                <TextField fx:id="campoObservacao" styleClass="campo"
+                           promptText="Ex.: mudou de cidade; vistoria feita sem pendências"/>
+            </VBox>
+        </VBox>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Encerrar contrato" onAction="#confirmar" styleClass="botao-primario" defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-log-out"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

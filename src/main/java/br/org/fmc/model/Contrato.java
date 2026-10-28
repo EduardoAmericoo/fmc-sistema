@@ -33,6 +33,9 @@ public class Contrato {
     /** Histórico de prorrogações, da mais antiga para a mais recente (BOARD-169). */
     private final List<Prorrogacao> prorrogacoes = new ArrayList<>();
 
+    /** Preenchido quando o contrato é encerrado (BOARD-174). */
+    private Encerramento encerramento;
+
     public Contrato(Imovel imovel, Inquilino inquilino, Garantia garantia,
                     PrazoContrato prazo, LocalDate dataEntregaChaves) {
         this.imovel = Valida.obrigatorio(imovel, "o imóvel");
@@ -83,10 +86,19 @@ public class Contrato {
         return mes.atDay(Math.min(diaVencimento, mes.lengthOfMonth()));
     }
 
-    /** Este contrato tem aluguel vencendo no mês informado? */
+    /**
+     * Este contrato tem aluguel vencendo no mês informado?
+     * Ativo: do 1º vencimento até o término. Encerrado (BOARD-174): só até o dia da saída,
+     * para que os meses em que o inquilino ainda morava lá continuem sendo cobrados.
+     */
     public boolean cobreCompetencia(YearMonth mes) {
         boolean depoisDoInicio = !mes.isBefore(YearMonth.from(primeiroVencimento()));
-        boolean antesDoFim = !vencimentoDe(mes).isAfter(dataTermino);
+        LocalDate vencimento = vencimentoDe(mes);
+        boolean antesDoFim = !vencimento.isAfter(dataTermino);
+        if (status == StatusContrato.ENCERRADO) {
+            return encerramento != null && depoisDoInicio && antesDoFim
+                    && !vencimento.isAfter(encerramento.getDataSaida());
+        }
         return status == StatusContrato.ATIVO && depoisDoInicio && antesDoFim;
     }
 
@@ -94,10 +106,24 @@ public class Contrato {
         return status == StatusContrato.ATIVO && !hoje.isBefore(dataEntregaChaves);
     }
 
-    /** Encerra o contrato e libera o imóvel. */
-    public void encerrar() {
+    /**
+     * Encerra o contrato (BOARD-174): fica "Encerrado" e o imóvel volta a vago.
+     * Quem confere se pode encerrar é o ServicoContratos.
+     */
+    public void encerrar(Encerramento e) {
+        encerramento = Valida.obrigatorio(e, "o encerramento");
         status = StatusContrato.ENCERRADO;
         imovel.desocupar();
+    }
+
+    /** Dados do encerramento, ou null se o contrato está ativo. */
+    public Encerramento getEncerramento() {
+        return encerramento;
+    }
+
+    /** Usado pelo repositório ao carregar do banco. */
+    public void restaurarEncerramento(Encerramento e) {
+        encerramento = e;
     }
 
     public Long getId() {

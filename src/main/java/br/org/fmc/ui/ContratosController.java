@@ -225,14 +225,17 @@ public class ContratosController {
             return selo;
         }));
         colunaSituacao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        // Prorrogar (BOARD-169): o botão fica ao lado do selo, só onde dá para prorrogar e para quem tem a permissão.
+        // Os botões ficam ao lado do selo, só para quem tem a permissão:
+        // Prorrogar (BOARD-169) nos vencidos ou vencendo, e Encerrar (BOARD-174) em qualquer contrato ativo.
         colunaSituacao.setCellFactory(c -> celula(ct -> {
-            Label selo = seloSituacao(ct);
-            if (!Sessao.pode(Acao.PRORROGAR_CONTRATO) || !servico.podeProrrogar(ct)) {
-                return selo;
-            }
-            HBox caixa = new HBox(6, selo, botaoProrrogar(ct));
+            HBox caixa = new HBox(4, seloSituacao(ct));
             caixa.setAlignment(Pos.CENTER_LEFT);
+            if (Sessao.pode(Acao.PRORROGAR_CONTRATO) && servico.podeProrrogar(ct)) {
+                caixa.getChildren().add(botaoProrrogar(ct));
+            }
+            if (Sessao.pode(Acao.ENCERRAR_CONTRATO) && ct.getStatus() == StatusContrato.ATIVO) {
+                caixa.getChildren().add(botaoEncerrar(ct));
+            }
             return caixa;
         }));
 
@@ -254,7 +257,12 @@ public class ContratosController {
      */
     private static Label seloSituacao(Contrato c) {
         if (c.getStatus() == StatusContrato.ENCERRADO) {
-            return selo("Encerrado", "selo-neutro");
+            Label selo = selo("Encerrado", "selo-neutro");
+            if (c.getEncerramento() != null) {
+                selo.setTooltip(new Tooltip("Chaves devolvidas em " + Formatos.data(c.getEncerramento().getDataSaida())
+                        + ". " + c.getEncerramento().getMotivo() + "."));
+            }
+            return selo;
         }
         long dias = ChronoUnit.DAYS.between(LocalDate.now(), c.getDataTermino());
         if (dias < 0) {
@@ -274,13 +282,26 @@ public class ContratosController {
 
     private Button botaoProrrogar(Contrato c) {
         Button botao = new Button(null, new FontIcon("fth-refresh-cw"));
-        botao.getStyleClass().addAll("botao-icone", "botao-prorrogar");
+        botao.getStyleClass().addAll("botao-icone", "botao-tabela", "botao-prorrogar");
         botao.setAccessibleText("Prorrogar");
         botao.setTooltip(new Tooltip("Prorrogar o contrato " + c.getNumero() + " por 12, 24 ou 36 meses"));
         botao.setOnAction(e -> ProrrogarContratoController.abrir(c, servico, prorrogado -> {
             carregarLista();
             mostrarToast("Contrato " + prorrogado.getNumero() + " prorrogado até "
                     + Formatos.data(prorrogado.getDataTermino()) + ".");
+        }));
+        return botao;
+    }
+
+    private Button botaoEncerrar(Contrato c) {
+        Button botao = new Button(null, new FontIcon("fth-log-out"));
+        botao.getStyleClass().addAll("botao-icone", "botao-tabela");
+        botao.setAccessibleText("Encerrar");
+        botao.setTooltip(new Tooltip("Encerrar o contrato " + c.getNumero() + " (o inquilino devolveu as chaves)"));
+        botao.setOnAction(e -> EncerrarContratoController.abrir(c, servico, encerrado -> {
+            carregarLista();
+            mostrarToast("Contrato " + encerrado.getNumero() + " encerrado. O imóvel "
+                    + encerrado.getImovel().getCodigo() + " agora está vago.");
         }));
         return botao;
     }

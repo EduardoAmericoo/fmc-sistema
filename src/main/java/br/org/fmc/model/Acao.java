@@ -25,6 +25,7 @@ public enum Acao {
     VER_CONTRATOS("Contratos", "Ver a lista de contratos", null),
     CRIAR_CONTRATO("Contratos", "Cadastrar contrato novo", VER_CONTRATOS),
     PRORROGAR_CONTRATO("Contratos", "Prorrogar contrato vencido ou vencendo", VER_CONTRATOS),
+    ENCERRAR_CONTRATO("Contratos", "Encerrar contrato (saída do inquilino)", VER_CONTRATOS),
 
     VER_ALUGUEIS("Aluguéis", "Ver aluguéis e números financeiros", null),
     GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),

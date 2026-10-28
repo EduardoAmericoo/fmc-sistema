@@ -5,11 +5,13 @@ import br.org.fmc.model.Caucao;
 import br.org.fmc.model.Conjuge;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
+import br.org.fmc.model.Encerramento;
 import br.org.fmc.model.Fianca;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.MotivoEncerramento;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.Prorrogacao;
 import br.org.fmc.model.RegrasNegocio;
@@ -41,6 +43,8 @@ import java.util.stream.Collectors;
  *
  * Prorrogação (BOARD-169): contrato ativo que venceu ou vence nos próximos 60 dias ganha mais
  * 12, 24 ou 36 meses, contados do término atual. Contrato vencido não gera aluguel até ser prorrogado.
+ *
+ * Encerramento (BOARD-174): quando o inquilino devolve as chaves, o contrato é encerrado e o imóvel fica vago.
  */
 public class ServicoContratos {
 
@@ -143,6 +147,45 @@ public class ServicoContratos {
                     + Formatos.data(termino.minusDays(RegrasNegocio.DIAS_AVISO_VENCIMENTO)) + ".";
         }
         return null;
+    }
+
+    /**
+     * Encerra o contrato (BOARD-174): o inquilino devolveu as chaves. O contrato fica "Encerrado",
+     * o imóvel volta a "Vago" e o inquilino pode fazer outro contrato no futuro.
+     * Os aluguéis até o dia da saída continuam valendo (inclusive os que estão em aberto).
+     *
+     * @param dataSaida  dia em que as chaves foram devolvidas
+     * @param observacao opcional, mas obrigatória quando o motivo é "Outro"
+     * @return o contrato já encerrado
+     */
+    public Contrato encerrar(long contratoId, LocalDate dataSaida, MotivoEncerramento motivo, String observacao)
+            throws SQLException {
+        Sessao.exigir(Acao.ENCERRAR_CONTRATO);
+        Contrato contrato = contratos.buscarPorId(contratoId)
+                .orElseThrow(() -> new RegraNegocioException("Contrato não encontrado."));
+        if (contrato.getStatus() != StatusContrato.ATIVO) {
+            throw new RegraNegocioException("Este contrato já está encerrado.");
+        }
+        List<String> erros = new ArrayList<>();
+        if (dataSaida == null) {
+            erros.add("Informe a data em que as chaves foram devolvidas.");
+        } else if (dataSaida.isBefore(contrato.getDataEntregaChaves())) {
+            erros.add("A data de saída não pode ser antes do início do contrato ("
+                    + Formatos.data(contrato.getDataEntregaChaves()) + ").");
+        } else if (dataSaida.isAfter(hoje())) {
+            erros.add("A data de saída não pode ser no futuro: encerre o contrato quando as chaves forem devolvidas.");
+        }
+        if (motivo == null) {
+            erros.add("Escolha o motivo do encerramento.");
+        } else if (motivo == MotivoEncerramento.OUTRO && !preenchido(observacao)) {
+            erros.add("Explique o motivo na observação.");
+        }
+        if (!erros.isEmpty()) {
+            throw new RegraNegocioException(erros);
+        }
+        contrato.encerrar(new Encerramento(dataSaida, motivo, observacao, hoje(), Sessao.usuario().getNome()));
+        contratos.salvarEncerramento(contrato); // encerramento + contrato encerrado + imóvel vago, tudo junto
+        return contrato;
     }
 
     /** Imóveis que podem receber contrato agora (vagos), para escolher no formulário. */
