@@ -187,14 +187,14 @@ public class ServicoPainel {
                             + Formatos.moeda(Valor.de(emAtraso).total()) + " sem encargos.",
                     Tipo.ALUGUEIS_EM_ATRASO));
         }
-        // Mais de um mês em atraso no mesmo contrato: hora de cobrar (e avisar o fiador).
+        // 2 ou mais aluguéis em atraso no mesmo contrato: hora de cobrar (e avisar o fiador).
         // A mesma regra filtra a tela de Aluguéis quando a pessoa clica em "Abrir".
-        int paraCobranca = (int) ServicoAlugueis.deInquilinosComMaisDeUmMesEmAtraso(emAtraso, hoje).stream()
+        int paraCobranca = (int) ServicoAlugueis.deInquilinosComDoisOuMaisAtrasados(emAtraso, hoje).stream()
                 .map(a -> a.getContrato().getId()).distinct().count();
         if (paraCobranca > 0) {
             pendencias.add(new Pendencia(Gravidade.ALTA, paraCobranca,
-                    plural(paraCobranca, "Inquilino com mais de 1 mês em atraso",
-                            "Inquilinos com mais de 1 mês em atraso"),
+                    plural(paraCobranca, "Inquilino com 2 ou mais aluguéis atrasados",
+                            "Inquilinos com 2 ou mais aluguéis atrasados"),
                     "Encaminhar para cobrança e avisar o fiador.", Tipo.INQUILINOS_PARA_COBRANCA));
         }
         List<Aluguel> tolerancia = filtrar(emAberto, a -> a.getSituacao(hoje) == SituacaoAluguel.EM_TOLERANCIA);

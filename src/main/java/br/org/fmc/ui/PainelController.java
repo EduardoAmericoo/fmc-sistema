@@ -236,7 +236,7 @@ public class PainelController {
     private static Object filtroDoDestino(Tipo tipo) {
         return switch (tipo) {
             case ALUGUEIS_EM_ATRASO -> SituacaoAluguel.EM_ATRASO;
-            case INQUILINOS_PARA_COBRANCA -> AlugueisController.Recorte.INQUILINOS_COM_MAIS_DE_UM_MES_EM_ATRASO;
+            case INQUILINOS_PARA_COBRANCA -> AlugueisController.Recorte.INQUILINOS_PARA_COBRANCA;
             case ALUGUEIS_EM_TOLERANCIA -> SituacaoAluguel.EM_TOLERANCIA;
             case CONTRATOS_VENCIDOS -> ContratosController.Recorte.VENCIDOS;
             case CONTRATOS_VENCENDO -> ContratosController.Recorte.VENCENDO;

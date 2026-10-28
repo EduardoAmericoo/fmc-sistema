@@ -2,6 +2,7 @@ package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
+import br.org.fmc.model.Contrato;
 import br.org.fmc.model.SituacaoAluguel;
 import br.org.fmc.repository.AluguelRepository;
 import br.org.fmc.util.TextoBusca;
@@ -11,6 +12,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -99,15 +101,53 @@ public class ServicoAlugueis {
     }
 
     /**
-     * Os aluguéis em atraso dos inquilinos com mais de 1 mês em atraso (2 ou mais aluguéis em
-     * atraso no mesmo contrato): é quem precisa ir para cobrança. O Painel conta esses inquilinos
-     * e a tela de Aluguéis mostra esses aluguéis, pela mesma regra.
+     * Uma linha da lista de cobrança: um inquilino (contrato) e todos os aluguéis dele em atraso,
+     * do mais antigo para o mais recente.
      */
-    public static List<Aluguel> deInquilinosComMaisDeUmMesEmAtraso(List<Aluguel> lista, LocalDate hoje) {
+    public record Cobranca(Contrato contrato, List<Aluguel> alugueis) {
+
+        /** O aluguel em atraso mais antigo: é ele que diz há quanto tempo o inquilino não paga. */
+        public Aluguel maisAntigo() {
+            return alugueis.get(0);
+        }
+
+        /** Soma dos aluguéis em atraso, sem multa e juros. */
+        public BigDecimal base() {
+            return alugueis.stream().map(Aluguel::base).reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        /** Quanto o inquilino deve se pagar hoje: os aluguéis em atraso com multa, juros e correção. */
+        public BigDecimal devidoHoje(LocalDate hoje) {
+            return alugueis.stream().map(a -> a.base().add(a.encargosEm(hoje).total()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+    }
+
+    /**
+     * Os aluguéis em atraso dos inquilinos com 2 ou mais aluguéis atrasados (no mesmo contrato):
+     * é quem precisa ir para cobrança. O Painel conta esses inquilinos e a tela de Aluguéis
+     * mostra a lista de cobrança deles, pela mesma regra.
+     */
+    public static List<Aluguel> deInquilinosComDoisOuMaisAtrasados(List<Aluguel> lista, LocalDate hoje) {
         List<Aluguel> emAtraso = lista.stream().filter(a -> a.getSituacao(hoje) == SituacaoAluguel.EM_ATRASO).toList();
         Map<Long, Long> porContrato = emAtraso.stream()
                 .collect(Collectors.groupingBy(a -> a.getContrato().getId(), Collectors.counting()));
         return emAtraso.stream().filter(a -> porContrato.get(a.getContrato().getId()) > 1).toList();
+    }
+
+    /**
+     * A lista de cobrança: uma linha por inquilino com 2 ou mais aluguéis atrasados, de quem
+     * está há mais tempo sem pagar para quem está há menos.
+     */
+    public static List<Cobranca> listaDeCobranca(List<Aluguel> lista, LocalDate hoje) {
+        Map<Long, List<Aluguel>> porContrato = deInquilinosComDoisOuMaisAtrasados(lista, hoje).stream()
+                .collect(Collectors.groupingBy(a -> a.getContrato().getId()));
+        return porContrato.values().stream()
+                .map(doContrato -> new Cobranca(doContrato.get(0).getContrato(), doContrato.stream()
+                        .sorted(Comparator.comparing(Aluguel::getVencimento)).toList()))
+                .sorted(Comparator.comparing((Cobranca c) -> c.maisAntigo().getVencimento())
+                        .thenComparing(c -> c.contrato().getImovel().getCodigo()))
+                .toList();
     }
 
     /** Quantos aluguéis há em cada situação e quanto somam, para o resumo no topo da tela. */

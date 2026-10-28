@@ -157,7 +157,7 @@ class PainelTest {
 
         assertEquals(List.of(
                 "ALTA 3 Aluguéis em atraso",
-                "ALTA 1 Inquilino com mais de 1 mês em atraso",
+                "ALTA 1 Inquilino com 2 ou mais aluguéis atrasados",
                 "MEDIA 1 Aluguel em tolerância",
                 "ALTA 1 Contrato vencido",
                 "MEDIA 1 Contrato vence nos próximos 60 dias",
@@ -180,16 +180,22 @@ class PainelTest {
     }
 
     @Test
-    void maisDeUmMesEmAtrasoMostraSoOsAtrasosDessesInquilinos() throws Exception {
-        // No Painel: 1 inquilino (Maria, agosto e setembro). Ana tem só 1 mês em atraso e fica de fora.
+    void listaDeCobrancaTemUmaLinhaPorInquilinoComDoisOuMaisAtrasados() throws Exception {
+        // No Painel: 1 inquilino (Maria, agosto e setembro). Ana tem só 1 aluguel atrasado e fica de fora.
         Pendencia cobranca = servico.montar().pendencias().get(1);
         assertEquals(1, cobranca.quantidade());
 
-        // Na tela de Aluguéis, pela mesma regra: só os 2 aluguéis em atraso de Maria.
-        List<Aluguel> lista = ServicoAlugueis.deInquilinosComMaisDeUmMesEmAtraso(
+        // Na tela de Aluguéis, pela mesma regra: 1 linha, a de Maria, com os 2 aluguéis dela.
+        List<ServicoAlugueis.Cobranca> lista = ServicoAlugueis.listaDeCobranca(
                 new ServicoAlugueis().listarEmAberto(), HOJE);
-        assertEquals(List.of("Maria Teste 2026-08-09", "Maria Teste 2026-09-09"),
-                lista.stream().map(a -> a.getContrato().getInquilino().getNome() + " " + a.getVencimento()).toList());
+        assertEquals(1, lista.size());
+        ServicoAlugueis.Cobranca maria = lista.get(0);
+        assertEquals("Maria Teste", maria.contrato().getInquilino().getNome());
+        assertEquals(List.of("2026-08-09", "2026-09-09"),
+                maria.alugueis().stream().map(a -> a.getVencimento().toString()).toList());
+        assertEquals(LocalDate.of(2026, 8, 9), maria.maisAntigo().getVencimento()); // há 76 dias
+        assertEquals(0, reais("2140.00").compareTo(maria.base())); // 2 x 1.070
+        assertTrue(maria.devidoHoje(HOJE).compareTo(maria.base()) > 0); // com multa e juros fica maior
     }
 
     @Test
