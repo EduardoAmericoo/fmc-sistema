@@ -4,10 +4,12 @@ import br.org.fmc.model.Acao;
 import br.org.fmc.model.Conjuge;
 import br.org.fmc.model.Cpf;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.InquilinoRepository;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,10 +19,14 @@ import java.util.Optional;
  *
  * Regras: CPF válido pelos dígitos verificadores, sem dois inquilinos com o
  * mesmo CPF. Criar, editar e ver dependem cada um da sua permissão (BOARD-41).
+ *
+ * Inquilino que não aluga mais é ARQUIVADO, nunca apagado: o histórico de contratos,
+ * aluguéis e recibos precisa continuar com o nome dele. Dá para reativar.
  */
 public class ServicoInquilinos {
 
     private final InquilinoRepository inquilinos;
+    private final ContratoRepository contratos = new ContratoRepository();
 
     public ServicoInquilinos() {
         this(new InquilinoRepository());
@@ -67,10 +73,50 @@ public class ServicoInquilinos {
 
     /**
      * Filtra uma lista já carregada, sem ir ao banco: a tela usa isto para filtrar
-     * enquanto a pessoa digita.
+     * enquanto a pessoa digita. Deixa de fora os arquivados.
      */
     public static List<Inquilino> filtrar(List<Inquilino> inquilinos, String busca) {
-        return inquilinos.stream().filter(i -> i.atendeBusca(busca)).toList();
+        return filtrar(inquilinos, busca, false);
+    }
+
+    /** Filtra pela busca e mostra só os arquivados (arquivados = true) ou só os que não estão. */
+    public static List<Inquilino> filtrar(List<Inquilino> inquilinos, String busca, boolean arquivados) {
+        return inquilinos.stream().filter(i -> i.estaArquivado() == arquivados && i.atendeBusca(busca)).toList();
+    }
+
+    /**
+     * Arquiva o inquilino (ex.: saiu do imóvel e não vai alugar de novo): some da lista do dia a dia
+     * e do formulário de contrato, mas o cadastro e o histórico ficam guardados.
+     * Não dá para arquivar quem tem contrato ativo.
+     *
+     * @param motivo opcional, ex.: "Mudou de cidade"
+     */
+    public Inquilino arquivar(long id, String motivo) throws SQLException {
+        Sessao.exigir(Acao.ARQUIVAR_INQUILINO);
+        Inquilino inquilino = buscarPorId(id);
+        if (inquilino.estaArquivado()) {
+            throw new RegraNegocioException(inquilino.getNome() + " já está arquivado.");
+        }
+        if (contratos.existeAtivoDoInquilino(id)) {
+            throw new RegraNegocioException(inquilino.getNome()
+                    + " tem contrato ativo. Encerre o contrato na tela Contratos antes de arquivar.");
+        }
+        inquilino.arquivar(LocalDate.now(), motivo);
+        inquilinos.salvarArquivamento(inquilino);
+        return inquilino;
+    }
+
+    /** Traz um inquilino arquivado de volta para a lista do dia a dia (ex.: vai alugar de novo). */
+    public Inquilino reativar(long id) throws SQLException {
+        Sessao.exigir(Acao.ARQUIVAR_INQUILINO);
+        Inquilino inquilino = buscarPorId(id);
+        inquilino.reativar();
+        inquilinos.salvarArquivamento(inquilino);
+        return inquilino;
+    }
+
+    private Inquilino buscarPorId(long id) throws SQLException {
+        return inquilinos.buscarPorId(id).orElseThrow(() -> new RegraNegocioException("Inquilino não encontrado."));
     }
 
     private Inquilino salvar(Long id, DadosInquilino d) throws SQLException {
@@ -89,7 +135,9 @@ public class ServicoInquilinos {
             Optional<Inquilino> mesmoCpf = inquilinos.buscarPorCpf(cpf);
             if (mesmoCpf.isPresent() && !mesmoCpf.get().getId().equals(id)) {
                 erros.add("Este CPF já está cadastrado para " + mesmoCpf.get().getNome()
-                        + ". Para mudar os dados, clique no nome na lista.");
+                        + (mesmoCpf.get().estaArquivado()
+                                ? ", que está arquivado. Marque \"Ver arquivados\" e reative o cadastro."
+                                : ". Para mudar os dados, clique no nome na lista."));
             }
         }
         if (d.email() != null && !d.email().isBlank() && !d.email().trim().matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {

@@ -194,14 +194,15 @@ public class ServicoContratos {
         return imoveis.listarTodos().stream().filter(Imovel::estaDisponivel).toList();
     }
 
-    /** Inquilinos sem contrato ativo, para escolher no formulário. */
+    /** Inquilinos sem contrato ativo e não arquivados, para escolher no formulário. */
     public List<Inquilino> inquilinosSemContrato() throws SQLException {
         Sessao.exigir(Acao.CRIAR_CONTRATO);
         Set<Long> comContrato = contratos.listarTodos().stream()
                 .filter(c -> c.getStatus() == StatusContrato.ATIVO)
                 .map(c -> c.getInquilino().getId())
                 .collect(Collectors.toSet());
-        return inquilinos.listarTodos().stream().filter(i -> !comContrato.contains(i.getId())).toList();
+        return inquilinos.listarTodos().stream()
+                .filter(i -> !i.estaArquivado() && !comContrato.contains(i.getId())).toList();
     }
 
     private Imovel buscarImovel(Long id, List<String> erros) throws SQLException {
@@ -231,6 +232,8 @@ public class ServicoContratos {
         Inquilino inquilino = inquilinos.buscarPorId(id).orElse(null);
         if (inquilino == null) {
             erros.add("Inquilino não encontrado.");
+        } else if (inquilino.estaArquivado()) {
+            erros.add(inquilino.getNome() + " está arquivado: reative o cadastro na tela Inquilinos antes de fazer contrato.");
         } else if (contratos.existeAtivoDoInquilino(id)) {
             erros.add(inquilino.getNome() + " já tem um contrato ativo.");
         }
