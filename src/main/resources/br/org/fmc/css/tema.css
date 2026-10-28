@@ -773,3 +773,186 @@
 .botao-tabela .ikonli-font-icon {
     -fx-icon-size: 16;
 }
+
+/* ===================== Painel (BOARD-40 e BOARD-61) ===================== */
+
+/* Cartão de número (KpiCard do design system) */
+.kpi {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 18 20 18 20;
+}
+
+.kpi-icone {
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
+    -fx-background-color: -fmc-fundo-afundado;
+    -fx-border-color: -fmc-borda;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+}
+
+.kpi-icone .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-corpo;
+    -fx-icon-size: 15;
+}
+
+.kpi-rotulo {
+    -fx-text-fill: -fmc-texto-corpo;
+    -fx-font-weight: 600;
+}
+
+.kpi-valor {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.kpi-meta {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-size: 13px;
+}
+
+.kpi-barra {
+    -fx-background-color: #E9ECEF;
+    -fx-background-radius: 999;
+    -fx-min-height: 6;
+    -fx-max-height: 6;
+}
+
+.kpi-barra-preenchida {
+    -fx-background-color: -fmc-azul;
+    -fx-background-radius: 999;
+}
+
+/* Cartão principal (recebido no mês): azul escuro, como no design system */
+.kpi-principal {
+    -fx-background-color: -fmc-azul-mais-escuro;
+    -fx-border-color: -fmc-azul-mais-escuro;
+}
+
+.kpi-principal .kpi-rotulo,
+.kpi-principal .kpi-meta {
+    -fx-text-fill: -fmc-azul-100;
+}
+
+.kpi-principal .kpi-valor {
+    -fx-text-fill: white;
+}
+
+.kpi-principal .kpi-icone {
+    -fx-background-color: -fmc-azul-escuro;
+    -fx-border-color: -fmc-azul-medio;
+}
+
+.kpi-principal .kpi-icone .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+.kpi-principal .kpi-barra {
+    -fx-background-color: -fmc-azul-escuro;
+}
+
+.kpi-principal .kpi-barra-preenchida {
+    -fx-background-color: #7FB2E5;
+}
+
+/* Cartão de atraso: valor e ícone em vermelho */
+.kpi-perigo .kpi-valor {
+    -fx-text-fill: -fmc-erro;
+}
+
+.kpi-perigo .kpi-icone {
+    -fx-background-color: -fmc-erro-fundo;
+    -fx-border-color: -fmc-erro-borda;
+}
+
+.kpi-perigo .kpi-icone .ikonli-font-icon {
+    -fx-icon-color: -fmc-erro;
+}
+
+/* Cartões de baixo: "Precisa de atenção" e "Aluguéis em atraso" */
+.cartao-painel {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16 20 8 20;
+    -fx-spacing: 8;
+}
+
+.cartao-painel-titulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+/* Um item de "Precisa de atenção" (AttentionList do design system) */
+.atencao-item {
+    -fx-padding: 14 4 14 0;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}
+
+.atencao-numero {
+    -fx-min-width: 52;
+    -fx-min-height: 44;
+    -fx-max-width: 52;
+    -fx-max-height: 44;
+    -fx-alignment: center;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.atencao-alta {
+    -fx-background-color: -fmc-erro;
+    -fx-text-fill: white;
+}
+
+.atencao-media {
+    -fx-background-color: -fmc-alerta-fundo;
+    -fx-border-color: #F0D3A8;
+    -fx-text-fill: -fmc-alerta;
+}
+
+.atencao-info {
+    -fx-background-color: -fmc-azul-claro;
+    -fx-border-color: -fmc-azul-100;
+    -fx-text-fill: -fmc-azul;
+}
+
+.atencao-titulo {
+    -fx-font-weight: 600;
+    -fx-font-size: 15px;
+    -fx-text-fill: -fmc-texto;
+}
+
+.atencao-detalhe {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.atencao-ok {
+    -fx-icon-color: -fmc-sucesso;
+}
+
+/* Botão secundário menor (ex.: "Abrir" nas pendências) */
+.botao-pequeno {
+    -fx-pref-height: 32;
+    -fx-min-height: 32;
+    -fx-padding: 0 10 0 12;
+    -fx-font-size: 13px;
+    -fx-graphic-text-gap: 4;
+}
+
+.botao-pequeno .ikonli-font-icon {
+    -fx-icon-size: 14;
+    -fx-icon-color: -fmc-texto-corpo;
+}

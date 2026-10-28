@@ -5,6 +5,7 @@ import br.org.fmc.service.Sessao;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -39,6 +40,8 @@ public final class Navegador {
 
     private static Stage palco;
     private static BorderPane janela;
+    /** Abre uma tela pelo menu lateral (marca o item); quem passa é a tela principal. */
+    private static Consumer<String> menu;
 
     /**
      * Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver).
@@ -119,9 +122,25 @@ public final class Navegador {
         camadas.getChildren().remove(veu);
     }
 
-    /** Chamado uma vez pela tela principal, para dizer onde as telas aparecem. */
-    static void configurar(BorderPane janelaPrincipal) {
+    /**
+     * Chamado uma vez pela tela principal, para dizer onde as telas aparecem e como abrir
+     * uma tela "pelo menu" (marcando o item do menu lateral).
+     */
+    static void configurar(BorderPane janelaPrincipal, Consumer<String> abrirPeloMenu) {
         janela = janelaPrincipal;
+        menu = abrirPeloMenu;
+    }
+
+    /**
+     * Abre outra tela como se a pessoa tivesse clicado no menu (ex.: o botão "Abrir" das
+     * pendências do Painel). O item do menu lateral acompanha.
+     */
+    public static void irPara(Tela tela) {
+        if (menu != null) {
+            menu.accept(tela.getArquivo());
+        } else {
+            abrir(tela.getArquivo());
+        }
     }
 
     /** Abre a tela pelo nome (ex.: "imoveis"). */

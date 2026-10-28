@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-40 e BOARD-61 · Tela "Painel", a primeira depois do login.
+  Segue a tela "Visão geral" do design system (ui_kits/gestao/Overview.jsx):
+  1. cabeçalho com a data de hoje e o atalho para Aluguéis;
+  2. cartões com os números do mês (recebido, em atraso, a receber e ocupação);
+  3. embaixo, à esquerda, "Precisa de atenção" e, à direita, os aluguéis em atraso,
+     do mais antigo para o mais recente.
+  Os cartões e a lista de atenção são montados pelo PainelController.
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.PainelController">
+
+    <VBox styleClass="conteudo" spacing="24">
+        <HBox alignment="BOTTOM_LEFT" spacing="24">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Painel" styleClass="titulo"/>
+                <Label fx:id="dataDeHoje" styleClass="texto"/>
+            </VBox>
+            <Button fx:id="botaoAlugueis" text="Ver aluguéis" onAction="#verAlugueis" styleClass="botao-primario">
+                <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
+            </Button>
+        </HBox>
+
+        <!-- Números do mês -->
+        <HBox fx:id="cartoes" spacing="16"/>
+
+        <HBox spacing="16" VBox.vgrow="ALWAYS">
+            <!-- Precisa de atenção -->
+            <VBox styleClass="cartao-painel" HBox.hgrow="ALWAYS" prefWidth="420" minWidth="320">
+                <Label text="Precisa de atenção" styleClass="cartao-painel-titulo"/>
+                <ScrollPane fitToWidth="true" styleClass="rolagem" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="listaAtencao"/>
+                </ScrollPane>
+            </VBox>
+
+            <!-- Aluguéis em atraso, do mais antigo para o mais recente -->
+            <VBox fx:id="cartaoAtrasos" styleClass="cartao-painel" HBox.hgrow="ALWAYS" prefWidth="520" minWidth="360">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Aluguéis em atraso" styleClass="cartao-painel-titulo" HBox.hgrow="ALWAYS"
+                           maxWidth="Infinity"/>
+                    <Label fx:id="contagemAtrasos" styleClass="texto"/>
+                </HBox>
+                <TableView fx:id="tabelaAtrasos" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colunaInquilino" text="Inquilino e imóvel" prefWidth="220" minWidth="150"/>
+                        <TableColumn fx:id="colunaVencimento" text="Venceu em" prefWidth="115" minWidth="110"/>
+                        <TableColumn fx:id="colunaValor" text="Valor hoje" prefWidth="145" minWidth="140"
+                                     styleClass="coluna-numero"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+                    </columnResizePolicy>
+                </TableView>
+            </VBox>
+        </HBox>
+    </VBox>
+</StackPane>
