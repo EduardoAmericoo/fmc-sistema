@@ -180,6 +180,19 @@ class PainelTest {
     }
 
     @Test
+    void maisDeUmMesEmAtrasoMostraSoOsAtrasosDessesInquilinos() throws Exception {
+        // No Painel: 1 inquilino (Maria, agosto e setembro). Ana tem só 1 mês em atraso e fica de fora.
+        Pendencia cobranca = servico.montar().pendencias().get(1);
+        assertEquals(1, cobranca.quantidade());
+
+        // Na tela de Aluguéis, pela mesma regra: só os 2 aluguéis em atraso de Maria.
+        List<Aluguel> lista = ServicoAlugueis.deInquilinosComMaisDeUmMesEmAtraso(
+                new ServicoAlugueis().listarEmAberto(), HOJE);
+        assertEquals(List.of("Maria Teste 2026-08-09", "Maria Teste 2026-09-09"),
+                lista.stream().map(a -> a.getContrato().getInquilino().getNome() + " " + a.getVencimento()).toList());
+    }
+
+    @Test
     void ocupacaoContaSoImoveisNaoArquivados() throws Exception {
         Imovel arquivado = novoImovel("IM-005", "900,00");
         new ServicoImoveis().arquivar(arquivado.getId(), "Vendido");

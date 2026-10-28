@@ -22,9 +22,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * O Painel, primeira tela depois do login: os números do mês (BOARD-40) e o que precisa
@@ -190,9 +188,9 @@ public class ServicoPainel {
                     Tipo.ALUGUEIS_EM_ATRASO));
         }
         // Mais de um mês em atraso no mesmo contrato: hora de cobrar (e avisar o fiador).
-        Map<Long, Long> atrasosPorContrato = emAtraso.stream()
-                .collect(Collectors.groupingBy(a -> a.getContrato().getId(), Collectors.counting()));
-        int paraCobranca = (int) atrasosPorContrato.values().stream().filter(n -> n > 1).count();
+        // A mesma regra filtra a tela de Aluguéis quando a pessoa clica em "Abrir".
+        int paraCobranca = (int) ServicoAlugueis.deInquilinosComMaisDeUmMesEmAtraso(emAtraso, hoje).stream()
+                .map(a -> a.getContrato().getId()).distinct().count();
         if (paraCobranca > 0) {
             pendencias.add(new Pendencia(Gravidade.ALTA, paraCobranca,
                     plural(paraCobranca, "Inquilino com mais de 1 mês em atraso",

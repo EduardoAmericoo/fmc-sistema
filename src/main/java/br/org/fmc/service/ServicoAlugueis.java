@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Lista de aluguéis com situação e filtros (BOARD-38).
@@ -95,6 +96,18 @@ public class ServicoAlugueis {
                 || TextoBusca.normalizar(a.getContrato().getImovel().getUnidade()).contains(termo)
                 || TextoBusca.normalizar(a.getContrato().getInquilino().getNome()).contains(termo)
                 || TextoBusca.normalizar(a.getContrato().getNumero()).contains(termo);
+    }
+
+    /**
+     * Os aluguéis em atraso dos inquilinos com mais de 1 mês em atraso (2 ou mais aluguéis em
+     * atraso no mesmo contrato): é quem precisa ir para cobrança. O Painel conta esses inquilinos
+     * e a tela de Aluguéis mostra esses aluguéis, pela mesma regra.
+     */
+    public static List<Aluguel> deInquilinosComMaisDeUmMesEmAtraso(List<Aluguel> lista, LocalDate hoje) {
+        List<Aluguel> emAtraso = lista.stream().filter(a -> a.getSituacao(hoje) == SituacaoAluguel.EM_ATRASO).toList();
+        Map<Long, Long> porContrato = emAtraso.stream()
+                .collect(Collectors.groupingBy(a -> a.getContrato().getId(), Collectors.counting()));
+        return emAtraso.stream().filter(a -> porContrato.get(a.getContrato().getId()) > 1).toList();
     }
 
     /** Quantos aluguéis há em cada situação e quanto somam, para o resumo no topo da tela. */

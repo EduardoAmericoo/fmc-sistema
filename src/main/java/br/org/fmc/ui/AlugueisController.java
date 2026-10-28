@@ -27,6 +27,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -46,7 +47,16 @@ public class AlugueisController {
      */
     private static final YearMonth TODOS_EM_ABERTO = YearMonth.of(1, 1);
 
+    /** Recortes que o Painel pede ao abrir esta tela, além das abas por situação. */
+    public enum Recorte {
+        /** Só os aluguéis em atraso de quem tem 2 ou mais meses em atraso (para cobrança). */
+        INQUILINOS_COM_MAIS_DE_UM_MES_EM_ATRASO
+    }
+
     private final ServicoAlugueis servico = new ServicoAlugueis();
+
+    /** O recorte em uso, ou null. */
+    private Recorte recorte;
 
     /** Todos os aluguéis do mês escolhido; a tabela mostra só os que passam nos filtros. */
     private List<Aluguel> doMes = List.of();
@@ -56,6 +66,10 @@ public class AlugueisController {
 
     @FXML
     private Label contagem;
+    @FXML
+    private HBox faixaRecorte;
+    @FXML
+    private Label textoRecorte;
     @FXML
     private ComboBox<YearMonth> campoMes;
     @FXML
@@ -130,9 +144,14 @@ public class AlugueisController {
             campoMes.getItems().setAll(meses);
             campoMes.getItems().add(0, TODOS_EM_ABERTO);
             // Vindo do Painel (ex.: "Aluguéis em atraso"): abre na aba pedida, com todos os meses em aberto.
-            if (Navegador.filtroRecebido() instanceof SituacaoAluguel pedida) {
+            Object filtro = Navegador.filtroRecebido();
+            if (filtro instanceof SituacaoAluguel pedida) {
                 grupoSituacao.getToggles().stream().filter(aba -> aba.getUserData() == pedida)
                         .findFirst().ifPresent(grupoSituacao::selectToggle);
+                campoMes.setValue(TODOS_EM_ABERTO);
+            } else if (filtro instanceof Recorte pedido) {
+                recorte = pedido;
+                grupoSituacao.selectToggle(abaAtraso);
                 campoMes.setValue(TODOS_EM_ABERTO);
             } else {
                 campoMes.setValue(YearMonth.from(hoje)); // abre no mês atual
@@ -187,6 +206,9 @@ public class AlugueisController {
             return;
         }
         try {
+            if (!mes.equals(TODOS_EM_ABERTO)) {
+                recorte = null; // o recorte do Painel vale para todos os meses em aberto
+            }
             doMes = mes.equals(TODOS_EM_ABERTO) ? servico.listarEmAberto() : servico.listarDoMes(mes);
             aplicarFiltros();
         } catch (RegraNegocioException e) {
@@ -203,8 +225,12 @@ public class AlugueisController {
             return;
         }
         String busca = campoBusca.getText();
+        // Recorte pedido pelo Painel: só os aluguéis em atraso de quem tem mais de 1 mês em atraso.
+        List<Aluguel> base = recorte == null ? doMes
+                : ServicoAlugueis.deInquilinosComMaisDeUmMesEmAtraso(doMes, hoje);
+        mostrarFaixa(base);
         // As contagens das abas respeitam a busca, para a pessoa ver quantos há em cada situação.
-        List<Aluguel> daBusca = ServicoAlugueis.filtrar(doMes, null, busca, hoje);
+        List<Aluguel> daBusca = ServicoAlugueis.filtrar(base, null, busca, hoje);
         Map<SituacaoAluguel, ServicoAlugueis.Total> totais = ServicoAlugueis.totais(daBusca, hoje);
         abaAtraso.setText("Em atraso · " + totais.get(SituacaoAluguel.EM_ATRASO).quantidade());
         abaTolerancia.setText("Em tolerância · " + totais.get(SituacaoAluguel.EM_TOLERANCIA).quantidade());
@@ -213,7 +239,7 @@ public class AlugueisController {
         abaTodos.setText("Todos · " + daBusca.size());
 
         SituacaoAluguel situacao = (SituacaoAluguel) grupoSituacao.getSelectedToggle().getUserData();
-        tabela.getItems().setAll(ServicoAlugueis.filtrar(doMes, situacao, busca, hoje));
+        tabela.getItems().setAll(ServicoAlugueis.filtrar(base, situacao, busca, hoje));
 
         // Resumo do mês embaixo do título: quantos aluguéis, quanto já entrou e quanto falta.
         Map<SituacaoAluguel, ServicoAlugueis.Total> doMesTodo = ServicoAlugueis.totais(doMes, hoje);
@@ -241,8 +267,27 @@ public class AlugueisController {
                         filtrando ? "Escolha outra aba ou clique em \"Limpar filtros\"." : ""));
     }
 
+    /** A faixa azul acima da tabela, que explica o recorte vindo do Painel. */
+    private void mostrarFaixa(List<Aluguel> base) {
+        faixaRecorte.setVisible(recorte != null);
+        faixaRecorte.setManaged(recorte != null);
+        if (recorte != null) {
+            long inquilinos = base.stream().map(a -> a.getContrato().getId()).distinct().count();
+            textoRecorte.setText("Mostrando só os aluguéis em atraso dos " + inquilinos
+                    + " inquilinos com mais de 1 mês em atraso (" + base.size() + " aluguéis).");
+        }
+    }
+
+    /** Botão "Ver todos" da faixa: tira o recorte e volta a mostrar todos os aluguéis. */
+    @FXML
+    private void verTodos() {
+        recorte = null;
+        aplicarFiltros();
+    }
+
     @FXML
     private void limparFiltros() {
+        recorte = null;
         campoBusca.clear();
         grupoSituacao.selectToggle(abaTodos);
         campoBusca.requestFocus();
