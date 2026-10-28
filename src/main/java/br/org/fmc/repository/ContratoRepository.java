@@ -13,6 +13,7 @@ import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.PrazoContrato;
+import br.org.fmc.model.Prorrogacao;
 import br.org.fmc.model.StatusContrato;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -205,6 +206,8 @@ public class ContratoRepository implements Repositorio<Contrato> {
         Map<Long, Inquilino> porInquilino = new HashMap<>();
         inquilinos.listarTodos().forEach(i -> porInquilino.put(i.getId(), i));
 
+        Map<Long, List<Prorrogacao>> porContrato = prorrogacoesPorContrato();
+
         String sql = "SELECT c.*, g.* FROM contrato c JOIN garantia g ON g.contrato_id = c.id "
                 + filtro + " ORDER BY c.numero";
         List<Contrato> lista = new ArrayList<>();
@@ -214,12 +217,71 @@ public class ContratoRepository implements Repositorio<Contrato> {
             }
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(montar(rs, porImovel.get(rs.getLong("imovel_id")),
-                            porInquilino.get(rs.getLong("inquilino_id"))));
+                    Contrato c = montar(rs, porImovel.get(rs.getLong("imovel_id")),
+                            porInquilino.get(rs.getLong("inquilino_id")));
+                    // O término gravado já inclui as prorrogações (BOARD-169).
+                    c.restaurarProrrogacoes(LocalDate.parse(rs.getString("data_termino")),
+                            porContrato.getOrDefault(c.getId(), List.of()));
+                    lista.add(c);
                 }
             }
         }
         return lista;
+    }
+
+    /**
+     * Grava uma prorrogação (BOARD-169) numa transação: o histórico e o novo término do contrato
+     * entram juntos, ou nenhum dos dois.
+     */
+    public void salvarProrrogacao(Contrato contrato, Prorrogacao p) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try {
+                String sql = "INSERT INTO contrato_prorrogacao (contrato_id, data, termino_anterior, novo_termino, "
+                        + "prazo, feita_por) VALUES (?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement st = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                    st.setLong(1, contrato.getId());
+                    st.setString(2, p.getData().toString());
+                    st.setString(3, p.getTerminoAnterior().toString());
+                    st.setString(4, p.getNovoTermino().toString());
+                    st.setString(5, p.getPrazo().name());
+                    st.setString(6, p.getFeitaPor());
+                    st.executeUpdate();
+                    try (ResultSet chaves = st.getGeneratedKeys()) {
+                        if (chaves.next()) {
+                            p.setId(chaves.getLong(1));
+                        }
+                    }
+                }
+                try (PreparedStatement st = conexao.prepareStatement(
+                        "UPDATE contrato SET data_termino = ? WHERE id = ?")) {
+                    st.setString(1, contrato.getDataTermino().toString());
+                    st.setLong(2, contrato.getId());
+                    st.executeUpdate();
+                }
+                conexao.commit();
+            } catch (SQLException | RuntimeException e) {
+                conexao.rollback();
+                throw e;
+            }
+        }
+    }
+
+    /** Todas as prorrogações, agrupadas por contrato e em ordem de data. */
+    private Map<Long, List<Prorrogacao>> prorrogacoesPorContrato() throws SQLException {
+        Map<Long, List<Prorrogacao>> mapa = new HashMap<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement("SELECT * FROM contrato_prorrogacao ORDER BY data, id");
+             ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Prorrogacao p = new Prorrogacao(LocalDate.parse(rs.getString("data")),
+                        LocalDate.parse(rs.getString("termino_anterior")), PrazoContrato.valueOf(rs.getString("prazo")),
+                        rs.getString("feita_por"));
+                p.setId(rs.getLong("id"));
+                mapa.computeIfAbsent(rs.getLong("contrato_id"), k -> new ArrayList<>()).add(p);
+            }
+        }
+        return mapa;
     }
 
     /** Transforma uma linha do banco (contrato + garantia) num objeto Contrato. */

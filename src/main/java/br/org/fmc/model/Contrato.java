@@ -30,6 +30,9 @@ public class Contrato {
     private int diaVencimento;
     private StatusContrato status = StatusContrato.ATIVO;
 
+    /** Histórico de prorrogações, da mais antiga para a mais recente (BOARD-169). */
+    private final List<Prorrogacao> prorrogacoes = new ArrayList<>();
+
     public Contrato(Imovel imovel, Inquilino inquilino, Garantia garantia,
                     PrazoContrato prazo, LocalDate dataEntregaChaves) {
         this.imovel = Valida.obrigatorio(imovel, "o imóvel");
@@ -170,6 +173,34 @@ public class Contrato {
     /** Usado pelo repositório ao carregar um contrato do banco. */
     public void setStatus(StatusContrato status) {
         this.status = Valida.obrigatorio(status, "a situação do contrato");
+    }
+
+    /**
+     * Prorroga o contrato (BOARD-169): o término passa para o término atual + o prazo escolhido,
+     * e a prorrogação entra no histórico. Quem confere se pode prorrogar é o ServicoContratos.
+     *
+     * @return a prorrogação feita, para gravar no banco
+     */
+    public Prorrogacao prorrogar(PrazoContrato novoPrazo, LocalDate hoje, String feitaPor) {
+        Prorrogacao p = new Prorrogacao(hoje, dataTermino, novoPrazo, feitaPor);
+        dataTermino = p.getNovoTermino();
+        prorrogacoes.add(p);
+        return p;
+    }
+
+    /** Histórico de prorrogações, da mais antiga para a mais recente. Vazio se nunca foi prorrogado. */
+    public List<Prorrogacao> getProrrogacoes() {
+        return List.copyOf(prorrogacoes);
+    }
+
+    /**
+     * Usado pelo repositório ao carregar do banco: o término gravado (que muda com as prorrogações)
+     * e o histórico delas.
+     */
+    public void restaurarProrrogacoes(LocalDate terminoGravado, List<Prorrogacao> historico) {
+        this.dataTermino = Valida.obrigatorio(terminoGravado, "o término do contrato");
+        this.prorrogacoes.clear();
+        this.prorrogacoes.addAll(historico);
     }
 
     @Override
