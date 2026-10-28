@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.function.Function;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleObjectProperty;
@@ -60,6 +61,50 @@ public class ContratosController {
 
     @FXML
     private Label contagem;
+    @FXML
+    private HBox faixaRecorte;
+    @FXML
+    private Label textoRecorte;
+
+    /**
+     * Recortes que o Painel pede ao abrir esta tela (BOARD-40/61). Quando a busca e os filtros da
+     * BOARD-59 chegarem, eles podem passar a usar estes mesmos recortes.
+     */
+    public enum Recorte {
+        VENCIDOS("os contratos vencidos, que não geram aluguel até serem prorrogados ou encerrados"),
+        VENCENDO("os contratos que vencem nos próximos " + RegrasNegocio.DIAS_AVISO_VENCIMENTO + " dias");
+
+        private final String descricao;
+
+        Recorte(String descricao) {
+            this.descricao = descricao;
+        }
+
+        public String getDescricao() {
+            return descricao;
+        }
+
+        boolean inclui(Contrato c) {
+            if (c.getStatus() != StatusContrato.ATIVO) {
+                return false;
+            }
+            LocalDate hoje = LocalDate.now();
+            return this == VENCIDOS
+                    ? c.getDataTermino().isBefore(hoje)
+                    : !c.getDataTermino().isBefore(hoje)
+                            && !c.getDataTermino().isAfter(hoje.plusDays(RegrasNegocio.DIAS_AVISO_VENCIMENTO));
+        }
+    }
+
+    /** O recorte em uso, ou null para mostrar todos. */
+    private Recorte recorte;
+
+    /** Botão "Ver todos" da faixa do recorte. */
+    @FXML
+    private void verTodos() {
+        recorte = null;
+        carregarLista();
+    }
     @FXML
     private Button botaoNovo;
     @FXML
@@ -193,6 +238,10 @@ public class ContratosController {
 
         esconder(veu);
         esconder(toast);
+        // Vindo do Painel (ex.: "Contratos vencidos"): mostra só esses, com a faixa "Ver todos".
+        if (Navegador.filtroRecebido() instanceof Recorte pedido) {
+            recorte = pedido;
+        }
         carregarLista();
     }
 
@@ -451,10 +500,15 @@ public class ContratosController {
 
     private void carregarLista() {
         try {
-            tabela.getItems().setAll(servico.listar());
-            int total = tabela.getItems().size();
-            long ativos = tabela.getItems().stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).count();
-            long vencidos = tabela.getItems().stream()
+            List<Contrato> todos = servico.listar();
+            tabela.getItems().setAll(recorte == null ? todos : todos.stream().filter(recorte::inclui).toList());
+            mostrar(faixaRecorte, recorte != null);
+            if (recorte != null) {
+                textoRecorte.setText("Mostrando só " + recorte.getDescricao() + " (" + tabela.getItems().size() + ").");
+            }
+            int total = todos.size();
+            long ativos = todos.stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).count();
+            long vencidos = todos.stream()
                     .filter(c -> c.getStatus() == StatusContrato.ATIVO && c.getDataTermino().isBefore(LocalDate.now()))
                     .count();
             contagem.setText((total == 1 ? "1 contrato cadastrado" : total + " contratos cadastrados, " + ativos + " ativos")

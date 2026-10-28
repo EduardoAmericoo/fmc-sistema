@@ -104,6 +104,25 @@ public class AluguelRepository {
         return meses;
     }
 
+    /**
+     * Todos os aluguéis ainda não pagos, de qualquer mês, do vencimento mais antigo para o mais recente
+     * (para o Painel, BOARD-40 e BOARD-61: um atraso de meses atrás também precisa aparecer).
+     */
+    public List<Aluguel> listarEmAberto() throws SQLException {
+        Map<Long, Contrato> porId = new HashMap<>();
+        contratos.listarTodos().forEach(c -> porId.put(c.getId(), c));
+        List<Aluguel> lista = new ArrayList<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement(
+                     "SELECT * FROM aluguel WHERE data_pagamento IS NULL ORDER BY vencimento, id");
+             ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                lista.add(montar(rs, porId.get(rs.getLong("contrato_id"))));
+            }
+        }
+        return lista;
+    }
+
     /** Transforma uma linha do banco num objeto Aluguel, com os valores de quando foi gerado. */
     private Aluguel montar(ResultSet rs, Contrato contrato) throws SQLException {
         String pago = rs.getString("data_pagamento");

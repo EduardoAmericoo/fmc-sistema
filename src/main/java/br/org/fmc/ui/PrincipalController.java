@@ -47,7 +47,7 @@ public class PrincipalController {
 
     @FXML
     private void initialize() {
-        Navegador.configurar(raiz);
+        Navegador.configurar(raiz, this::abrir);
         if (Sessao.estaLogado()) {
             Usuario u = Sessao.usuario();
             avatar.setText(Iniciais.de(u.getNome()));

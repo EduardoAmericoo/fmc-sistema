@@ -4,12 +4,14 @@ import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.SituacaoAluguel;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoAlugueis;
+import br.org.fmc.service.ServicoAlugueis.Cobranca;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,15 +20,18 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -40,7 +45,22 @@ public class AlugueisController {
     private static final DateTimeFormatter MES = DateTimeFormatter.ofPattern("MMMM 'de' yyyy",
             Locale.forLanguageTag("pt-BR"));
 
+    /**
+     * Opção do filtro de mês que mostra os aluguéis em aberto de todos os meses (é como a tela
+     * abre quando vem do Painel, porque um atraso pode ser de meses atrás). Não é um mês de verdade.
+     */
+    private static final YearMonth TODOS_EM_ABERTO = YearMonth.of(1, 1);
+
+    /** Recortes que o Painel pede ao abrir esta tela, além das abas por situação. */
+    public enum Recorte {
+        /** Lista de cobrança: uma linha por inquilino com 2 ou mais aluguéis atrasados. */
+        INQUILINOS_PARA_COBRANCA
+    }
+
     private final ServicoAlugueis servico = new ServicoAlugueis();
+
+    /** O recorte em uso, ou null. */
+    private Recorte recorte;
 
     /** Todos os aluguéis do mês escolhido; a tabela mostra só os que passam nos filtros. */
     private List<Aluguel> doMes = List.of();
@@ -50,6 +70,10 @@ public class AlugueisController {
 
     @FXML
     private Label contagem;
+    @FXML
+    private HBox faixaRecorte;
+    @FXML
+    private Label textoRecorte;
     @FXML
     private ComboBox<YearMonth> campoMes;
     @FXML
@@ -78,11 +102,26 @@ public class AlugueisController {
     private TableColumn<Aluguel, Aluguel> colunaValor;
     @FXML
     private TableColumn<Aluguel, Aluguel> colunaSituacao;
+    @FXML
+    private HBox abas;
+    @FXML
+    private TableView<Cobranca> tabelaCobranca;
+    @FXML
+    private TableColumn<Cobranca, Cobranca> cobrancaInquilino;
+    @FXML
+    private TableColumn<Cobranca, Cobranca> cobrancaAtrasados;
+    @FXML
+    private TableColumn<Cobranca, Cobranca> cobrancaMaisAntigo;
+    @FXML
+    private TableColumn<Cobranca, Cobranca> cobrancaDevido;
+    @FXML
+    private TableColumn<Cobranca, Cobranca> cobrancaAcao;
 
     @FXML
     private void initialize() {
         hoje = servico.hoje();
         montarTabela();
+        montarTabelaCobranca();
 
         // Abas por situação: cada uma guarda a situação que filtra; "Todos" guarda null.
         abaAtraso.setUserData(SituacaoAluguel.EM_ATRASO);
@@ -122,7 +161,20 @@ public class AlugueisController {
         try {
             List<YearMonth> meses = servico.mesesDisponiveis();
             campoMes.getItems().setAll(meses);
-            campoMes.setValue(YearMonth.from(hoje)); // abre no mês atual
+            campoMes.getItems().add(0, TODOS_EM_ABERTO);
+            // Vindo do Painel (ex.: "Aluguéis em atraso"): abre na aba pedida, com todos os meses em aberto.
+            Object filtro = Navegador.filtroRecebido();
+            if (filtro instanceof SituacaoAluguel pedida) {
+                grupoSituacao.getToggles().stream().filter(aba -> aba.getUserData() == pedida)
+                        .findFirst().ifPresent(grupoSituacao::selectToggle);
+                campoMes.setValue(TODOS_EM_ABERTO);
+            } else if (filtro instanceof Recorte pedido) {
+                recorte = pedido;
+                grupoSituacao.selectToggle(abaAtraso);
+                campoMes.setValue(TODOS_EM_ABERTO);
+            } else {
+                campoMes.setValue(YearMonth.from(hoje)); // abre no mês atual
+            }
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
@@ -162,6 +214,72 @@ public class AlugueisController {
         colunaSituacao.setCellFactory(c -> celula(a -> selo(a.getSituacao(hoje))));
     }
 
+    /** Lista de cobrança: quem é, quantos aluguéis deve, há quanto tempo e quanto deve hoje. */
+    private void montarTabelaCobranca() {
+        cobrancaInquilino.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        cobrancaInquilino.setCellFactory(c -> celula(cb -> {
+            String unidade = cb.contrato().getImovel().getUnidade();
+            return duasLinhas(cb.contrato().getInquilino().getNome(), cb.contrato().getImovel().getCodigo()
+                    + (unidade == null ? "" : " · " + unidade) + " · " + cb.contrato().getNumero(), null);
+        }));
+        cobrancaAtrasados.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        cobrancaAtrasados.setCellFactory(c -> celula(cb -> duasLinhas(cb.alugueis().size() + " aluguéis",
+                "ref. " + meses(cb.alugueis()), null)));
+        cobrancaMaisAntigo.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        cobrancaMaisAntigo.setCellFactory(c -> celula(cb -> duasLinhas(
+                "Há " + cb.maisAntigo().diasAtraso(hoje) + " dias",
+                "desde " + Formatos.data(cb.maisAntigo().getVencimento()), "celula-detalhe-erro")));
+        cobrancaDevido.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        cobrancaDevido.setCellFactory(c -> {
+            TableCell<Cobranca, Cobranca> celula = celula(cb -> {
+                VBox valor = duasLinhas(Formatos.moeda(cb.devidoHoje(hoje)),
+                        Formatos.moeda(cb.base()) + " + encargos", null);
+                valor.setAlignment(Pos.CENTER_RIGHT);
+                return valor;
+            });
+            celula.getStyleClass().add("celula-numero");
+            return celula;
+        });
+        // "Ver aluguéis": abre os aluguéis em aberto desse inquilino, um por um (para receber).
+        cobrancaAcao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        cobrancaAcao.setCellFactory(c -> celula(cb -> {
+            Button ver = new Button("Ver aluguéis");
+            ver.getStyleClass().addAll("botao-secundario", "botao-pequeno");
+            ver.setOnAction(e -> verAlugueisDe(cb));
+            return ver;
+        }));
+        tabelaCobranca.setRowFactory(t -> {
+            TableRow<Cobranca> linha = new TableRow<>();
+            linha.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && !linha.isEmpty()) {
+                    verAlugueisDe(linha.getItem());
+                }
+            });
+            return linha;
+        });
+    }
+
+    /** Sai da lista de cobrança e mostra os aluguéis em aberto do contrato desse inquilino. */
+    private void verAlugueisDe(Cobranca cb) {
+        recorte = null;
+        grupoSituacao.selectToggle(abaTodos);
+        campoBusca.setText(cb.contrato().getNumero()); // a busca já chama aplicarFiltros
+        aplicarFiltros();
+    }
+
+    /** "ago, set e out" (com o ano quando não é o ano de hoje: "dez/25, jan e fev"). */
+    private String meses(List<Aluguel> alugueis) {
+        List<String> nomes = alugueis.stream().map(a -> {
+            YearMonth m = a.getCompetencia();
+            String nome = m.getMonth().getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("pt-BR")).replace(".", "");
+            return m.getYear() == hoje.getYear() ? nome : nome + "/" + String.valueOf(m.getYear()).substring(2);
+        }).toList();
+        if (nomes.size() == 1) {
+            return nomes.get(0);
+        }
+        return String.join(", ", nomes.subList(0, nomes.size() - 1)) + " e " + nomes.get(nomes.size() - 1);
+    }
+
     private long diasAte(Aluguel a) {
         return java.time.temporal.ChronoUnit.DAYS.between(hoje, a.getVencimento());
     }
@@ -173,7 +291,10 @@ public class AlugueisController {
             return;
         }
         try {
-            doMes = servico.listarDoMes(mes);
+            if (!mes.equals(TODOS_EM_ABERTO)) {
+                recorte = null; // o recorte do Painel vale para todos os meses em aberto
+            }
+            doMes = mes.equals(TODOS_EM_ABERTO) ? servico.listarEmAberto() : servico.listarDoMes(mes);
             aplicarFiltros();
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
@@ -189,8 +310,27 @@ public class AlugueisController {
             return;
         }
         String busca = campoBusca.getText();
+        // Lista de cobrança pedida pelo Painel: troca as abas e a tabela por uma linha por inquilino.
+        boolean cobranca = recorte == Recorte.INQUILINOS_PARA_COBRANCA;
+        mostrar(abas, !cobranca);
+        mostrar(tabela, !cobranca);
+        mostrar(tabelaCobranca, cobranca);
+        mostrar(faixaRecorte, cobranca);
+        if (cobranca) {
+            List<Cobranca> lista = ServicoAlugueis.listaDeCobranca(doMes, hoje);
+            textoRecorte.setText("Lista de cobrança: " + lista.size()
+                    + (lista.size() == 1 ? " inquilino" : " inquilinos") + " com 2 ou mais aluguéis atrasados, "
+                    + "que devem " + Formatos.moeda(lista.stream().map(c -> c.devidoHoje(hoje))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)) + " com multa e juros.");
+            tabelaCobranca.getItems().setAll(ServicoAlugueis.listaDeCobranca(
+                    ServicoAlugueis.filtrar(doMes, null, busca, hoje), hoje));
+            tabelaCobranca.setPlaceholder(vazio("fth-check-circle", "Ninguém para cobrar",
+                    busca.isBlank() ? "Nenhum inquilino tem 2 ou mais aluguéis atrasados."
+                            : "Nenhum inquilino da lista com essa busca."));
+        }
+        List<Aluguel> base = doMes;
         // As contagens das abas respeitam a busca, para a pessoa ver quantos há em cada situação.
-        List<Aluguel> daBusca = ServicoAlugueis.filtrar(doMes, null, busca, hoje);
+        List<Aluguel> daBusca = ServicoAlugueis.filtrar(base, null, busca, hoje);
         Map<SituacaoAluguel, ServicoAlugueis.Total> totais = ServicoAlugueis.totais(daBusca, hoje);
         abaAtraso.setText("Em atraso · " + totais.get(SituacaoAluguel.EM_ATRASO).quantidade());
         abaTolerancia.setText("Em tolerância · " + totais.get(SituacaoAluguel.EM_TOLERANCIA).quantidade());
@@ -199,19 +339,27 @@ public class AlugueisController {
         abaTodos.setText("Todos · " + daBusca.size());
 
         SituacaoAluguel situacao = (SituacaoAluguel) grupoSituacao.getSelectedToggle().getUserData();
-        tabela.getItems().setAll(ServicoAlugueis.filtrar(doMes, situacao, busca, hoje));
+        tabela.getItems().setAll(ServicoAlugueis.filtrar(base, situacao, busca, hoje));
 
         // Resumo do mês embaixo do título: quantos aluguéis, quanto já entrou e quanto falta.
         Map<SituacaoAluguel, ServicoAlugueis.Total> doMesTodo = ServicoAlugueis.totais(doMes, hoje);
         BigDecimal pago = doMesTodo.get(SituacaoAluguel.PAGO).valor();
         BigDecimal emAberto = doMes.stream().map(Aluguel::base).reduce(BigDecimal.ZERO, BigDecimal::add).subtract(pago);
         String nome = nomeDoMes(mes);
-        contagem.setText(doMes.isEmpty() ? nome + " · nenhum aluguel gerado ainda"
-                : nome + " · " + doMes.size() + (doMes.size() == 1 ? " aluguel" : " aluguéis") + " · "
-                        + Formatos.moeda(pago) + " recebidos · " + Formatos.moeda(emAberto) + " em aberto");
+        boolean todosEmAberto = mes.equals(TODOS_EM_ABERTO);
+        if (todosEmAberto) {
+            contagem.setText(nome + " · " + doMes.size() + (doMes.size() == 1 ? " aluguel" : " aluguéis") + " · "
+                    + Formatos.moeda(emAberto) + " em aberto");
+        } else {
+            contagem.setText(doMes.isEmpty() ? nome + " · nenhum aluguel gerado ainda"
+                    : nome + " · " + doMes.size() + (doMes.size() == 1 ? " aluguel" : " aluguéis") + " · "
+                            + Formatos.moeda(pago) + " recebidos · " + Formatos.moeda(emAberto) + " em aberto");
+        }
 
         boolean filtrando = situacao != null || !busca.isBlank();
-        tabela.setPlaceholder(doMes.isEmpty()
+        tabela.setPlaceholder(todosEmAberto && doMes.isEmpty()
+                ? vazio("fth-check-circle", "Nenhum aluguel em aberto", "Todos os aluguéis gerados já foram pagos.")
+                : doMes.isEmpty()
                 ? vazio("fth-calendar", "Nenhum aluguel gerado para " + mes.format(MES),
                         "Os aluguéis do mês aparecem aqui depois de gerados.")
                 : vazio(filtrando ? "fth-search" : "fth-check-circle",
@@ -219,8 +367,21 @@ public class AlugueisController {
                         filtrando ? "Escolha outra aba ou clique em \"Limpar filtros\"." : ""));
     }
 
+    private static void mostrar(Node no, boolean visivel) {
+        no.setVisible(visivel);
+        no.setManaged(visivel);
+    }
+
+    /** Botão "Ver todos os aluguéis" da faixa: sai da lista de cobrança e volta à aba Em atraso. */
+    @FXML
+    private void verTodos() {
+        recorte = null;
+        aplicarFiltros();
+    }
+
     @FXML
     private void limparFiltros() {
+        recorte = null;
         campoBusca.clear();
         grupoSituacao.selectToggle(abaTodos);
         campoBusca.requestFocus();
@@ -228,6 +389,9 @@ public class AlugueisController {
 
     /** "outubro de 2026" vira "Outubro de 2026". */
     private static String nomeDoMes(YearMonth mes) {
+        if (mes.equals(TODOS_EM_ABERTO)) {
+            return "Em aberto, todos os meses";
+        }
         String texto = mes.format(MES);
         return Character.toUpperCase(texto.charAt(0)) + texto.substring(1);
     }
@@ -245,11 +409,11 @@ public class AlugueisController {
         return selo;
     }
 
-    /** Célula de tabela que desenha um componente a partir do aluguel da linha. */
-    private static TableCell<Aluguel, Aluguel> celula(Function<Aluguel, Node> desenho) {
+    /** Célula de tabela que desenha um componente a partir do item da linha. */
+    private static <T> TableCell<T, T> celula(Function<T, Node> desenho) {
         return new TableCell<>() {
             @Override
-            protected void updateItem(Aluguel a, boolean vazio) {
+            protected void updateItem(T a, boolean vazio) {
                 super.updateItem(a, vazio);
                 setGraphic(vazio || a == null ? null : desenho.apply(a));
             }

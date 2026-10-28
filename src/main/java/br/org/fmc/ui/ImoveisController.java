@@ -171,6 +171,10 @@ public class ImoveisController {
         esconder(veuArquivar);
         esconder(toast);
         carregarLista();
+        // Vindo do Painel (ex.: "Imóveis vagos"): abre já filtrado nessa situação.
+        if (Navegador.filtroRecebido() instanceof SituacaoImovel pedida) {
+            filtroSituacao.setValue(pedida);
+        }
     }
 
     private void montarTabela() {
