@@ -46,13 +46,13 @@
         <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
             <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colunaNumero" text="Contrato" prefWidth="95" minWidth="90"/>
-                    <TableColumn fx:id="colunaImovel" text="Imóvel" prefWidth="120" minWidth="110"/>
-                    <TableColumn fx:id="colunaInquilino" text="Inquilino" prefWidth="175" minWidth="125"/>
+                    <TableColumn fx:id="colunaNumero" text="Contrato" prefWidth="90" minWidth="90"/>
+                    <TableColumn fx:id="colunaImovel" text="Imóvel" prefWidth="105" minWidth="100"/>
+                    <TableColumn fx:id="colunaInquilino" text="Inquilino" prefWidth="175" minWidth="140"/>
                     <TableColumn fx:id="colunaAluguel" text="Aluguel" prefWidth="125" minWidth="125" styleClass="coluna-numero"/>
-                    <TableColumn fx:id="colunaVigencia" text="Vigência" prefWidth="215" minWidth="215"/>
-                    <TableColumn fx:id="colunaGarantia" text="Garantia" prefWidth="105" minWidth="105"/>
-                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="155" minWidth="155"/>
+                    <TableColumn fx:id="colunaVigencia" text="Vigência" prefWidth="210" minWidth="210"/>
+                    <TableColumn fx:id="colunaGarantia" text="Garantia" prefWidth="100" minWidth="95"/>
+                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="165" minWidth="165"/>
                 </columns>
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
