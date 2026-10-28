@@ -139,6 +139,16 @@ CREATE TABLE IF NOT EXISTS imovel_arquivado (
     motivo      TEXT
 );
 
+-- Inquilinos arquivados: não alugam mais com a Fundação (ex.: saíram e devolveram as chaves).
+-- Somem da lista do dia a dia e do formulário de contrato, mas o cadastro e o histórico
+-- continuam guardados e podem ser reativados (ex.: a pessoa vai alugar de novo).
+-- Tem linha aqui só enquanto o inquilino está arquivado.
+CREATE TABLE IF NOT EXISTS inquilino_arquivado (
+    inquilino_id INTEGER PRIMARY KEY REFERENCES inquilino(id) ON DELETE CASCADE,
+    arquivado_em TEXT NOT NULL,
+    motivo       TEXT
+);
+
 -- BOARD-38 · Aluguéis: o aluguel de cada mês de cada contrato.
 -- Competência = o mês em que o aluguel vence, no formato AAAA-MM (ex.: "2026-10").
 -- Os valores são copiados do contrato quando o aluguel é gerado (BOARD-37).
