@@ -43,6 +43,13 @@
             </Button>
         </HBox>
 
+        <!-- Faixa que aparece quando a tela vem do Painel já filtrada (ex.: só os vencidos) -->
+        <HBox fx:id="faixaRecorte" styleClass="resumo-calculado" spacing="10" alignment="CENTER_LEFT">
+            <FontIcon iconLiteral="fth-filter"/>
+            <Label fx:id="textoRecorte" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button text="Ver todos" onAction="#verTodos" styleClass="botao-secundario, botao-pequeno"/>
+        </HBox>
+
         <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
             <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
                 <columns>

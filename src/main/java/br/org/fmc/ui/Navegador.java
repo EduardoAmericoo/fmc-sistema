@@ -42,6 +42,8 @@ public final class Navegador {
     private static BorderPane janela;
     /** Abre uma tela pelo menu lateral (marca o item); quem passa é a tela principal. */
     private static Consumer<String> menu;
+    /** Filtro para a tela que está abrindo agora (ver irPara(tela, filtro)). */
+    private static Object filtroDaProximaTela;
 
     /**
      * Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver).
@@ -141,6 +143,24 @@ public final class Navegador {
         } else {
             abrir(tela.getArquivo());
         }
+    }
+
+    /**
+     * Abre outra tela já filtrada (ex.: Aluguéis só "Em atraso", Imóveis só "Vago").
+     * A tela que abre lê o filtro com filtroRecebido() no initialize; depois ele é esquecido.
+     */
+    public static void irPara(Tela tela, Object filtro) {
+        filtroDaProximaTela = filtro;
+        try {
+            irPara(tela);
+        } finally {
+            filtroDaProximaTela = null;
+        }
+    }
+
+    /** O filtro pedido por quem abriu esta tela (ver irPara(tela, filtro)), ou null. */
+    public static Object filtroRecebido() {
+        return filtroDaProximaTela;
     }
 
     /** Abre a tela pelo nome (ex.: "imoveis"). */

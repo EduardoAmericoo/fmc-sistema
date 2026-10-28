@@ -40,6 +40,12 @@ public class AlugueisController {
     private static final DateTimeFormatter MES = DateTimeFormatter.ofPattern("MMMM 'de' yyyy",
             Locale.forLanguageTag("pt-BR"));
 
+    /**
+     * Opção do filtro de mês que mostra os aluguéis em aberto de todos os meses (é como a tela
+     * abre quando vem do Painel, porque um atraso pode ser de meses atrás). Não é um mês de verdade.
+     */
+    private static final YearMonth TODOS_EM_ABERTO = YearMonth.of(1, 1);
+
     private final ServicoAlugueis servico = new ServicoAlugueis();
 
     /** Todos os aluguéis do mês escolhido; a tabela mostra só os que passam nos filtros. */
@@ -122,7 +128,15 @@ public class AlugueisController {
         try {
             List<YearMonth> meses = servico.mesesDisponiveis();
             campoMes.getItems().setAll(meses);
-            campoMes.setValue(YearMonth.from(hoje)); // abre no mês atual
+            campoMes.getItems().add(0, TODOS_EM_ABERTO);
+            // Vindo do Painel (ex.: "Aluguéis em atraso"): abre na aba pedida, com todos os meses em aberto.
+            if (Navegador.filtroRecebido() instanceof SituacaoAluguel pedida) {
+                grupoSituacao.getToggles().stream().filter(aba -> aba.getUserData() == pedida)
+                        .findFirst().ifPresent(grupoSituacao::selectToggle);
+                campoMes.setValue(TODOS_EM_ABERTO);
+            } else {
+                campoMes.setValue(YearMonth.from(hoje)); // abre no mês atual
+            }
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
@@ -173,7 +187,7 @@ public class AlugueisController {
             return;
         }
         try {
-            doMes = servico.listarDoMes(mes);
+            doMes = mes.equals(TODOS_EM_ABERTO) ? servico.listarEmAberto() : servico.listarDoMes(mes);
             aplicarFiltros();
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
@@ -206,12 +220,20 @@ public class AlugueisController {
         BigDecimal pago = doMesTodo.get(SituacaoAluguel.PAGO).valor();
         BigDecimal emAberto = doMes.stream().map(Aluguel::base).reduce(BigDecimal.ZERO, BigDecimal::add).subtract(pago);
         String nome = nomeDoMes(mes);
-        contagem.setText(doMes.isEmpty() ? nome + " · nenhum aluguel gerado ainda"
-                : nome + " · " + doMes.size() + (doMes.size() == 1 ? " aluguel" : " aluguéis") + " · "
-                        + Formatos.moeda(pago) + " recebidos · " + Formatos.moeda(emAberto) + " em aberto");
+        boolean todosEmAberto = mes.equals(TODOS_EM_ABERTO);
+        if (todosEmAberto) {
+            contagem.setText(nome + " · " + doMes.size() + (doMes.size() == 1 ? " aluguel" : " aluguéis") + " · "
+                    + Formatos.moeda(emAberto) + " em aberto");
+        } else {
+            contagem.setText(doMes.isEmpty() ? nome + " · nenhum aluguel gerado ainda"
+                    : nome + " · " + doMes.size() + (doMes.size() == 1 ? " aluguel" : " aluguéis") + " · "
+                            + Formatos.moeda(pago) + " recebidos · " + Formatos.moeda(emAberto) + " em aberto");
+        }
 
         boolean filtrando = situacao != null || !busca.isBlank();
-        tabela.setPlaceholder(doMes.isEmpty()
+        tabela.setPlaceholder(todosEmAberto && doMes.isEmpty()
+                ? vazio("fth-check-circle", "Nenhum aluguel em aberto", "Todos os aluguéis gerados já foram pagos.")
+                : doMes.isEmpty()
                 ? vazio("fth-calendar", "Nenhum aluguel gerado para " + mes.format(MES),
                         "Os aluguéis do mês aparecem aqui depois de gerados.")
                 : vazio(filtrando ? "fth-search" : "fth-check-circle",
@@ -228,6 +250,9 @@ public class AlugueisController {
 
     /** "outubro de 2026" vira "Outubro de 2026". */
     private static String nomeDoMes(YearMonth mes) {
+        if (mes.equals(TODOS_EM_ABERTO)) {
+            return "Em aberto, todos os meses";
+        }
         String texto = mes.format(MES);
         return Character.toUpperCase(texto.charAt(0)) + texto.substring(1);
     }

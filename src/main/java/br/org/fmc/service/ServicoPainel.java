@@ -78,7 +78,32 @@ public class ServicoPainel {
     public enum Gravidade { ALTA, MEDIA, INFO }
 
     /** Um item de "Precisa de atenção", com a tela que resolve. */
-    public record Pendencia(Gravidade gravidade, int quantidade, String titulo, String detalhe, Tela destino) {
+    public record Pendencia(Gravidade gravidade, int quantidade, String titulo, String detalhe, Tipo tipo) {
+
+        /** A tela que resolve a pendência. */
+        public Tela destino() {
+            return tipo.getDestino();
+        }
+    }
+
+    /** Que pendência é; a tela do Painel usa para abrir o destino já filtrado. */
+    public enum Tipo {
+        ALUGUEIS_EM_ATRASO(Tela.ALUGUEIS),
+        INQUILINOS_PARA_COBRANCA(Tela.ALUGUEIS),
+        ALUGUEIS_EM_TOLERANCIA(Tela.ALUGUEIS),
+        CONTRATOS_VENCIDOS(Tela.CONTRATOS),
+        CONTRATOS_VENCENDO(Tela.CONTRATOS),
+        IMOVEIS_VAGOS(Tela.IMOVEIS);
+
+        private final Tela destino;
+
+        Tipo(Tela destino) {
+            this.destino = destino;
+        }
+
+        public Tela getDestino() {
+            return destino;
+        }
     }
 
     /**
@@ -124,7 +149,7 @@ public class ServicoPainel {
             if (ocupacao.vagos() > 0) {
                 pendencias.add(new Pendencia(Gravidade.INFO, ocupacao.vagos(),
                         plural(ocupacao.vagos(), "Imóvel vago", "Imóveis vagos"),
-                        "Prontos para receber um novo contrato.", Tela.IMOVEIS));
+                        "Prontos para receber um novo contrato.", Tipo.IMOVEIS_VAGOS));
             }
         }
         return new Painel(hoje, numeros, ocupacao, List.copyOf(pendencias), emAtraso);
@@ -161,7 +186,8 @@ public class ServicoPainel {
             pendencias.add(new Pendencia(Gravidade.ALTA, emAtraso.size(),
                     plural(emAtraso.size(), "Aluguel em atraso", "Aluguéis em atraso"),
                     "Passaram dos " + RegrasNegocio.TOLERANCIA_DIAS + " dias de tolerância. Somam "
-                            + Formatos.moeda(Valor.de(emAtraso).total()) + " sem encargos.", Tela.ALUGUEIS));
+                            + Formatos.moeda(Valor.de(emAtraso).total()) + " sem encargos.",
+                    Tipo.ALUGUEIS_EM_ATRASO));
         }
         // Mais de um mês em atraso no mesmo contrato: hora de cobrar (e avisar o fiador).
         Map<Long, Long> atrasosPorContrato = emAtraso.stream()
@@ -171,14 +197,14 @@ public class ServicoPainel {
             pendencias.add(new Pendencia(Gravidade.ALTA, paraCobranca,
                     plural(paraCobranca, "Inquilino com mais de 1 mês em atraso",
                             "Inquilinos com mais de 1 mês em atraso"),
-                    "Encaminhar para cobrança e avisar o fiador.", Tela.ALUGUEIS));
+                    "Encaminhar para cobrança e avisar o fiador.", Tipo.INQUILINOS_PARA_COBRANCA));
         }
         List<Aluguel> tolerancia = filtrar(emAberto, a -> a.getSituacao(hoje) == SituacaoAluguel.EM_TOLERANCIA);
         if (!tolerancia.isEmpty()) {
             pendencias.add(new Pendencia(Gravidade.MEDIA, tolerancia.size(),
                     plural(tolerancia.size(), "Aluguel em tolerância", "Aluguéis em tolerância"),
                     "Venceram há até " + RegrasNegocio.TOLERANCIA_DIAS + " dias. Ainda dá para pagar sem multa.",
-                    Tela.ALUGUEIS));
+                    Tipo.ALUGUEIS_EM_TOLERANCIA));
         }
     }
 
@@ -192,13 +218,13 @@ public class ServicoPainel {
         if (vencidos > 0) {
             pendencias.add(new Pendencia(Gravidade.ALTA, (int) vencidos,
                     plural(vencidos, "Contrato vencido", "Contratos vencidos"),
-                    "Não geram aluguel. Prorrogue ou encerre cada um.", Tela.CONTRATOS));
+                    "Não geram aluguel. Prorrogue ou encerre cada um.", Tipo.CONTRATOS_VENCIDOS));
         }
         if (vencendo > 0) {
             pendencias.add(new Pendencia(Gravidade.MEDIA, (int) vencendo,
                     plural(vencendo, "Contrato vence", "Contratos vencem") + " nos próximos "
                             + RegrasNegocio.DIAS_AVISO_VENCIMENTO + " dias",
-                    "Combine com o inquilino se vai renovar ou sair.", Tela.CONTRATOS));
+                    "Combine com o inquilino se vai renovar ou sair.", Tipo.CONTRATOS_VENCENDO));
         }
     }
 

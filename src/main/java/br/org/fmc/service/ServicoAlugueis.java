@@ -55,7 +55,16 @@ public class ServicoAlugueis {
     }
 
     /**
-     * Os meses para o filtro: os que já têm aluguéis, do mais recente para o mais antigo,
+     * Todos os aluguéis ainda não pagos, de qualquer mês, do vencimento mais antigo para o mais recente.
+     * É o que a tela mostra quando vem do Painel (ex.: "28 aluguéis em atraso" somam vários meses).
+     */
+    public List<Aluguel> listarEmAberto() throws SQLException {
+        Sessao.exigir(Acao.VER_ALUGUEIS);
+        return alugueis.listarEmAberto();
+    }
+
+    /**
+     * Os meses para o filtro:os que já têm aluguéis, do mais recente para o mais antigo,
      * e sempre o mês atual (mesmo antes de os aluguéis dele serem gerados).
      */
     public List<YearMonth> mesesDisponiveis() throws SQLException {

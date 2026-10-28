@@ -168,6 +168,18 @@ class PainelTest {
     }
 
     @Test
+    void abrirLevaParaATelaCertaEAListaDeAlugueisEmAbertoBateComOPainel() throws Exception {
+        List<Pendencia> pendencias = servico.montar().pendencias();
+        assertEquals(List.of(Tela.ALUGUEIS, Tela.ALUGUEIS, Tela.ALUGUEIS, Tela.CONTRATOS, Tela.CONTRATOS, Tela.IMOVEIS),
+                pendencias.stream().map(Pendencia::destino).toList());
+
+        // "Em aberto, todos os meses" na tela de Aluguéis: os 3 em atraso + o de Carlos em tolerância.
+        List<Aluguel> emAberto = new ServicoAlugueis().listarEmAberto();
+        assertEquals(List.of("2026-08-01", "2026-08-09", "2026-09-09", "2026-10-20"),
+                emAberto.stream().map(a -> a.getVencimento().toString()).toList());
+    }
+
+    @Test
     void ocupacaoContaSoImoveisNaoArquivados() throws Exception {
         Imovel arquivado = novoImovel("IM-005", "900,00");
         new ServicoImoveis().arquivar(arquivado.getId(), "Vendido");

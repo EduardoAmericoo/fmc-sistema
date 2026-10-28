@@ -2,6 +2,8 @@ package br.org.fmc.ui;
 
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
+import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.Tela;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoPainel;
@@ -9,6 +11,7 @@ import br.org.fmc.service.ServicoPainel.NumerosDoMes;
 import br.org.fmc.service.ServicoPainel.Ocupacao;
 import br.org.fmc.service.ServicoPainel.Painel;
 import br.org.fmc.service.ServicoPainel.Pendencia;
+import br.org.fmc.service.ServicoPainel.Tipo;
 import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
 import java.sql.SQLException;
@@ -220,13 +223,24 @@ public class PainelController {
         abrir.setContentDisplay(ContentDisplay.RIGHT);
         abrir.getStyleClass().addAll("botao-secundario", "botao-pequeno");
         abrir.setMinWidth(Region.USE_PREF_SIZE);
-        abrir.setOnAction(e -> Navegador.irPara(p.destino()));
+        abrir.setOnAction(e -> Navegador.irPara(p.destino(), filtroDoDestino(p.tipo())));
         mostrar(abrir, Sessao.podeAbrir(p.destino()));
 
         HBox item = new HBox(16, numero, textos, abrir);
         item.setAlignment(Pos.CENTER_LEFT);
         item.getStyleClass().add("atencao-item");
         return item;
+    }
+
+    /** O "Abrir" leva à tela já filtrada só no que pede atenção (ex.: Aluguéis na aba "Em atraso"). */
+    private static Object filtroDoDestino(Tipo tipo) {
+        return switch (tipo) {
+            case ALUGUEIS_EM_ATRASO, INQUILINOS_PARA_COBRANCA -> SituacaoAluguel.EM_ATRASO;
+            case ALUGUEIS_EM_TOLERANCIA -> SituacaoAluguel.EM_TOLERANCIA;
+            case CONTRATOS_VENCIDOS -> ContratosController.Recorte.VENCIDOS;
+            case CONTRATOS_VENCENDO -> ContratosController.Recorte.VENCENDO;
+            case IMOVEIS_VAGOS -> SituacaoImovel.VAGO;
+        };
     }
 
     // ---------- Aluguéis em atraso (BOARD-61) ----------

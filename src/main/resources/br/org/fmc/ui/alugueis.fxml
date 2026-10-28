@@ -36,7 +36,7 @@
         </HBox>
 
         <HBox spacing="12" alignment="CENTER_LEFT">
-            <ComboBox fx:id="campoMes" prefWidth="210" accessibleText="Mês dos aluguéis"/>
+            <ComboBox fx:id="campoMes" prefWidth="235" accessibleText="Mês dos aluguéis"/>
             <TextField fx:id="campoBusca" promptText="Buscar por imóvel, inquilino ou contrato" HBox.hgrow="ALWAYS"
                        accessibleText="Buscar aluguel"/>
             <Button text="Limpar filtros" onAction="#limparFiltros"/>
