@@ -10,6 +10,9 @@ import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.PrazoContrato;
+import br.org.fmc.model.Prorrogacao;
+import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
 import br.org.fmc.repository.ContratoRepository;
@@ -18,6 +21,8 @@ import br.org.fmc.repository.InquilinoRepository;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,12 +38,25 @@ import java.util.stream.Collectors;
  * - toda locação tem garantia: fiador (CPF válido, diferente do inquilino; se casado, com cônjuge)
  *   ou caução (pelo menos 3 aluguéis, recebida até a entrega das chaves).
  * Ao cadastrar, o imóvel passa a "Ocupado".
+ *
+ * Prorrogação (BOARD-169): contrato ativo que venceu ou vence nos próximos 60 dias ganha mais
+ * 12, 24 ou 36 meses, contados do término atual. Contrato vencido não gera aluguel até ser prorrogado.
  */
 public class ServicoContratos {
 
     private final ContratoRepository contratos = new ContratoRepository();
     private final ImovelRepository imoveis = new ImovelRepository();
     private final InquilinoRepository inquilinos = new InquilinoRepository();
+    private Clock relogio = Clock.systemDefaultZone();
+
+    /** Para os testes: fixa o "hoje" num dia conhecido. */
+    void usarRelogio(Clock relogio) {
+        this.relogio = relogio;
+    }
+
+    private LocalDate hoje() {
+        return LocalDate.now(relogio);
+    }
 
     /**
      * Cadastra um contrato novo, já ativo.
@@ -77,6 +95,54 @@ public class ServicoContratos {
     public List<Contrato> listar() throws SQLException {
         Sessao.exigir(Acao.VER_CONTRATOS);
         return contratos.listarTodos();
+    }
+
+    /**
+     * Pode prorrogar? Só contrato ativo que já venceu ou vence nos próximos 60 dias.
+     * (Um contrato que ainda tem muito tempo pela frente não precisa de prorrogação agora.)
+     */
+    public boolean podeProrrogar(Contrato contrato) {
+        return motivoParaNaoProrrogar(contrato) == null;
+    }
+
+    /**
+     * Prorroga o contrato por mais 12, 24 ou 36 meses, a partir do término atual,
+     * e guarda no histórico quem fez e quando.
+     *
+     * @return o contrato já com o novo término
+     */
+    public Contrato prorrogar(long contratoId, PrazoContrato prazo) throws SQLException {
+        Sessao.exigir(Acao.PRORROGAR_CONTRATO);
+        Contrato contrato = contratos.buscarPorId(contratoId)
+                .orElseThrow(() -> new RegraNegocioException("Contrato não encontrado."));
+        List<String> erros = new ArrayList<>();
+        String motivo = motivoParaNaoProrrogar(contrato);
+        if (motivo != null) {
+            erros.add(motivo);
+        }
+        if (prazo == null) {
+            erros.add("Escolha o prazo da prorrogação.");
+        }
+        if (!erros.isEmpty()) {
+            throw new RegraNegocioException(erros);
+        }
+        Prorrogacao p = contrato.prorrogar(prazo, hoje(), Sessao.usuario().getNome());
+        contratos.salvarProrrogacao(contrato, p); // histórico + novo término, tudo junto
+        return contrato;
+    }
+
+    /** O motivo de o contrato não poder ser prorrogado agora, ou null se pode. */
+    private String motivoParaNaoProrrogar(Contrato contrato) {
+        if (contrato.getStatus() != StatusContrato.ATIVO) {
+            return "Contrato encerrado não pode ser prorrogado.";
+        }
+        LocalDate termino = contrato.getDataTermino();
+        if (termino.isAfter(hoje().plusDays(RegrasNegocio.DIAS_AVISO_VENCIMENTO))) {
+            return "O contrato " + contrato.getNumero() + " só vence em " + Formatos.data(termino)
+                    + ": dá para prorrogar a partir de "
+                    + Formatos.data(termino.minusDays(RegrasNegocio.DIAS_AVISO_VENCIMENTO)) + ".";
+        }
+        return null;
     }
 
     /** Imóveis que podem receber contrato agora (vagos), para escolher no formulário. */
