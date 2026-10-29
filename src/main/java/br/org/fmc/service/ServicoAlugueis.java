@@ -2,7 +2,10 @@ package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
+import br.org.fmc.model.Caucao;
 import br.org.fmc.model.Contrato;
+import br.org.fmc.model.Fiador;
+import br.org.fmc.model.Fianca;
 import br.org.fmc.model.SituacaoAluguel;
 import br.org.fmc.repository.AluguelRepository;
 import br.org.fmc.util.TextoBusca;
@@ -121,6 +124,16 @@ public class ServicoAlugueis {
             return alugueis.stream().map(a -> a.base().add(a.encargosEm(hoje).total()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
+
+        /** O fiador, para avisar da dívida; null quando a garantia é caução. */
+        public Fiador fiador() {
+            return contrato.getGarantia() instanceof Fianca f ? f.getFiador() : null;
+        }
+
+        /** A caução que garante o contrato; null quando a garantia é fiador. */
+        public Caucao caucao() {
+            return contrato.getGarantia() instanceof Caucao c ? c : null;
+        }
     }
 
     /**
@@ -136,8 +149,8 @@ public class ServicoAlugueis {
     }
 
     /**
-     * A lista de cobrança: uma linha por inquilino com 2 ou mais aluguéis atrasados, de quem
-     * está há mais tempo sem pagar para quem está há menos.
+     * A lista de cobrança: uma linha por inquilino com 2 ou mais aluguéis atrasados. Primeiro quem
+     * deve mais aluguéis; entre os que devem o mesmo número, quem está há mais tempo sem pagar.
      */
     public static List<Cobranca> listaDeCobranca(List<Aluguel> lista, LocalDate hoje) {
         Map<Long, List<Aluguel>> porContrato = deInquilinosComDoisOuMaisAtrasados(lista, hoje).stream()
@@ -145,9 +158,20 @@ public class ServicoAlugueis {
         return porContrato.values().stream()
                 .map(doContrato -> new Cobranca(doContrato.get(0).getContrato(), doContrato.stream()
                         .sorted(Comparator.comparing(Aluguel::getVencimento)).toList()))
-                .sorted(Comparator.comparing((Cobranca c) -> c.maisAntigo().getVencimento())
+                .sorted(Comparator.comparing((Cobranca c) -> c.alugueis().size()).reversed()
+                        .thenComparing(c -> c.maisAntigo().getVencimento())
                         .thenComparing(c -> c.contrato().getImovel().getCodigo()))
                 .toList();
+    }
+
+    /** Quantos inquilinos da lista de cobrança devem 2, 3, e 4 ou mais aluguéis. */
+    public record Faixas(int dois, int tres, int quatroOuMais) {
+    }
+
+    public static Faixas faixas(List<Cobranca> lista) {
+        int dois = (int) lista.stream().filter(c -> c.alugueis().size() == 2).count();
+        int tres = (int) lista.stream().filter(c -> c.alugueis().size() == 3).count();
+        return new Faixas(dois, tres, lista.size() - dois - tres);
     }
 
     /** Quantos aluguéis há em cada situação e quanto somam, para o resumo no topo da tela. */

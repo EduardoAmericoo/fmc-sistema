@@ -196,6 +196,27 @@ class PainelTest {
         assertEquals(LocalDate.of(2026, 8, 9), maria.maisAntigo().getVencimento()); // há 76 dias
         assertEquals(0, reais("2140.00").compareTo(maria.base())); // 2 x 1.070
         assertTrue(maria.devidoHoje(HOJE).compareTo(maria.base()) > 0); // com multa e juros fica maior
+        // [D6] Quem avisar: o fiador do contrato (não há caução neste contrato).
+        assertEquals("José Fiador", maria.fiador().getNome());
+        assertEquals("(79) 99999-1111", maria.fiador().getTelefone());
+        assertNull(maria.caucao());
+    }
+
+    @Test
+    void listaDeCobrancaComecaPorQuemDeveMaisAlugueisEContaAsFaixas() throws Exception {
+        // Ana passa a dever junho, julho e agosto (3); Maria continua com agosto e setembro (2).
+        Contrato ana = new br.org.fmc.repository.ContratoRepository().listarTodos().stream()
+                .filter(c -> c.getInquilino().getNome().equals("Ana Teste")).findFirst().orElseThrow();
+        aluguel(ana, YearMonth.of(2026, 6), null);
+        aluguel(ana, YearMonth.of(2026, 7), null);
+
+        List<ServicoAlugueis.Cobranca> lista = ServicoAlugueis.listaDeCobranca(
+                new ServicoAlugueis().listarEmAberto(), HOJE);
+
+        assertEquals(List.of("Ana Teste 3", "Maria Teste 2"), lista.stream()
+                .map(c -> c.contrato().getInquilino().getNome() + " " + c.alugueis().size()).toList());
+        assertEquals(new ServicoAlugueis.Faixas(1, 1, 0), ServicoAlugueis.faixas(lista));
+        assertEquals(2, servico.montar().pendencias().get(1).quantidade()); // o Painel conta os mesmos 2
     }
 
     @Test
