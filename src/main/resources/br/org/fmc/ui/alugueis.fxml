@@ -41,6 +41,10 @@
             <TextField fx:id="campoBusca" promptText="Buscar por imóvel, inquilino ou contrato" HBox.hgrow="ALWAYS"
                        accessibleText="Buscar aluguel"/>
             <Button text="Limpar filtros" onAction="#limparFiltros"/>
+            <!-- [D6] BOARD-44: abre a lista de cobrança (uma linha por inquilino com 2 ou mais aluguéis atrasados) -->
+            <Button fx:id="botaoCobranca" text="Lista de cobrança" onAction="#abrirCobranca" styleClass="botao-secundario">
+                <graphic><FontIcon iconLiteral="fth-alert-triangle"/></graphic>
+            </Button>
         </HBox>
 
         <!-- Faixa que aparece quando a tela vem do Painel com a lista de cobrança -->
@@ -78,12 +82,13 @@
             <TableView fx:id="tabelaCobranca" styleClass="tabela-fmc" VBox.vgrow="ALWAYS"
                        managed="false" visible="false">
                 <columns>
-                    <TableColumn fx:id="cobrancaInquilino" text="Inquilino e imóvel" prefWidth="290" minWidth="200"/>
-                    <TableColumn fx:id="cobrancaAtrasados" text="Aluguéis atrasados" prefWidth="140" minWidth="130"/>
-                    <TableColumn fx:id="cobrancaMaisAntigo" text="Mais antigo" prefWidth="150" minWidth="140"/>
-                    <TableColumn fx:id="cobrancaDevido" text="Deve hoje" prefWidth="200" minWidth="180"
+                    <TableColumn fx:id="cobrancaInquilino" text="Inquilino e imóvel" prefWidth="225" minWidth="200"/>
+                    <TableColumn fx:id="cobrancaAtrasados" text="Atrasados" prefWidth="125" minWidth="115"/>
+                    <TableColumn fx:id="cobrancaMaisAntigo" text="Mais antigo" prefWidth="155" minWidth="150"/>
+                    <TableColumn fx:id="cobrancaGarantia" text="Fiador ou caução" prefWidth="180" minWidth="160"/>
+                    <TableColumn fx:id="cobrancaDevido" text="Deve hoje" prefWidth="170" minWidth="160"
                                  styleClass="coluna-numero"/>
-                    <TableColumn fx:id="cobrancaAcao" prefWidth="130" minWidth="125" sortable="false"/>
+                    <TableColumn fx:id="cobrancaAcao" prefWidth="60" minWidth="60" maxWidth="60" sortable="false"/>
                 </columns>
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
