@@ -29,6 +29,9 @@ public final class RegrasNegocio {
     /** O 1º aluguel vence 30 dias depois da entrega das chaves. */
     public static final int DIAS_1O_VENCIMENTO = 30;
 
+    /** Contrato que vence nos próximos 60 dias já pode ser prorrogado (e aparece como "vencendo"). */
+    public static final int DIAS_AVISO_VENCIMENTO = 60;
+
     private RegrasNegocio() {
     }
 }

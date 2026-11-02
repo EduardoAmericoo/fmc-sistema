@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -22,8 +23,10 @@ import java.util.stream.Collectors;
 public class UsuarioRepository implements Repositorio<Usuario> {
 
     /** Junta as permissões personalizadas (BOARD-41): p.acoes vem nulo para quem segue o perfil. */
-    private static final String SELECT = "SELECT u.id, u.nome, u.email, u.senha_hash, u.perfil, u.ativo, p.acoes "
-            + "FROM usuario u LEFT JOIN usuario_permissoes p ON p.usuario_id = u.id";
+    private static final String SELECT = "SELECT u.id, u.nome, u.email, u.senha_hash, u.perfil, u.ativo, p.acoes, "
+            + "sp.usuario_id AS provisoria "
+            + "FROM usuario u LEFT JOIN usuario_permissoes p ON p.usuario_id = u.id "
+            + "LEFT JOIN usuario_senha_provisoria sp ON sp.usuario_id = u.id";
 
     @Override
     public void salvar(Usuario usuario) throws SQLException {
@@ -33,6 +36,7 @@ public class UsuarioRepository implements Repositorio<Usuario> {
             atualizar(usuario);
         }
         salvarPermissoes(usuario);
+        salvarSenhaProvisoria(usuario);
     }
 
     private void inserir(Usuario u) throws SQLException {
@@ -80,6 +84,25 @@ public class UsuarioRepository implements Repositorio<Usuario> {
                         "INSERT INTO usuario_permissoes (usuario_id, acoes) VALUES (?, ?)")) {
                     st.setLong(1, u.getId());
                     st.setString(2, acoes);
+                    st.executeUpdate();
+                }
+            }
+        }
+    }
+
+    /** BOARD-62: tem linha em usuario_senha_provisoria só quem ainda precisa trocar a senha. */
+    private void salvarSenhaProvisoria(Usuario u) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            try (PreparedStatement st = conexao.prepareStatement(
+                    "DELETE FROM usuario_senha_provisoria WHERE usuario_id = ?")) {
+                st.setLong(1, u.getId());
+                st.executeUpdate();
+            }
+            if (u.temSenhaProvisoria()) {
+                try (PreparedStatement st = conexao.prepareStatement(
+                        "INSERT INTO usuario_senha_provisoria (usuario_id, criada_em) VALUES (?, ?)")) {
+                    st.setLong(1, u.getId());
+                    st.setString(2, LocalDateTime.now().withNano(0).toString());
                     st.executeUpdate();
                 }
             }
@@ -142,6 +165,7 @@ public class UsuarioRepository implements Repositorio<Usuario> {
         u.setId(rs.getLong("id"));
         u.setSenhaHash(rs.getString("senha_hash"));
         u.setAtivo(rs.getInt("ativo") == 1);
+        u.setSenhaProvisoria(rs.getObject("provisoria") != null);
         String acoes = rs.getString("acoes");
         if (acoes != null) {
             u.personalizarPermissoes(lerAcoes(acoes));

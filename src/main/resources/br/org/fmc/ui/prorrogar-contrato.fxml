@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-169 · Janela "Prorrogar contrato", aberta pelo botão Prorrogar de cada linha da tela Contratos.
+  Fica num arquivo próprio para a tela de Contratos (que a BOARD-59 vai mexer) continuar pequena.
+
+  Mostra o término atual e a situação, a escolha do prazo (12, 24 ou 36 meses),
+  a prévia do novo término e o histórico das prorrogações anteriores.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.ProrrogarContratoController">
+    <VBox styleClass="janela" maxWidth="580" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label fx:id="titulo" styleClass="janela-titulo" wrapText="true"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="janela-corpo" spacing="18">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Situação de hoje -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="Término atual" styleClass="rotulo"/>
+                    <Label fx:id="terminoAtual" styleClass="celula-nome"/>
+                </VBox>
+                <Label fx:id="seloSituacao"/>
+            </HBox>
+            <Label fx:id="explicacao" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+
+            <!-- Prazo -->
+            <VBox spacing="8">
+                <Label text="Prorrogar por *" styleClass="rotulo"/>
+                <HBox>
+                    <fx:define><ToggleGroup fx:id="grupoPrazo"/></fx:define>
+                    <ToggleButton fx:id="opcao12" text="12 meses" toggleGroup="$grupoPrazo"
+                                  styleClass="left-pill" prefWidth="130"/>
+                    <ToggleButton fx:id="opcao24" text="24 meses" toggleGroup="$grupoPrazo"
+                                  styleClass="center-pill" prefWidth="130"/>
+                    <ToggleButton fx:id="opcao36" text="36 meses" toggleGroup="$grupoPrazo"
+                                  styleClass="right-pill" prefWidth="130"/>
+                </HBox>
+            </VBox>
+            <HBox styleClass="resumo-calculado" spacing="10" alignment="CENTER_LEFT">
+                <FontIcon iconLiteral="fth-calendar"/>
+                <Label fx:id="novoTermino" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Histórico -->
+            <VBox spacing="8">
+                <Label text="Prorrogações anteriores" styleClass="rotulo"/>
+                <VBox fx:id="historico" spacing="8"/>
+            </VBox>
+        </VBox>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Prorrogar contrato" onAction="#confirmar" styleClass="botao-primario" defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-refresh-cw"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

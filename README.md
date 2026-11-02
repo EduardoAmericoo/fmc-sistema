@@ -74,6 +74,38 @@ Para criar uma tabela nova, acrescente um `CREATE TABLE IF NOT EXISTS ...` em `s
 
 ⚠️ Nunca use nomes ou CPFs reais da Fundação como dados de teste.
 
+## Dados de teste
+
+O sistema já vem com dados fictícios para testar e apresentar (124 imóveis, 110 inquilinos, 110 contratos com fiador ou caução e usuários de teste).
+
+**Você não precisa fazer nada:** na primeira vez que o sistema abre com o banco vazio (por exemplo, logo depois de
+baixar o projeto ou de apagar a pasta `data/`), ele carrega os dados de teste sozinho e avisa numa janelinha.
+Se o seu banco já tem algum cadastro, nada é mexido.
+
+**Para apagar tudo e recarregar do zero** (por exemplo, antes de uma apresentação):
+
+- **No VS Code:** em Run and Debug (Ctrl+Shift+D), escolha no topo **"Rodar com dados de teste (apaga tudo e recarrega)"** e aperte ▶.
+  Depois, volte a escolher **"Rodar o sistema"**, senão o F5 vai apagar tudo de novo na próxima vez.
+- **No terminal (Windows):** `$env:FMC_DADOS_TESTE="recarregar"; .\mvnw.cmd javafx:run`
+- **No terminal (Mac/Linux):** `FMC_DADOS_TESTE=recarregar ./mvnw javafx:run`
+
+⚠️ Recarregar **apaga todos os dados** do seu banco local. O banco é de cada pessoa (`data/fmc.db`, não vai para o
+GitHub): o que você cadastra não aparece para os outros, e o que eles cadastram não aparece para você.
+
+Na versão entregue à Fundação, a carga automática deve ser desligada com `FMC_DADOS_TESTE=nao`.
+
+Acessos depois da carga:
+
+| E-mail | Senha | Perfil |
+|---|---|---|
+| `admin@fmc.org` | `Fmc@2026` | Administrador inicial (o mesmo de sempre) |
+| `administrador@exemplo.org` | `teste123` | Administrador |
+| `secretaria@exemplo.org` | `teste123` | Secretaria |
+| `financeiro@exemplo.org` | `teste123` | Financeiro (só consulta) |
+| `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
+
+Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC".
+
 ## Visual das telas (design system)
 
 O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):

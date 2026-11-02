@@ -15,11 +15,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** Salva e busca inquilinos na tabela "inquilino" (BOARD-35). */
+/** Salva e busca inquilinos na tabela "inquilino" (BOARD-35), e o arquivamento deles. */
 public class InquilinoRepository implements Repositorio<Inquilino> {
 
-    private static final String COLUNAS = "id, nome, cpf, telefone, email, estado_civil, profissao, local_trabalho, "
-            + "renda_mensal, outras_rendas, conjuge_nome, conjuge_cpf, conjuge_renda";
+    /** Junta o arquivamento: arquivado_em vem nulo para quem não está arquivado. */
+    private static final String SELECT = "SELECT i.*, a.arquivado_em, a.motivo FROM inquilino i "
+            + "LEFT JOIN inquilino_arquivado a ON a.inquilino_id = i.id";
+
+    /** Grava se o inquilino está arquivado ou não (tabela inquilino_arquivado). */
+    public void salvarArquivamento(Inquilino inquilino) throws SQLException {
+        try (Connection c = Database.conectar()) {
+            try (PreparedStatement s = c.prepareStatement("DELETE FROM inquilino_arquivado WHERE inquilino_id = ?")) {
+                s.setLong(1, inquilino.getId());
+                s.executeUpdate();
+            }
+            if (inquilino.estaArquivado()) {
+                try (PreparedStatement s = c.prepareStatement(
+                        "INSERT INTO inquilino_arquivado (inquilino_id, arquivado_em, motivo) VALUES (?, ?, ?)")) {
+                    s.setLong(1, inquilino.getId());
+                    s.setString(2, inquilino.getArquivadoEm().toString());
+                    s.setString(3, inquilino.getMotivoArquivamento());
+                    s.executeUpdate();
+                }
+            }
+        }
+    }
 
     @Override
     public void salvar(Inquilino inquilino) throws SQLException {
@@ -76,18 +96,18 @@ public class InquilinoRepository implements Repositorio<Inquilino> {
 
     @Override
     public Optional<Inquilino> buscarPorId(long id) throws SQLException {
-        return buscarUm("SELECT " + COLUNAS + " FROM inquilino WHERE id = ?", id);
+        return buscarUm(SELECT + " WHERE i.id = ?", id);
     }
 
     public Optional<Inquilino> buscarPorCpf(Cpf cpf) throws SQLException {
-        return buscarUm("SELECT " + COLUNAS + " FROM inquilino WHERE cpf = ?", cpf.getNumero());
+        return buscarUm(SELECT + " WHERE i.cpf = ?", cpf.getNumero());
     }
 
     @Override
     public List<Inquilino> listarTodos() throws SQLException {
         List<Inquilino> lista = new ArrayList<>();
         try (Connection conexao = Database.conectar();
-             PreparedStatement st = conexao.prepareStatement("SELECT " + COLUNAS + " FROM inquilino ORDER BY nome");
+             PreparedStatement st = conexao.prepareStatement(SELECT + " ORDER BY i.nome");
              ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 lista.add(montar(rs));
@@ -124,6 +144,10 @@ public class InquilinoRepository implements Repositorio<Inquilino> {
             c.setCpf(cpfConjuge == null ? null : new Cpf(cpfConjuge));
             c.setRenda(new BigDecimal(rs.getString("conjuge_renda")));
             i.setConjuge(c);
+        }
+        String arquivadoEm = rs.getString("arquivado_em");
+        if (arquivadoEm != null) {
+            i.arquivar(java.time.LocalDate.parse(arquivadoEm), rs.getString("motivo"));
         }
         return i;
     }

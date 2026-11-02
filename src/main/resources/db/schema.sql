@@ -3,7 +3,8 @@
 -- "CREATE TABLE IF NOT EXISTS" para não apagar dados existentes.
 --
 -- Cada história do MVP acrescenta aqui as suas tabelas
--- (usuario, imovel, inquilino, fiador, contrato, garantia, aluguel, recibo).
+-- (usuario, imovel, inquilino, contrato, garantia, aluguel, recibo).
+-- O fiador fica dentro da tabela garantia.
 -- O pagamento fica registrado na própria tabela recibo.
 
 CREATE TABLE IF NOT EXISTS sistema (
@@ -12,22 +13,6 @@ CREATE TABLE IF NOT EXISTS sistema (
 );
 
 INSERT OR IGNORE INTO sistema (chave, valor) VALUES ('versao_schema', '1');
-
-CREATE TABLE IF NOT EXISTS imovel (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    codigo TEXT NOT NULL UNIQUE,
-    unidade TEXT,
-    nome_inquilino TEXT,
-    contrato_ate TEXT,
-    tipo TEXT NOT NULL,
-    endereco TEXT NOT NULL,
-    bairro TEXT,
-    grupo TEXT,
-    valor_aluguel TEXT NOT NULL,
-    taxa_luz TEXT NOT NULL,
-    valor_iptu TEXT NOT NULL,
-    situacao TEXT NOT NULL
-);
 
 -- BOARD-33 · Login: quem pode entrar no sistema.
 -- A senha nunca é guardada: só o hash (ver util/SenhaUtil.java).
@@ -46,6 +31,23 @@ CREATE TABLE IF NOT EXISTS usuario (
 CREATE TABLE IF NOT EXISTS usuario_permissoes (
     usuario_id INTEGER PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
     acoes      TEXT    NOT NULL
+);
+
+-- BOARD-62 · Quem está com senha provisória (criada pelo Administrador) e precisa
+-- trocá-la no próximo acesso. Tem linha aqui só enquanto a senha é provisória:
+-- ao trocar, a linha é apagada.
+CREATE TABLE IF NOT EXISTS usuario_senha_provisoria (
+    usuario_id INTEGER PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
+    criada_em  TEXT    NOT NULL
+);
+
+-- Senhas erradas seguidas no login, por e-mail (limite de tentativas).
+-- Depois de 5 erros, o e-mail fica em pausa até "pausa_ate" (data e hora).
+-- Ao entrar com a senha certa, a linha é apagada.
+CREATE TABLE IF NOT EXISTS tentativa_login (
+    email     TEXT PRIMARY KEY,
+    erros     INTEGER NOT NULL,
+    pausa_ate TEXT
 );
 
 -- BOARD-35 · Inquilinos, com os dados da proposta.
@@ -67,4 +69,125 @@ CREATE TABLE IF NOT EXISTS inquilino (
     conjuge_nome   TEXT,
     conjuge_cpf    TEXT,
     conjuge_renda  TEXT
+);
+
+-- BOARD-34 · Imóveis da Fundação.
+-- O código é a identificação e não pode se repetir. A unidade é opcional
+-- (ex.: "Apto 101 · Bloco A"), mas, se for informada, também não se repete (regra no service).
+-- Valores em dinheiro ficam como texto (ex.: "1500.00") para não perder centavos.
+CREATE TABLE IF NOT EXISTS imovel (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo        TEXT NOT NULL UNIQUE,
+    unidade       TEXT,
+    tipo          TEXT NOT NULL,
+    endereco      TEXT NOT NULL,
+    bairro        TEXT,
+    grupo         TEXT,
+    valor_aluguel TEXT NOT NULL,
+    taxa_luz      TEXT NOT NULL DEFAULT '0',
+    valor_iptu    TEXT NOT NULL DEFAULT '0',
+    situacao      TEXT NOT NULL
+);
+
+-- BOARD-36 · Contratos de locação. O contrato já nasce ativo.
+-- Os valores (aluguel, luz, IPTU) são copiados do imóvel no dia do cadastro,
+-- para um reajuste futuro no imóvel não mudar contratos antigos.
+-- O número (ex.: "CT-1001") é gerado pelo sistema a partir do id.
+-- Datas ficam como texto no formato AAAA-MM-DD (ex.: "2026-10-24").
+CREATE TABLE IF NOT EXISTS contrato (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero              TEXT    UNIQUE,
+    imovel_id           INTEGER NOT NULL REFERENCES imovel(id),
+    inquilino_id        INTEGER NOT NULL REFERENCES inquilino(id),
+    valor_aluguel       TEXT    NOT NULL,
+    taxa_luz            TEXT    NOT NULL DEFAULT '0',
+    valor_iptu          TEXT    NOT NULL DEFAULT '0',
+    prazo               TEXT    NOT NULL,
+    data_entrega_chaves TEXT    NOT NULL,
+    data_termino        TEXT    NOT NULL,
+    dia_vencimento      INTEGER NOT NULL,
+    status              TEXT    NOT NULL
+);
+
+-- BOARD-36/57 · Garantia do contrato: fiador ou caução (uma por contrato).
+-- tipo = 'FIADOR' usa as colunas fiador_*, tipo = 'CAUCAO' usa as colunas caucao_*.
+-- As colunas fiador_conjuge_* só são preenchidas para fiador casado(a) ou em união estável.
+CREATE TABLE IF NOT EXISTS garantia (
+    contrato_id          INTEGER PRIMARY KEY REFERENCES contrato(id) ON DELETE CASCADE,
+    tipo                 TEXT NOT NULL,
+    fiador_nome          TEXT,
+    fiador_cpf           TEXT,
+    fiador_telefone      TEXT,
+    fiador_estado_civil  TEXT,
+    fiador_renda         TEXT,
+    fiador_endereco      TEXT,
+    fiador_conjuge_nome  TEXT,
+    fiador_conjuge_cpf   TEXT,
+    caucao_valor         TEXT,
+    caucao_data          TEXT,
+    caucao_forma         TEXT,
+    caucao_recibo        TEXT
+);
+
+-- Imóveis arquivados: saíram do patrimônio (ex.: vendidos) ou de uso.
+-- Somem das listas do dia a dia, mas continuam guardados com o histórico
+-- (contratos, aluguéis, recibos) e podem ser reativados.
+-- Tem linha aqui só enquanto o imóvel está arquivado.
+CREATE TABLE IF NOT EXISTS imovel_arquivado (
+    imovel_id   INTEGER PRIMARY KEY REFERENCES imovel(id) ON DELETE CASCADE,
+    arquivado_em TEXT NOT NULL,
+    motivo      TEXT
+);
+
+-- Inquilinos arquivados: não alugam mais com a Fundação (ex.: saíram e devolveram as chaves).
+-- Somem da lista do dia a dia e do formulário de contrato, mas o cadastro e o histórico
+-- continuam guardados e podem ser reativados (ex.: a pessoa vai alugar de novo).
+-- Tem linha aqui só enquanto o inquilino está arquivado.
+CREATE TABLE IF NOT EXISTS inquilino_arquivado (
+    inquilino_id INTEGER PRIMARY KEY REFERENCES inquilino(id) ON DELETE CASCADE,
+    arquivado_em TEXT NOT NULL,
+    motivo       TEXT
+);
+
+-- BOARD-38 · Aluguéis: o aluguel de cada mês de cada contrato.
+-- Competência = o mês em que o aluguel vence, no formato AAAA-MM (ex.: "2026-10").
+-- Os valores são copiados do contrato quando o aluguel é gerado (BOARD-37).
+-- data_pagamento fica vazia enquanto o aluguel não for pago (o recebimento é a BOARD-39).
+-- Um contrato tem no máximo um aluguel por mês (UNIQUE): gerar duas vezes não duplica.
+CREATE TABLE IF NOT EXISTS aluguel (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id    INTEGER NOT NULL REFERENCES contrato(id),
+    competencia    TEXT    NOT NULL,
+    vencimento     TEXT    NOT NULL,
+    valor_aluguel  TEXT    NOT NULL,
+    taxa_luz       TEXT    NOT NULL DEFAULT '0',
+    valor_iptu     TEXT    NOT NULL DEFAULT '0',
+    outros         TEXT    NOT NULL DEFAULT '0',
+    data_pagamento TEXT,
+    UNIQUE (contrato_id, competencia)
+);
+
+-- BOARD-169 · Prorrogações de contrato: contrato vencido não gera aluguel. Para continuar,
+-- ele é prorrogado por 12, 24 ou 36 meses a partir do término anterior.
+-- Cada prorrogação fica no histórico, e a data_termino da tabela contrato passa a ser o novo término.
+CREATE TABLE IF NOT EXISTS contrato_prorrogacao (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id      INTEGER NOT NULL REFERENCES contrato(id) ON DELETE CASCADE,
+    data             TEXT    NOT NULL,
+    termino_anterior TEXT    NOT NULL,
+    novo_termino     TEXT    NOT NULL,
+    prazo            TEXT    NOT NULL,
+    feita_por        TEXT    NOT NULL
+);
+
+-- BOARD-174 · Encerramento de contrato: o inquilino devolveu as chaves e saiu do imóvel.
+-- Um por contrato. Ao encerrar, o status do contrato vira ENCERRADO e o imóvel volta a VAGO.
+-- O contrato encerrado não é apagado: ele é o histórico (contratos e recibos).
+CREATE TABLE IF NOT EXISTS contrato_encerramento (
+    contrato_id   INTEGER PRIMARY KEY REFERENCES contrato(id) ON DELETE CASCADE,
+    data_saida    TEXT    NOT NULL,
+    motivo        TEXT    NOT NULL,
+    observacao    TEXT,
+    registrado_em TEXT    NOT NULL,
+    feito_por     TEXT    NOT NULL
 );

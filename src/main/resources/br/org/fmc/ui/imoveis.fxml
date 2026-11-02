@@ -1,5 +1,208 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  BOARD-34 e BOARD-55 · Tela "Imóveis", no mesmo modelo da tela de Inquilinos.
+
+  Camadas empilhadas (StackPane), de baixo para cima:
+  1. a página: cabeçalho (título + "Novo imóvel"), busca e filtros, e a tabela num cartão;
+  2. o aviso rápido (toast) no canto de baixo;
+  3. a janela do formulário (cadastrar / editar), sobre um véu escuro;
+  4. a janela "Arquivar imóvel", com o motivo (ex.: vendido).
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:id="pagina" fx:controller="br.org.fmc.ui.ImoveisController"
-      spacing="24" styleClass="conteudo"/>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.ImoveisController">
+
+    <!-- 1. Página -->
+    <VBox styleClass="conteudo" spacing="24">
+        <HBox alignment="BOTTOM_LEFT" spacing="24">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Imóveis" styleClass="titulo"/>
+                <Label fx:id="contagem" styleClass="texto"/>
+            </VBox>
+            <Button fx:id="botaoNovo" text="Novo imóvel" onAction="#novo" styleClass="botao-primario">
+                <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
+            </Button>
+        </HBox>
+
+        <!-- Busca e filtros (BOARD-55) -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="campoBusca" promptText="Buscar por código, unidade, endereço ou bairro"
+                       HBox.hgrow="ALWAYS" accessibleText="Buscar imóvel"/>
+            <ComboBox fx:id="filtroSituacao" prefWidth="190" promptText="Todas as situações"/>
+            <CheckBox fx:id="verArquivados" text="Ver arquivados"/>
+            <Button text="Limpar filtros" onAction="#limparFiltros"/>
+        </HBox>
+
+        <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colunaImovel" text="Imóvel" prefWidth="230" minWidth="160"/>
+                    <TableColumn fx:id="colunaEndereco" text="Endereço" prefWidth="290" minWidth="170"/>
+                    <TableColumn fx:id="colunaTipo" text="Tipo" prefWidth="140" minWidth="130"/>
+                    <TableColumn fx:id="colunaAluguel" text="Aluguel" prefWidth="130" minWidth="120"
+                                 styleClass="coluna-numero"/>
+                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="150" minWidth="140"/>
+                    <TableColumn fx:id="colunaAcoes" prefWidth="132" maxWidth="132" minWidth="132" sortable="false"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+                </columnResizePolicy>
+            </TableView>
+        </VBox>
+    </VBox>
+
+    <!-- 2. Aviso rápido -->
+    <HBox fx:id="toast" styleClass="toast" spacing="10" alignment="CENTER_LEFT"
+          StackPane.alignment="BOTTOM_RIGHT" maxWidth="-Infinity" maxHeight="-Infinity">
+        <StackPane.margin><Insets right="32" bottom="28"/></StackPane.margin>
+        <FontIcon iconLiteral="fth-check-circle"/>
+        <Label fx:id="textoToast"/>
+    </HBox>
+
+    <!-- 3. Janela do formulário -->
+    <StackPane fx:id="veu" styleClass="veu">
+        <VBox styleClass="janela" maxWidth="720" maxHeight="-Infinity">
+            <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+            <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label fx:id="tituloJanela" text="Novo imóvel" styleClass="janela-titulo"/>
+                    <Label fx:id="subtituloJanela" text="Campos com * são obrigatórios." styleClass="janela-sub"
+                           wrapText="true"/>
+                </VBox>
+                <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                    <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+                </Button>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
+                <VBox styleClass="janela-corpo" spacing="20">
+
+                    <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                        <FontIcon iconLiteral="fth-alert-circle"/>
+                        <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <Label text="Identificação" styleClass="secao-formulario"/>
+                    <GridPane hgap="16" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+                        <VBox spacing="6">
+                            <Label text="Código *" labelFor="$campoCodigo" styleClass="rotulo"/>
+                            <TextField fx:id="campoCodigo" promptText="IM-125" styleClass="campo"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1">
+                            <Label text="Unidade" labelFor="$campoUnidade" styleClass="rotulo"/>
+                            <TextField fx:id="campoUnidade" promptText="Apto 101 · Bloco A" styleClass="campo"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.rowIndex="1">
+                            <Label text="Tipo *" labelFor="$campoTipo" styleClass="rotulo"/>
+                            <ComboBox fx:id="campoTipo" maxWidth="Infinity" styleClass="campo"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Label text="Situação *" labelFor="$campoSituacao" styleClass="rotulo"/>
+                            <ComboBox fx:id="campoSituacao" maxWidth="Infinity" styleClass="campo"/>
+                            <Label fx:id="dicaSituacao" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Label text="Endereço" styleClass="secao-formulario"/>
+                    <GridPane hgap="16" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnSpan="2">
+                            <Label text="Endereço *" labelFor="$campoEndereco" styleClass="rotulo"/>
+                            <TextField fx:id="campoEndereco" promptText="Rua, número" styleClass="campo"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.rowIndex="1">
+                            <Label text="Bairro" labelFor="$campoBairro" styleClass="rotulo"/>
+                            <TextField fx:id="campoBairro" styleClass="campo"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Label text="Valores mensais" styleClass="secao-formulario"/>
+                    <GridPane hgap="16" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+                        <VBox spacing="6">
+                            <Label text="Aluguel (R$) *" labelFor="$campoAluguel" styleClass="rotulo"/>
+                            <TextField fx:id="campoAluguel" promptText="1.500,00" styleClass="campo"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1">
+                            <Label text="Taxa de luz (R$)" labelFor="$campoLuz" styleClass="rotulo"/>
+                            <TextField fx:id="campoLuz" promptText="0,00" styleClass="campo"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.rowIndex="1">
+                            <Label text="IPTU (R$)" labelFor="$campoIptu" styleClass="rotulo"/>
+                            <TextField fx:id="campoIptu" promptText="0,00" styleClass="campo"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </ScrollPane>
+
+            <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+                <Button fx:id="botaoSalvar" text="Cadastrar imóvel" onAction="#salvar" styleClass="botao-primario"
+                        defaultButton="true"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- 4. Janela "Arquivar imóvel" -->
+    <StackPane fx:id="veuArquivar" styleClass="veu">
+        <VBox styleClass="janela" maxWidth="540" maxHeight="-Infinity">
+            <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+            <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label fx:id="tituloArquivar" styleClass="janela-titulo" wrapText="true"/>
+                    <Label text="O imóvel sai das listas e dos formulários, mas o histórico de contratos e aluguéis fica guardado. Dá para reativar quando quiser."
+                           styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+                </VBox>
+                <Button onAction="#fecharArquivar" styleClass="botao-icone" accessibleText="Fechar">
+                    <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+                </Button>
+            </HBox>
+            <VBox styleClass="janela-corpo" spacing="14">
+                <HBox fx:id="avisoArquivar" styleClass="aviso-erro" spacing="10">
+                    <FontIcon iconLiteral="fth-alert-circle"/>
+                    <Label fx:id="textoAvisoArquivar" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <VBox spacing="6">
+                    <Label text="Motivo" labelFor="$campoMotivo" styleClass="rotulo"/>
+                    <TextField fx:id="campoMotivo" promptText="Ex.: vendido em outubro de 2026" styleClass="campo"/>
+                </VBox>
+            </VBox>
+            <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancelar" onAction="#fecharArquivar" styleClass="botao-secundario"/>
+                <Button text="Arquivar imóvel" onAction="#confirmarArquivar" styleClass="botao-primario"
+                        defaultButton="true"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>

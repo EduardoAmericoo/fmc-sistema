@@ -56,32 +56,34 @@ class ServicoAcessoTest {
     }
 
     @Test
-    void senhaErradaOuEmailInexistenteDaAMesmaMensagemENaoEntra() throws Exception {
+    void senhaErradaEEmailInexistenteAvisamNoCampoCerto() throws Exception {
         servico.garantirAdministradorInicial();
-        RegraNegocioException senhaErrada = assertThrows(RegraNegocioException.class,
+        FalhaLogin senhaErrada = assertThrows(FalhaLogin.class,
                 () -> servico.login(ServicoAcesso.EMAIL_ADMIN_INICIAL, "errada"));
-        RegraNegocioException emailErrado = assertThrows(RegraNegocioException.class,
+        FalhaLogin emailErrado = assertThrows(FalhaLogin.class,
                 () -> servico.login("ninguem@fmc.org", ServicoAcesso.SENHA_ADMIN_INICIAL));
-        assertEquals(ServicoAcesso.MSG_INCORRETOS, senhaErrada.getMessage());
-        assertEquals(ServicoAcesso.MSG_INCORRETOS, emailErrado.getMessage());
+        assertEquals("Senha incorreta.", senhaErrada.mensagem(FalhaLogin.Campo.SENHA));
+        assertEquals("Nenhum usuário com este e-mail. Confira se digitou certo.",
+                emailErrado.mensagem(FalhaLogin.Campo.EMAIL));
         assertFalse(Sessao.estaLogado());
     }
 
     @Test
-    void camposVaziosPedemParaPreencher() {
-        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.login("", ""));
-        assertEquals("Informe o e-mail e a senha.", e.getMessage());
+    void camposVaziosPedemParaPreencherCadaUm() {
+        FalhaLogin e = assertThrows(FalhaLogin.class, () -> servico.login("", ""));
+        assertEquals("Informe o e-mail.", e.mensagem(FalhaLogin.Campo.EMAIL));
+        assertEquals("Informe a senha.", e.mensagem(FalhaLogin.Campo.SENHA));
     }
 
     @Test
-    void usuarioDesativadoNaoEntra() throws Exception {
+    void usuarioBloqueadoNaoEntra() throws Exception {
         Usuario u = new Usuario("Antiga", "antiga@fmc.org", Perfil.SECRETARIA);
         u.setSenhaHash(SenhaUtil.gerarHash("Senha123"));
         u.setAtivo(false);
         repo.salvar(u);
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
                 () -> servico.login("antiga@fmc.org", "Senha123"));
-        assertTrue(e.getMessage().contains("desativado"));
+        assertTrue(e.getMessage().contains("bloqueado"));
         assertFalse(Sessao.estaLogado());
     }
 }

@@ -47,7 +47,7 @@ public class PrincipalController {
 
     @FXML
     private void initialize() {
-        Navegador.configurar(raiz);
+        Navegador.configurar(raiz, this::abrir);
         if (Sessao.estaLogado()) {
             Usuario u = Sessao.usuario();
             avatar.setText(Iniciais.de(u.getNome()));
@@ -70,6 +70,12 @@ public class PrincipalController {
     private void abrirTela(ActionEvent evento) {
         Button botao = (Button) evento.getSource();
         abrir((String) botao.getUserData());
+    }
+
+    /** Botão da chave, no cartão do usuário: troca a própria senha (BOARD-62). */
+    @FXML
+    private void trocarSenha() {
+        Navegador.mostrarTrocaDeSenha(false);
     }
 
     /** Botão Sair: encerra a sessão e volta para o login. */

@@ -11,12 +11,16 @@ import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -26,6 +30,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -34,7 +40,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * Controla a tela "Inquilinos" (ui/inquilinos.fxml).
- * Só cuida da tela: as regras (CPF válido, CPF repetido, quem pode) ficam no ServicoInquilinos.
+ * Só cuida da tela: as regras (CPF válido, CPF repetido, arquivar, quem pode) ficam no ServicoInquilinos.
  */
 public class InquilinosController {
 
@@ -43,13 +49,42 @@ public class InquilinosController {
     /** Inquilino aberto na janela para editar; null quando é um cadastro novo. */
     private Inquilino emEdicao;
 
+    /** Todos os inquilinos carregados do banco; a tabela mostra só os que atendem à busca (BOARD-56). */
+    private List<Inquilino> todos = List.of();
+
+    /** O que a tabela mostra quando não há cadastro nenhum, e quando a busca não encontra ninguém. */
+    private VBox vazioSemCadastro;
+    private VBox vazioBusca;
+    private VBox vazioArquivados;
+    private Label tituloVazioBusca;
+
     /** Quem está logado pode editar inquilinos? (mostra o lápis e abre a janela ao clicar na linha) */
     private boolean podeEditar;
+
+    /** Quem está logado pode arquivar e reativar inquilinos? */
+    private boolean podeArquivar;
+
+    /** Inquilino que está sendo arquivado (janela "Arquivar inquilino"). */
+    private Inquilino aArquivar;
 
     @FXML
     private Label contagem;
     @FXML
     private Button botaoNovo;
+    @FXML
+    private TextField campoBusca;
+    @FXML
+    private CheckBox verArquivados;
+    @FXML
+    private StackPane veuArquivar;
+    @FXML
+    private Label tituloArquivar;
+    @FXML
+    private HBox avisoArquivar;
+    @FXML
+    private Label textoAvisoArquivar;
+    @FXML
+    private TextField campoMotivo;
     @FXML
     private TableView<Inquilino> tabela;
     @FXML
@@ -114,6 +149,7 @@ public class InquilinosController {
     @FXML
     private void initialize() {
         podeEditar = Sessao.pode(Acao.EDITAR_INQUILINO);
+        podeArquivar = Sessao.pode(Acao.ARQUIVAR_INQUILINO);
         montarTabela();
 
         // Máscaras: os campos se formatam sozinhos enquanto a pessoa digita (BOARD-165).
@@ -129,16 +165,37 @@ public class InquilinosController {
 
         // Cada botão só aparece para quem tem a permissão dele (ex.: pode editar, mas não criar).
         Permissoes.mostrarSe(botaoNovo, Acao.CRIAR_INQUILINO);
-        colunaAcoes.setVisible(podeEditar);
+        colunaAcoes.setVisible(podeEditar || podeArquivar);
 
-        // Esc fecha a janela do formulário.
+        // Esc fecha as janelas.
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
                 fechar();
             }
         });
+        veuArquivar.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                fecharArquivar();
+            }
+        });
+        verArquivados.selectedProperty().addListener((obs, antes, agora) -> aplicarBusca());
+
+        // Busca: filtra enquanto a pessoa digita; Esc limpa; Ctrl+F leva o cursor para a busca.
+        campoBusca.textProperty().addListener((obs, antes, agora) -> aplicarBusca());
+        campoBusca.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                limparBusca();
+            }
+        });
+        campoBusca.sceneProperty().addListener((obs, antes, cena) -> {
+            if (cena != null) {
+                cena.getAccelerators().put(new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN),
+                        () -> campoBusca.requestFocus());
+            }
+        });
 
         esconder(veu);
+        esconder(veuArquivar);
         esconder(toast);
         carregarLista();
     }
@@ -159,10 +216,18 @@ public class InquilinosController {
                 Label nome = new Label(i.getNome());
                 nome.getStyleClass().add("celula-nome");
                 String detalhe = i.getProfissao() != null ? i.getProfissao() : i.getEmail();
+                if (i.estaArquivado()) {
+                    // Na lista de arquivados: quando foi arquivado e por quê.
+                    detalhe = "Arquivado em " + Formatos.data(i.getArquivadoEm())
+                            + (i.getMotivoArquivamento() == null ? "" : " · " + i.getMotivoArquivamento());
+                }
                 VBox textos = new VBox(2, nome);
                 if (detalhe != null) {
                     Label linha = new Label(detalhe);
                     linha.getStyleClass().add("celula-detalhe");
+                    if (i.estaArquivado()) {
+                        linha.setTooltip(new Tooltip(detalhe)); // o motivo pode ser maior que a coluna
+                    }
                     textos.getChildren().add(linha);
                 }
                 HBox caixa = new HBox(12, avatar, textos);
@@ -187,30 +252,22 @@ public class InquilinosController {
             return celula;
         });
 
-        // Coluna de ações: botão de lápis para editar.
+        // Coluna de ações: lápis para editar e caixa para arquivar; na lista de arquivados, reativar.
         colunaAcoes.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaAcoes.setCellFactory(c -> new TableCell<>() {
             @Override
             protected void updateItem(Inquilino i, boolean vazio) {
                 super.updateItem(i, vazio);
-                if (vazio || i == null) {
-                    setGraphic(null);
-                    return;
-                }
-                Button editar = new Button(null, new FontIcon("fth-edit-2"));
-                editar.getStyleClass().add("botao-icone");
-                editar.setTooltip(new Tooltip("Editar " + i.getNome()));
-                editar.setOnAction(e -> abrirParaEditar(i));
-                setGraphic(editar);
+                setGraphic(vazio || i == null ? null : botoesDaLinha(i));
                 setAlignment(Pos.CENTER);
             }
         });
 
-        // Clicar na linha também abre para editar (para quem pode).
+        // Clicar na linha também abre para editar (para quem pode; arquivado não se edita).
         tabela.setRowFactory(t -> {
             TableRow<Inquilino> linha = new TableRow<>();
             linha.setOnMouseClicked(e -> {
-                if (podeEditar && !linha.isEmpty()) {
+                if (podeEditar && !linha.isEmpty() && !linha.getItem().estaArquivado() && !cliqueEmBotao(e.getTarget())) {
                     abrirParaEditar(linha.getItem());
                 }
             });
@@ -225,7 +282,28 @@ public class InquilinosController {
         VBox vazio = new VBox(8, icone, titulo, dica);
         vazio.setAlignment(Pos.CENTER);
         vazio.getStyleClass().add("tabela-vazia");
-        tabela.setPlaceholder(vazio);
+        vazioSemCadastro = vazio;
+
+        // Busca sem resultado: diz o que foi buscado e oferece limpar.
+        tituloVazioBusca = new Label();
+        tituloVazioBusca.getStyleClass().add("tabela-vazia-titulo");
+        Label dicaBusca = new Label("Confira se digitou certo. Dá para buscar por parte do nome ou do CPF.");
+        dicaBusca.getStyleClass().add("texto");
+        Button limpar = new Button("Limpar busca");
+        limpar.getStyleClass().add("botao-secundario");
+        limpar.setOnAction(e -> limparBusca());
+        vazioBusca = new VBox(8, new FontIcon("fth-search"), tituloVazioBusca, dicaBusca, limpar);
+        vazioBusca.setAlignment(Pos.CENTER);
+        vazioBusca.getStyleClass().add("tabela-vazia");
+
+        Label tituloArquivados = new Label("Nenhum inquilino arquivado");
+        tituloArquivados.getStyleClass().add("tabela-vazia-titulo");
+        Label dicaArquivados = new Label("Quem não aluga mais com a Fundação e foi arquivado aparece aqui.");
+        dicaArquivados.getStyleClass().add("texto");
+        vazioArquivados = new VBox(8, new FontIcon("fth-archive"), tituloArquivados, dicaArquivados);
+        vazioArquivados.setAlignment(Pos.CENTER);
+        vazioArquivados.getStyleClass().add("tabela-vazia");
+        tabela.setPlaceholder(vazioSemCadastro);
     }
 
     /** Botão "Novo inquilino": abre a janela vazia. */
@@ -311,14 +389,138 @@ public class InquilinosController {
 
     private void carregarLista() {
         try {
-            tabela.getItems().setAll(servico.listar());
-            int total = tabela.getItems().size();
-            contagem.setText(total == 1 ? "1 inquilino cadastrado" : total + " inquilinos cadastrados");
+            todos = servico.listar();
+            aplicarBusca();
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
             contagem.setText("Erro no banco de dados: " + e.getMessage());
         }
+    }
+
+    /** Mostra na tabela só os inquilinos que atendem à busca (ativos ou arquivados) e atualiza a contagem. */
+    private void aplicarBusca() {
+        String busca = campoBusca.getText();
+        boolean buscando = !busca.isBlank();
+        boolean arquivados = verArquivados.isSelected();
+        tabela.getItems().setAll(ServicoInquilinos.filtrar(todos, busca, arquivados));
+        int total = (int) todos.stream().filter(i -> i.estaArquivado() == arquivados).count();
+        int achados = tabela.getItems().size();
+        if (buscando) {
+            contagem.setText(achados + " de " + total + (arquivados ? " arquivados"
+                    : total == 1 ? " inquilino" : " inquilinos"));
+            tituloVazioBusca.setText("Nenhum inquilino" + (arquivados ? " arquivado" : "")
+                    + " encontrado para \"" + busca.trim() + "\"");
+            tabela.setPlaceholder(vazioBusca);
+        } else if (arquivados) {
+            contagem.setText(total == 1 ? "1 inquilino arquivado" : total + " inquilinos arquivados");
+            tabela.setPlaceholder(vazioArquivados);
+        } else {
+            contagem.setText(total == 1 ? "1 inquilino cadastrado" : total + " inquilinos cadastrados");
+            tabela.setPlaceholder(vazioSemCadastro);
+        }
+    }
+
+    /** Botão "Limpar filtros" (ao lado da busca), "Limpar busca" (na lista vazia) e a tecla Esc. */
+    @FXML
+    private void limparBusca() {
+        campoBusca.clear();
+        verArquivados.setSelected(false);
+        campoBusca.requestFocus();
+    }
+
+    /** Botões da linha, cada um só para quem tem a permissão dele. */
+    private HBox botoesDaLinha(Inquilino i) {
+        HBox botoes = new HBox(4);
+        botoes.setAlignment(Pos.CENTER);
+        if (!i.estaArquivado()) {
+            if (podeEditar) {
+                botoes.getChildren().add(botaoIcone("fth-edit-2", "Editar " + i.getNome(), () -> abrirParaEditar(i)));
+            }
+            if (podeArquivar) {
+                botoes.getChildren().add(botaoIcone("fth-archive", "Arquivar " + i.getNome() + " (não aluga mais)",
+                        () -> abrirArquivar(i)));
+            }
+        } else if (podeArquivar) {
+            botoes.getChildren().add(botaoIcone("fth-rotate-ccw", "Reativar " + i.getNome(), () -> reativar(i)));
+        }
+        return botoes;
+    }
+
+    /** Botão da caixa: abre a janela "Arquivar inquilino", com o motivo. */
+    private void abrirArquivar(Inquilino i) {
+        aArquivar = i;
+        tituloArquivar.setText("Arquivar " + i.getNome() + "?");
+        campoMotivo.clear();
+        esconder(avisoArquivar);
+        Navegador.mostrarJanela(veuArquivar);
+        campoMotivo.requestFocus();
+    }
+
+    @FXML
+    private void fecharArquivar() {
+        aArquivar = null;
+        Navegador.fecharJanela(veuArquivar);
+    }
+
+    @FXML
+    private void confirmarArquivar() {
+        if (aArquivar == null) {
+            return;
+        }
+        try {
+            Inquilino arquivado = servico.arquivar(aArquivar.getId(), campoMotivo.getText());
+            fecharArquivar();
+            carregarLista();
+            mostrarToast("Inquilino arquivado: " + arquivado.getNome() + ". Veja em \"Ver arquivados\".");
+        } catch (RegraNegocioException e) {
+            textoAvisoArquivar.setText(String.join("\n", e.getErros()));
+            avisoArquivar.setVisible(true);
+            avisoArquivar.setManaged(true);
+        } catch (SQLException e) {
+            textoAvisoArquivar.setText("Não foi possível arquivar no banco de dados. Tente de novo.");
+            avisoArquivar.setVisible(true);
+            avisoArquivar.setManaged(true);
+        }
+    }
+
+    /** Botão de reativar (na lista de arquivados). */
+    private void reativar(Inquilino i) {
+        try {
+            servico.reativar(i.getId());
+            carregarLista();
+            mostrarToast("Inquilino reativado: " + i.getNome());
+        } catch (RegraNegocioException e) {
+            avisarErro(String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            avisarErro("Não foi possível reativar no banco de dados. Tente de novo.");
+        }
+    }
+
+    private void avisarErro(String texto) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING, texto);
+        alerta.initOwner(tabela.getScene().getWindow());
+        alerta.setTitle("Inquilinos");
+        alerta.setHeaderText("Não foi possível concluir");
+        alerta.show();
+    }
+
+    private static Button botaoIcone(String icone, String dica, Runnable acao) {
+        Button botao = new Button(null, new FontIcon(icone));
+        botao.getStyleClass().add("botao-icone");
+        botao.setTooltip(new Tooltip(dica));
+        botao.setOnAction(e -> acao.run());
+        return botao;
+    }
+
+    /** O clique foi num dos botões da linha? (aí a linha não abre o formulário) */
+    private static boolean cliqueEmBotao(Object alvo) {
+        for (Node n = alvo instanceof Node no ? no : null; n != null; n = n.getParent()) {
+            if (n instanceof Button) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void mostrarErros(String texto) {

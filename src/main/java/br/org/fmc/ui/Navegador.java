@@ -5,11 +5,13 @@ import br.org.fmc.service.Sessao;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -27,26 +29,70 @@ import javafx.stage.Stage;
 public final class Navegador {
 
     private static final String CSS = "/br/org/fmc/css/tema.css";
-    private static final double LARGURA = 1100;
-    private static final double ALTURA = 700;
+    /** Tamanho quando a pessoa sai do tela cheia, e o menor tamanho permitido (as telas não cabem em menos). */
+    private static final double LARGURA = 1280;
+    private static final double ALTURA = 800;
+    private static final double LARGURA_MINIMA = 1024;
+    private static final double ALTURA_MINIMA = 680;
+
+    /** Ícone da janela e da barra de tarefas, em vários tamanhos (o Windows escolhe o melhor). */
+    private static final int[] TAMANHOS_ICONE = {16, 24, 32, 48, 64, 128, 256};
 
     private static Stage palco;
     private static BorderPane janela;
+    /** Abre uma tela pelo menu lateral (marca o item); quem passa é a tela principal. */
+    private static Consumer<String> menu;
+    /** Filtro para a tela que está abrindo agora (ver irPara(tela, filtro)). */
+    private static Object filtroDaProximaTela;
 
-    /** Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver). */
+    /**
+     * Raiz da cena: a tela por baixo e, por cima, a janela aberta (se houver).
+     * A cena é uma só a vida toda; trocar de tela troca só o que está dentro dela.
+     * Assim a janela não "reabre" nem volta ao tamanho pequeno a cada troca de tela.
+     */
     private static StackPane camadas;
 
     private Navegador() {
     }
 
-    /** Chamado uma vez pelo App, com a janela do sistema. */
+    /** Chamado uma vez pelo App, com a janela do sistema: monta a cena, o ícone e abre maximizada. */
     public static void iniciar(Stage stage) {
         palco = stage;
+        camadas = new StackPane();
+        Scene cena = new Scene(camadas, LARGURA, ALTURA);
+        cena.getStylesheets().add(Navegador.class.getResource(CSS).toExternalForm());
+        stage.setScene(cena);
+        stage.setMinWidth(LARGURA_MINIMA);
+        stage.setMinHeight(ALTURA_MINIMA);
+        for (int tamanho : TAMANHOS_ICONE) {
+            URL icone = Navegador.class.getResource("/br/org/fmc/icones/fmc-" + tamanho + ".png");
+            if (icone != null) {
+                stage.getIcons().add(new Image(icone.toExternalForm()));
+            }
+        }
+        stage.setMaximized(true);
     }
 
     /** Mostra a tela de login (ao abrir o sistema e ao sair). */
     public static void mostrarLogin() {
         trocarCena("login");
+    }
+
+    /** A troca de senha aberta agora é a obrigatória do 1º acesso? (lida pelo TrocarSenhaController) */
+    private static boolean trocaObrigatoria;
+
+    /**
+     * Mostra a tela de troca de senha (BOARD-62).
+     * Obrigatória: logo depois do login com senha provisória; a pessoa só sai dela trocando a senha ou saindo.
+     * Não obrigatória: quando a pessoa clica em "Trocar minha senha"; dá para cancelar e voltar.
+     */
+    public static void mostrarTrocaDeSenha(boolean obrigatoria) {
+        trocaObrigatoria = obrigatoria;
+        trocarCena("trocar-senha");
+    }
+
+    static boolean trocaObrigatoria() {
+        return trocaObrigatoria;
     }
 
     /** Mostra o sistema (menu + telas), depois do login. */
@@ -59,10 +105,7 @@ public final class Navegador {
             throw new IllegalStateException("Chame Navegador.iniciar(stage) antes.");
         }
         Parent raiz = (Parent) carregarFxml(Navegador.class.getResource("/br/org/fmc/ui/" + fxml + ".fxml"), fxml);
-        camadas = new StackPane(raiz);
-        Scene cena = new Scene(camadas, LARGURA, ALTURA);
-        cena.getStylesheets().add(Navegador.class.getResource(CSS).toExternalForm());
-        palco.setScene(cena);
+        camadas.getChildren().setAll(raiz); // troca a tela (e fecha qualquer janela que estivesse aberta)
     }
 
     /**
@@ -81,9 +124,43 @@ public final class Navegador {
         camadas.getChildren().remove(veu);
     }
 
-    /** Chamado uma vez pela tela principal, para dizer onde as telas aparecem. */
-    static void configurar(BorderPane janelaPrincipal) {
+    /**
+     * Chamado uma vez pela tela principal, para dizer onde as telas aparecem e como abrir
+     * uma tela "pelo menu" (marcando o item do menu lateral).
+     */
+    static void configurar(BorderPane janelaPrincipal, Consumer<String> abrirPeloMenu) {
         janela = janelaPrincipal;
+        menu = abrirPeloMenu;
+    }
+
+    /**
+     * Abre outra tela como se a pessoa tivesse clicado no menu (ex.: o botão "Abrir" das
+     * pendências do Painel). O item do menu lateral acompanha.
+     */
+    public static void irPara(Tela tela) {
+        if (menu != null) {
+            menu.accept(tela.getArquivo());
+        } else {
+            abrir(tela.getArquivo());
+        }
+    }
+
+    /**
+     * Abre outra tela já filtrada (ex.: Aluguéis só "Em atraso", Imóveis só "Vago").
+     * A tela que abre lê o filtro com filtroRecebido() no initialize; depois ele é esquecido.
+     */
+    public static void irPara(Tela tela, Object filtro) {
+        filtroDaProximaTela = filtro;
+        try {
+            irPara(tela);
+        } finally {
+            filtroDaProximaTela = null;
+        }
+    }
+
+    /** O filtro pedido por quem abriu esta tela (ver irPara(tela, filtro)), ou null. */
+    public static Object filtroRecebido() {
+        return filtroDaProximaTela;
     }
 
     /** Abre a tela pelo nome (ex.: "imoveis"). */

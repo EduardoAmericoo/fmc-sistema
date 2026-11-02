@@ -20,6 +20,12 @@ public class Usuario {
     private boolean ativo = true;
 
     /**
+     * A senha atual é provisória (BOARD-62): a pessoa precisa trocá-la antes de usar o sistema.
+     * Enquanto isso, não pode fazer nada nem abrir nenhuma tela.
+     */
+    private boolean senhaProvisoria;
+
+    /**
      * Permissões escolhidas pelo Administrador só para esta pessoa (BOARD-41).
      * null quando o usuário segue o padrão do perfil.
      */
@@ -31,14 +37,21 @@ public class Usuario {
         setPerfil(perfil);
     }
 
-    /** O usuário só pode fazer algo se estiver ativo e as permissões dele permitirem. */
+    /**
+     * O usuário só pode fazer algo se estiver ativo (não bloqueado), já tiver trocado
+     * a senha provisória e as permissões dele permitirem.
+     */
     public boolean pode(Acao acao) {
-        return ativo && getPermissoes().contains(acao);
+        return liberado() && getPermissoes().contains(acao);
     }
 
     /** O usuário pode abrir esta tela do menu? */
     public boolean podeAbrir(Tela tela) {
-        return ativo && (tela.getAcaoExigida() == null || pode(tela.getAcaoExigida()));
+        return liberado() && (tela.getAcaoExigida() == null || pode(tela.getAcaoExigida()));
+    }
+
+    private boolean liberado() {
+        return ativo && !senhaProvisoria;
     }
 
     /** O que este usuário pode fazer: as permissões personalizadas ou, se não houver, as do perfil. */
@@ -128,8 +141,18 @@ public class Usuario {
         return ativo;
     }
 
+    /** false = bloqueado pelo Administrador: não consegue entrar. */
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    /** A senha atual é provisória e precisa ser trocada no próximo acesso? */
+    public boolean temSenhaProvisoria() {
+        return senhaProvisoria;
+    }
+
+    public void setSenhaProvisoria(boolean senhaProvisoria) {
+        this.senhaProvisoria = senhaProvisoria;
     }
 
     @Override

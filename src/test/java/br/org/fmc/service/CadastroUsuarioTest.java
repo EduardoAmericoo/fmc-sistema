@@ -63,12 +63,11 @@ class CadastroUsuarioTest {
     @Test
     void mostraTodosOsErrosDeUmaVez() {
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
-                () -> servico.criarUsuario(" ", "sem-arroba", null, "123"));
+                () -> servico.criarUsuario(" ", "sem-arroba", null));
         assertEquals(List.of(
                 "Informe o nome.",
                 "Informe um e-mail válido.",
-                "Escolha o perfil.",
-                "A senha inicial precisa ter pelo menos 6 caracteres."), e.getErros());
+                "Escolha o perfil."), e.getErros());
     }
 
     @Test

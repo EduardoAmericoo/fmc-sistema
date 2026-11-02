@@ -37,6 +37,36 @@ public final class SenhaUtil {
         return "pbkdf2$" + ITERACOES + "$" + b64.encodeToString(sal) + "$" + b64.encodeToString(hash);
     }
 
+    /** Letras e números sem os que se confundem ao ler (0 e O, 1, l e I). */
+    private static final String MAIUSCULAS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    private static final String MINUSCULAS = "abcdefghijkmnpqrstuvwxyz";
+    private static final String NUMEROS = "23456789";
+
+    /**
+     * Senha provisória aleatória (BOARD-62), fácil de ler e ditar, no formato
+     * "Abc4-dEf7": 8 letras e números, com maiúscula, minúscula e número (já é uma senha forte).
+     */
+    public static String gerarProvisoria() {
+        String todos = MAIUSCULAS + MINUSCULAS + NUMEROS;
+        char[] c = new char[8];
+        for (int i = 0; i < c.length; i++) {
+            c[i] = todos.charAt(ALEATORIO.nextInt(todos.length()));
+        }
+        // Garante um de cada tipo, em posições sorteadas e diferentes.
+        int[] posicoes = {0, 1, 2, 3, 4, 5, 6, 7};
+        for (int i = posicoes.length - 1; i > 0; i--) {
+            int j = ALEATORIO.nextInt(i + 1);
+            int t = posicoes[i];
+            posicoes[i] = posicoes[j];
+            posicoes[j] = t;
+        }
+        c[posicoes[0]] = MAIUSCULAS.charAt(ALEATORIO.nextInt(MAIUSCULAS.length()));
+        c[posicoes[1]] = MINUSCULAS.charAt(ALEATORIO.nextInt(MINUSCULAS.length()));
+        c[posicoes[2]] = NUMEROS.charAt(ALEATORIO.nextInt(NUMEROS.length()));
+        String s = new String(c);
+        return s.substring(0, 4) + "-" + s.substring(4);
+    }
+
     /** A senha digitada corresponde ao hash guardado? */
     public static boolean confere(String senha, String hashGuardado) {
         if (senha == null || hashGuardado == null) {

@@ -15,14 +15,18 @@ public enum Acao {
     VER_IMOVEIS("Imóveis", "Ver a lista de imóveis", null),
     CRIAR_IMOVEL("Imóveis", "Cadastrar imóvel novo", VER_IMOVEIS),
     EDITAR_IMOVEL("Imóveis", "Editar dados de imóvel", VER_IMOVEIS),
-    EXCLUIR_IMOVEL("Imóveis", "Excluir imóvel", VER_IMOVEIS),
+    ARQUIVAR_IMOVEL("Imóveis", "Arquivar e reativar imóvel (ex.: vendido)", VER_IMOVEIS),
+    EXCLUIR_IMOVEL("Imóveis", "Excluir imóvel cadastrado por engano", VER_IMOVEIS),
 
     VER_INQUILINOS("Inquilinos", "Ver a lista de inquilinos", null),
     CRIAR_INQUILINO("Inquilinos", "Cadastrar inquilino novo", VER_INQUILINOS),
     EDITAR_INQUILINO("Inquilinos", "Editar dados de inquilino", VER_INQUILINOS),
+    ARQUIVAR_INQUILINO("Inquilinos", "Arquivar e reativar inquilino (ex.: saiu do imóvel)", VER_INQUILINOS),
 
     VER_CONTRATOS("Contratos", "Ver a lista de contratos", null),
     CRIAR_CONTRATO("Contratos", "Cadastrar contrato novo", VER_CONTRATOS),
+    PRORROGAR_CONTRATO("Contratos", "Prorrogar contrato vencido ou vencendo", VER_CONTRATOS),
+    ENCERRAR_CONTRATO("Contratos", "Encerrar contrato (saída do inquilino)", VER_CONTRATOS),
 
     VER_ALUGUEIS("Aluguéis", "Ver aluguéis e números financeiros", null),
     GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),
@@ -30,7 +34,8 @@ public enum Acao {
 
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),
     CRIAR_USUARIO("Usuários", "Criar usuário novo", VER_USUARIOS),
-    EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS);
+    EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS),
+    GERENCIAR_ACESSO("Usuários", "Bloquear usuário e gerar senha provisória", VER_USUARIOS);
 
     private final String tela;
     private final String descricao;

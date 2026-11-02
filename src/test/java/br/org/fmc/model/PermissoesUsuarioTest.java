@@ -35,7 +35,8 @@ class PermissoesUsuarioTest {
     @Test
     void tirarOVerDeUmaTelaEscondeSoEssaTela() {
         Set<Acao> acoes = EnumSet.copyOf(Perfil.SECRETARIA.getPermissoes());
-        acoes.removeAll(Set.of(Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO));
+        acoes.removeAll(Set.of(Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO,
+                Acao.ARQUIVAR_INQUILINO));
         secretaria.personalizarPermissoes(acoes);
 
         assertFalse(secretaria.podeAbrir(Tela.INQUILINOS));

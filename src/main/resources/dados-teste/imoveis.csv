@@ -1,0 +1,125 @@
+codigo;unidade;tipo;endereco;bairro;aluguel;taxa_luz;iptu;situacao
+IM-001;Apto 101 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1430.00;22.45;50.00;Vago
+IM-002;Apto 102 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1280.00;22.45;45.00;Ocupado
+IM-003;Apto 201 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2310.00;22.45;81.00;Ocupado
+IM-004;Apto 202 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1110.00;22.45;39.00;Ocupado
+IM-005;Apto 301 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2170.00;22.45;76.00;Ocupado
+IM-006;Apto 302 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1670.00;22.45;58.00;Ocupado
+IM-007;Apto 401 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1190.00;22.45;42.00;Ocupado
+IM-008;Apto 402 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1310.00;22.45;46.00;Ocupado
+IM-009;Apto 501 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2220.00;22.45;78.00;Ocupado
+IM-010;Apto 502 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1290.00;22.45;45.00;Ocupado
+IM-011;Apto 601 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2220.00;22.45;78.00;Ocupado
+IM-012;Apto 602 · Bloco A · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1130.00;22.45;40.00;Ocupado
+IM-013;Apto 101 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;2330.00;18.90;82.00;Ocupado
+IM-014;Apto 102 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1310.00;18.90;46.00;Vago
+IM-015;Apto 201 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1190.00;18.90;42.00;Ocupado
+IM-016;Apto 202 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1190.00;18.90;42.00;Ocupado
+IM-017;Apto 301 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1240.00;18.90;43.00;Ocupado
+IM-018;Apto 302 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1300.00;18.90;46.00;Ocupado
+IM-019;Apto 401 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1580.00;18.90;55.00;Ocupado
+IM-020;Apto 402 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1810.00;18.90;63.00;Ocupado
+IM-021;Apto 501 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1350.00;18.90;47.00;Ocupado
+IM-022;Apto 502 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1970.00;18.90;69.00;Ocupado
+IM-023;Apto 601 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1870.00;18.90;65.00;Ocupado
+IM-024;Apto 602 · Bloco B · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1880.00;18.90;66.00;Ocupado
+IM-025;Apto 101 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1310.00;25.10;46.00;Ocupado
+IM-026;Apto 102 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2280.00;25.10;80.00;Ocupado
+IM-027;Apto 201 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2310.00;25.10;81.00;Vago
+IM-028;Apto 202 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2250.00;25.10;79.00;Ocupado
+IM-029;Apto 301 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1170.00;25.10;41.00;Ocupado
+IM-030;Apto 302 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1740.00;25.10;61.00;Em manutenção
+IM-031;Apto 401 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2010.00;25.10;70.00;Ocupado
+IM-032;Apto 402 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1860.00;25.10;65.00;Ocupado
+IM-033;Apto 501 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1940.00;25.10;68.00;Ocupado
+IM-034;Apto 502 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1640.00;25.10;57.00;Ocupado
+IM-035;Apto 601 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1210.00;25.10;42.00;Ocupado
+IM-036;Apto 602 · Bloco C · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1810.00;25.10;63.00;Ocupado
+IM-037;Apto 101 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2260.00;19.80;79.00;Ocupado
+IM-038;Apto 102 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2310.00;19.80;81.00;Ocupado
+IM-039;Apto 201 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1180.00;19.80;41.00;Ocupado
+IM-040;Apto 202 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1460.00;19.80;51.00;Vago
+IM-041;Apto 301 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2070.00;19.80;72.00;Ocupado
+IM-042;Apto 302 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1760.00;19.80;62.00;Ocupado
+IM-043;Apto 401 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2120.00;19.80;74.00;Ocupado
+IM-044;Apto 402 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1620.00;19.80;57.00;Ocupado
+IM-045;Apto 501 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2110.00;19.80;74.00;Ocupado
+IM-046;Apto 502 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1200.00;19.80;42.00;Ocupado
+IM-047;Apto 601 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1540.00;19.80;54.00;Ocupado
+IM-048;Apto 602 · Bloco D · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2100.00;19.80;74.00;Ocupado
+IM-049;Apto 101 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1340.00;21.30;47.00;Ocupado
+IM-050;Apto 102 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1530.00;21.30;54.00;Ocupado
+IM-051;Apto 201 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2020.00;21.30;71.00;Ocupado
+IM-052;Apto 202 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2160.00;21.30;76.00;Ocupado
+IM-053;Apto 301 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1770.00;21.30;62.00;Vago
+IM-054;Apto 302 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1350.00;21.30;47.00;Ocupado
+IM-055;Apto 401 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1290.00;21.30;45.00;Ocupado
+IM-056;Apto 402 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2310.00;21.30;81.00;Ocupado
+IM-057;Apto 501 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2320.00;21.30;81.00;Ocupado
+IM-058;Apto 502 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2270.00;21.30;79.00;Ocupado
+IM-059;Apto 601 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1980.00;21.30;69.00;Ocupado
+IM-060;Apto 602 · Bloco E · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2310.00;21.30;81.00;Ocupado
+IM-061;Casa 1 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;2200.00;0.00;77.00;Em manutenção
+IM-062;Casa 2 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1480.00;0.00;52.00;Ocupado
+IM-063;Casa 3 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;2230.00;0.00;78.00;Ocupado
+IM-064;Casa 4 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;2020.00;0.00;71.00;Ocupado
+IM-065;Casa 5 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1740.00;0.00;61.00;Ocupado
+IM-066;Casa 6 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;2320.00;0.00;81.00;Vago
+IM-067;Casa 7 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1240.00;0.00;43.00;Ocupado
+IM-068;Casa 8 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;2000.00;0.00;70.00;Ocupado
+IM-069;Casa 9 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1230.00;0.00;43.00;Ocupado
+IM-070;Casa 10 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1310.00;0.00;46.00;Ocupado
+IM-071;Casa 11 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1410.00;0.00;49.00;Ocupado
+IM-072;Casa 12 · Vila Jabotiana;Casa;Rua João Vieira de Aquino, 182;Jabotiana;1610.00;0.00;56.00;Ocupado
+IM-073;Apto 101 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2310.00;22.45;81.00;Ocupado
+IM-074;Apto 102 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1320.00;22.45;46.00;Ocupado
+IM-075;Apto 201 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2270.00;22.45;79.00;Ocupado
+IM-076;Apto 202 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2070.00;22.45;72.00;Ocupado
+IM-077;Apto 301 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1250.00;22.45;44.00;Ocupado
+IM-078;Apto 302 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2160.00;22.45;76.00;Ocupado
+IM-079;Apto 401 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1850.00;22.45;65.00;Vago
+IM-080;Apto 402 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1360.00;22.45;48.00;Ocupado
+IM-081;Apto 501 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1320.00;22.45;46.00;Ocupado
+IM-082;Apto 502 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;1220.00;22.45;43.00;Ocupado
+IM-083;Apto 601 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2250.00;22.45;79.00;Ocupado
+IM-084;Apto 602 · Bloco G · Residencial;Apartamento;Av. Gonçalo Prado Rollemberg, 52;São José;2330.00;22.45;82.00;Ocupado
+IM-085;Apto 101 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1810.00;18.90;63.00;Ocupado
+IM-086;Apto 102 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1820.00;18.90;64.00;Ocupado
+IM-087;Apto 201 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1160.00;18.90;41.00;Ocupado
+IM-088;Apto 202 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1240.00;18.90;43.00;Ocupado
+IM-089;Apto 301 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;2250.00;18.90;79.00;Ocupado
+IM-090;Apto 302 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;2200.00;18.90;77.00;Em manutenção
+IM-091;Apto 401 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1180.00;18.90;41.00;Ocupado
+IM-092;Apto 402 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1600.00;18.90;56.00;Vago
+IM-093;Apto 501 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;2340.00;18.90;82.00;Ocupado
+IM-094;Apto 502 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;2040.00;18.90;71.00;Ocupado
+IM-095;Apto 601 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1670.00;18.90;58.00;Ocupado
+IM-096;Apto 602 · Bloco H · Residencial;Apartamento;Rua Tenente Jansen Melo, 13;18 do Forte;1430.00;18.90;50.00;Ocupado
+IM-097;Apto 101 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1670.00;25.10;58.00;Ocupado
+IM-098;Apto 102 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1580.00;25.10;55.00;Ocupado
+IM-099;Apto 201 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1880.00;25.10;66.00;Ocupado
+IM-100;Apto 202 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2030.00;25.10;71.00;Ocupado
+IM-101;Apto 301 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1220.00;25.10;43.00;Ocupado
+IM-102;Apto 302 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1970.00;25.10;69.00;Ocupado
+IM-103;Apto 401 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1470.00;25.10;51.00;Ocupado
+IM-104;Apto 402 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1950.00;25.10;68.00;Ocupado
+IM-105;Apto 501 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2310.00;25.10;81.00;Vago
+IM-106;Apto 502 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1690.00;25.10;59.00;Ocupado
+IM-107;Apto 601 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;1660.00;25.10;58.00;Ocupado
+IM-108;Apto 602 · Bloco I · Residencial;Apartamento;Rua Julieta Pereira Alves, 52;Atalaia;2270.00;25.10;79.00;Ocupado
+IM-109;Apto 101 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1410.00;19.80;49.00;Ocupado
+IM-110;Apto 102 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1770.00;19.80;62.00;Ocupado
+IM-111;Apto 201 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1640.00;19.80;57.00;Ocupado
+IM-112;Apto 202 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1670.00;19.80;58.00;Ocupado
+IM-113;Apto 301 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2010.00;19.80;70.00;Ocupado
+IM-114;Apto 302 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1990.00;19.80;70.00;Ocupado
+IM-115;Apto 401 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2000.00;19.80;70.00;Ocupado
+IM-116;Apto 402 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1740.00;19.80;61.00;Ocupado
+IM-117;Apto 501 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1320.00;19.80;46.00;Ocupado
+IM-118;Apto 502 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1600.00;19.80;56.00;Vago
+IM-119;Apto 601 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;2280.00;19.80;80.00;Ocupado
+IM-120;Apto 602 · Bloco J · Residencial;Apartamento;Av. Minas Gerais, 145;Siqueira Campos;1650.00;19.80;58.00;Ocupado
+IM-121;Apto 101 · Bloco K · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1140.00;21.30;40.00;Em manutenção
+IM-122;Apto 102 · Bloco K · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1540.00;21.30;54.00;Ocupado
+IM-123;Apto 201 · Bloco K · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;2210.00;21.30;77.00;Ocupado
+IM-124;Apto 202 · Bloco K · Residencial;Apartamento;Rua Rio Grande do Norte, 169;Santos Dumont;1840.00;21.30;64.00;Ocupado

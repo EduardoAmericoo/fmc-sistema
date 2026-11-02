@@ -15,17 +15,20 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Clipboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -79,7 +82,15 @@ public class UsuariosController {
     @FXML
     private ComboBox<Perfil> campoPerfil;
     @FXML
-    private PasswordField campoSenha;
+    private StackPane veuSenha;
+    @FXML
+    private Label tituloSenha;
+    @FXML
+    private Label subtituloSenha;
+    @FXML
+    private TextField campoSenhaProvisoria;
+    @FXML
+    private Button botaoCopiar;
 
     @FXML
     private StackPane veuPermissoes;
@@ -100,7 +111,7 @@ public class UsuariosController {
         campoPerfil.getItems().setAll(Perfil.values());
         // Cada botão só aparece para quem tem a permissão dele.
         Permissoes.mostrarSe(botaoNovo, Acao.CRIAR_USUARIO);
-        colunaAcoes.setVisible(Sessao.pode(Acao.EDITAR_PERMISSOES));
+        colunaAcoes.setVisible(Sessao.pode(Acao.EDITAR_PERMISSOES) || Sessao.pode(Acao.GERENCIAR_ACESSO));
         montarCaixinhas();
 
         // Esc fecha a janela aberta.
@@ -116,6 +127,7 @@ public class UsuariosController {
         });
 
         esconder(veuNovo);
+        esconder(veuSenha);
         esconder(veuPermissoes);
         esconder(toast);
         carregarLista();
@@ -142,25 +154,17 @@ public class UsuariosController {
                 ? selo("Personalizadas", "selo-info")
                 : selo("Padrão do perfil", "selo-neutro")));
         colunaSituacao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        colunaSituacao.setCellFactory(c -> celula(u -> u.isAtivo()
-                ? selo("Ativo", "selo-sucesso")
-                : selo("Desativado", "selo-neutro")));
+        colunaSituacao.setCellFactory(c -> celula(UsuariosController::seloSituacao));
 
-        // Coluna de ações: botão para ajustar as permissões.
+        // Coluna de ações: um botão para cada ação, só para quem tem a permissão dela.
         colunaAcoes.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        colunaAcoes.setCellFactory(c -> celula(u -> {
-            Button ajustar = new Button(null, new FontIcon("fth-sliders"));
-            ajustar.getStyleClass().add("botao-icone");
-            ajustar.setTooltip(new Tooltip("Ajustar permissões de " + u.getNome()));
-            ajustar.setOnAction(e -> abrirPermissoes(u));
-            return ajustar;
-        }));
+        colunaAcoes.setCellFactory(c -> celula(this::botoesDaLinha));
 
         // Clicar na linha também abre as permissões (para quem pode ajustá-las).
         tabela.setRowFactory(t -> {
             TableRow<Usuario> linha = new TableRow<>();
             linha.setOnMouseClicked(e -> {
-                if (Sessao.pode(Acao.EDITAR_PERMISSOES) && !linha.isEmpty()) {
+                if (Sessao.pode(Acao.EDITAR_PERMISSOES) && !linha.isEmpty() && !cliqueEmBotao(e.getTarget())) {
                     abrirPermissoes(linha.getItem());
                 }
             });
@@ -245,7 +249,6 @@ public class UsuariosController {
     private void novo() {
         campoNome.clear();
         campoEmail.clear();
-        campoSenha.clear();
         campoPerfil.setValue(Perfil.SECRETARIA);
         esconder(avisoNovo);
         Navegador.mostrarJanela(veuNovo);
@@ -261,16 +264,146 @@ public class UsuariosController {
     @FXML
     private void criar() {
         try {
-            Usuario novo = servico.criarUsuario(campoNome.getText(), campoEmail.getText(),
-                    campoPerfil.getValue(), campoSenha.getText());
+            ServicoAcesso.UsuarioCriado criado = servico.criarUsuario(campoNome.getText(), campoEmail.getText(),
+                    campoPerfil.getValue());
             fecharNovo();
             carregarLista();
-            mostrarToast("Usuário criado: " + novo.getNome() + ". O acesso já funciona.");
+            mostrarSenha("Usuário criado: " + criado.usuario().getNome(),
+                    "O acesso é " + criado.usuario().getEmail() + ", com a senha provisória abaixo.",
+                    criado.senhaProvisoria());
         } catch (RegraNegocioException e) {
             mostrarAviso(avisoNovo, textoAvisoNovo, String.join("\n", e.getErros()));
         } catch (SQLException e) {
             mostrarAviso(avisoNovo, textoAvisoNovo, "Erro no banco de dados: " + e.getMessage());
         }
+    }
+
+    /** Bloqueado; com senha provisória (ainda não fez o 1º acesso); ou ativo. */
+    private static Label seloSituacao(Usuario u) {
+        if (!u.isAtivo()) {
+            return selo("Bloqueado", "selo-erro");
+        }
+        if (u.temSenhaProvisoria()) {
+            Label selo = selo("Senha provisória", "selo-alerta");
+            selo.setTooltip(new Tooltip("Ainda não trocou a senha provisória."));
+            return selo;
+        }
+        return selo("Ativo", "selo-sucesso");
+    }
+
+    /** Botões da linha: permissões, senha provisória nova e bloquear/desbloquear. */
+    private Node botoesDaLinha(Usuario u) {
+        HBox botoes = new HBox(4);
+        botoes.setAlignment(Pos.CENTER);
+        if (Sessao.pode(Acao.EDITAR_PERMISSOES)) {
+            botoes.getChildren().add(botaoIcone("fth-sliders", "Ajustar permissões de " + u.getNome(),
+                    () -> abrirPermissoes(u)));
+        }
+        boolean euMesmo = u.getId().equals(Sessao.usuario().getId());
+        if (Sessao.pode(Acao.GERENCIAR_ACESSO) && !euMesmo) {
+            botoes.getChildren().add(botaoIcone("fth-key", "Gerar senha provisória nova para " + u.getNome(),
+                    () -> gerarSenha(u)));
+            botoes.getChildren().add(u.isAtivo()
+                    ? botaoIcone("fth-lock", "Bloquear o acesso de " + u.getNome(), () -> alternarBloqueio(u))
+                    : botaoIcone("fth-unlock", "Desbloquear o acesso de " + u.getNome(), () -> alternarBloqueio(u)));
+        }
+        return botoes;
+    }
+
+    private static Button botaoIcone(String icone, String dica, Runnable acao) {
+        Button botao = new Button(null, new FontIcon(icone));
+        botao.getStyleClass().add("botao-icone");
+        botao.setTooltip(new Tooltip(dica));
+        botao.setOnAction(e -> acao.run());
+        return botao;
+    }
+
+    /** O clique foi num dos botões da linha? (aí a linha não abre as permissões) */
+    private static boolean cliqueEmBotao(Object alvo) {
+        for (Node n = alvo instanceof Node no ? no : null; n != null; n = n.getParent()) {
+            if (n instanceof Button) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Botão da chave: gera uma senha provisória nova (para quem esqueceu a senha). */
+    private void gerarSenha(Usuario u) {
+        if (!confirmar("Gerar senha provisória nova?",
+                "A senha atual de " + u.getNome() + " deixa de valer. A pessoa vai entrar com a senha provisória "
+                        + "e escolher uma senha nova no primeiro acesso.", "Gerar senha")) {
+            return;
+        }
+        try {
+            String provisoria = servico.gerarSenhaProvisoria(u.getId());
+            carregarLista();
+            mostrarSenha("Senha provisória nova", "Para " + u.getNome() + " (" + u.getEmail() + ").", provisoria);
+        } catch (RegraNegocioException e) {
+            avisarErro(String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            avisarErro("Erro no banco de dados: " + e.getMessage());
+        }
+    }
+
+    /** Botão do cadeado: bloqueia quem está ativo e desbloqueia quem está bloqueado. */
+    private void alternarBloqueio(Usuario u) {
+        boolean bloquear = u.isAtivo();
+        if (bloquear && !confirmar("Bloquear o acesso de " + u.getNome() + "?",
+                "A pessoa não vai conseguir entrar no sistema até ser desbloqueada. Os dados dela continuam guardados.",
+                "Bloquear")) {
+            return;
+        }
+        try {
+            Usuario atualizado = bloquear ? servico.bloquear(u.getId()) : servico.desbloquear(u.getId());
+            carregarLista();
+            mostrarToast((bloquear ? "Acesso bloqueado: " : "Acesso liberado de novo: ") + atualizado.getNome());
+        } catch (RegraNegocioException e) {
+            avisarErro(String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            avisarErro("Erro no banco de dados: " + e.getMessage());
+        }
+    }
+
+    /** Janela com a senha provisória, para o Administrador copiar e entregar à pessoa. */
+    private void mostrarSenha(String titulo, String subtitulo, String senha) {
+        tituloSenha.setText(titulo);
+        subtituloSenha.setText(subtitulo);
+        campoSenhaProvisoria.setText(senha);
+        botaoCopiar.setText("Copiar");
+        Navegador.mostrarJanela(veuSenha);
+    }
+
+    @FXML
+    private void copiarSenha() {
+        ClipboardContent conteudo = new ClipboardContent();
+        conteudo.putString(campoSenhaProvisoria.getText());
+        Clipboard.getSystemClipboard().setContent(conteudo);
+        botaoCopiar.setText("Copiada");
+    }
+
+    @FXML
+    private void fecharSenha() {
+        campoSenhaProvisoria.clear(); // a senha não fica guardada na tela
+        Navegador.fecharJanela(veuSenha);
+    }
+
+    private boolean confirmar(String titulo, String texto, String botao) {
+        ButtonType sim = new ButtonType(botao, javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        ButtonType nao = new ButtonType("Cancelar", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION, texto, sim, nao);
+        alerta.initOwner(tabela.getScene().getWindow());
+        alerta.setTitle("Usuários");
+        alerta.setHeaderText(titulo);
+        return alerta.showAndWait().orElse(nao) == sim;
+    }
+
+    private void avisarErro(String texto) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING, texto);
+        alerta.initOwner(tabela.getScene().getWindow());
+        alerta.setTitle("Usuários");
+        alerta.setHeaderText("Não foi possível concluir");
+        alerta.show();
     }
 
     /** Abre a janela com as permissões do usuário, já marcadas como estão hoje. */

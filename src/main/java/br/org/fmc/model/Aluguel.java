@@ -24,15 +24,37 @@ public class Aluguel {
     private LocalDate dataPagamento; // nulo enquanto não for pago
 
     public Aluguel(Contrato contrato, YearMonth competencia) {
+        this(contrato, competencia, true);
+    }
+
+    private Aluguel(Contrato contrato, YearMonth competencia, boolean conferirContrato) {
         this.contrato = Valida.obrigatorio(contrato, "o contrato");
         this.competencia = Valida.obrigatorio(competencia, "o mês");
-        if (!contrato.cobreCompetencia(competencia)) {
+        if (conferirContrato && !contrato.cobreCompetencia(competencia)) {
             throw new IllegalArgumentException("O contrato não tem aluguel vencendo em " + competencia + ".");
         }
         this.vencimento = contrato.vencimentoDe(competencia);
         this.valorAluguel = contrato.getValorAluguel();
         this.taxaLuz = contrato.getTaxaLuz();
         this.valorIptu = contrato.getValorIptu();
+    }
+
+    /**
+     * Usado pelo repositório ao carregar do banco (BOARD-38): um aluguel já gravado volta como foi gerado,
+     * com os valores daquele mês e o pagamento, se houver, mesmo que o contrato tenha sido
+     * encerrado ou reajustado depois.
+     */
+    public static Aluguel doBanco(Contrato contrato, YearMonth competencia, LocalDate vencimento,
+            BigDecimal valorAluguel, BigDecimal taxaLuz, BigDecimal valorIptu, BigDecimal outros,
+            LocalDate dataPagamento) {
+        Aluguel a = new Aluguel(contrato, competencia, false);
+        a.vencimento = Valida.obrigatorio(vencimento, "o vencimento");
+        a.valorAluguel = Valida.positivo(valorAluguel, "o valor do aluguel");
+        a.taxaLuz = Valida.naoNegativo(taxaLuz, "a taxa de luz");
+        a.valorIptu = Valida.naoNegativo(valorIptu, "o IPTU");
+        a.setOutros(outros);
+        a.dataPagamento = dataPagamento;
+        return a;
     }
 
     /** Valor devido sem encargos: aluguel + luz + IPTU + outros. */
