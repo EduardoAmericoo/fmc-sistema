@@ -3,6 +3,8 @@ package br.org.fmc.repository;
 import br.org.fmc.db.Database;
 import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Contrato;
+import br.org.fmc.model.RecebimentoAluguel;
+import br.org.fmc.model.FormaPagamento;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,6 +26,98 @@ import java.util.Map;
  * Um contrato tem no máximo um aluguel por mês: o banco recusa a repetição (UNIQUE).
  */
 public class AluguelRepository {
+
+    public java.util.Optional<Aluguel> buscarPorId(long id) throws SQLException {
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement("SELECT * FROM aluguel WHERE id = ?")) {
+            st.setLong(1, id);
+            try (ResultSet rs = st.executeQuery()) {
+                if (!rs.next()) return java.util.Optional.empty();
+                long contratoId = rs.getLong("contrato_id");
+                Contrato contrato = contratos.listarTodos().stream()
+                        .filter(c -> c.getId() == contratoId).findFirst().orElseThrow();
+                return java.util.Optional.of(montar(rs, contrato));
+            }
+        }
+    }
+
+    /** A baixa e os valores recebidos são gravados juntos. Uma cobrança só pode ser recebida uma vez. */
+    public boolean registrarRecebimento(RecebimentoAluguel r) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try {
+                try (PreparedStatement st = conexao.prepareStatement(
+                        "UPDATE aluguel SET data_pagamento = ? WHERE id = ? AND data_pagamento IS NULL")) {
+                    st.setString(1, r.data().toString());
+                    st.setLong(2, r.aluguelId());
+                    if (st.executeUpdate() != 1) {
+                        conexao.rollback();
+                        return false;
+                    }
+                }
+                try (PreparedStatement st = conexao.prepareStatement(
+                        "INSERT INTO aluguel_recebimento (aluguel_id, data, forma, valor_base, multa, juros, correcao, total) "
+                                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+                    st.setLong(1, r.aluguelId());
+                    st.setString(2, r.data().toString());
+                    st.setString(3, r.forma().name());
+                    st.setString(4, r.valorBase().toPlainString());
+                    st.setString(5, r.multa().toPlainString());
+                    st.setString(6, r.juros().toPlainString());
+                    st.setString(7, r.correcao().toPlainString());
+                    st.setString(8, r.total().toPlainString());
+                    st.executeUpdate();
+                }
+                conexao.commit();
+                return true;
+            } catch (SQLException e) {
+                conexao.rollback();
+                throw e;
+            }
+        }
+    }
+
+    public java.util.Optional<RecebimentoAluguel> buscarRecebimento(long id) throws SQLException {
+        try (Connection conexao = Database.conectar(); PreparedStatement st = conexao.prepareStatement(
+                "SELECT * FROM aluguel_recebimento WHERE aluguel_id = ?")) {
+            st.setLong(1, id);
+            try (ResultSet rs = st.executeQuery()) {
+                if (!rs.next()) return java.util.Optional.empty();
+                return java.util.Optional.of(new RecebimentoAluguel(id, LocalDate.parse(rs.getString("data")),
+                        FormaPagamento.valueOf(rs.getString("forma")), new BigDecimal(rs.getString("valor_base")),
+                        new BigDecimal(rs.getString("multa")), new BigDecimal(rs.getString("juros")),
+                        new BigDecimal(rs.getString("correcao")), new BigDecimal(rs.getString("total"))));
+            }
+        }
+    }
+
+    /** Lote atômico: a chave contrato/mês também evita duplicidade entre duas gerações simultâneas. */
+    public int inserirAusentes(List<Aluguel> lista) throws SQLException {
+        String sql = "INSERT INTO aluguel (contrato_id, competencia, vencimento, valor_aluguel, taxa_luz, "
+                + "valor_iptu, outros) VALUES (?, ?, ?, ?, ?, ?, ?) "
+                + "ON CONFLICT(contrato_id, competencia) DO NOTHING";
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try (PreparedStatement st = conexao.prepareStatement(sql)) {
+                int gerados = 0;
+                for (Aluguel a : lista) {
+                    st.setLong(1, a.getContrato().getId());
+                    st.setString(2, a.getCompetencia().toString());
+                    st.setString(3, a.getVencimento().toString());
+                    st.setString(4, a.getValorAluguel().toPlainString());
+                    st.setString(5, a.getTaxaLuz().toPlainString());
+                    st.setString(6, a.getValorIptu().toPlainString());
+                    st.setString(7, a.getOutros().toPlainString());
+                    gerados += st.executeUpdate();
+                }
+                conexao.commit();
+                return gerados;
+            } catch (SQLException e) {
+                conexao.rollback();
+                throw e;
+            }
+        }
+    }
 
     private final ContratoRepository contratos = new ContratoRepository();
 

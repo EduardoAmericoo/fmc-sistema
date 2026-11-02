@@ -33,9 +33,9 @@ class TelaTest {
     }
 
     @Test
-    void financeiroSoConsultaSecretariaOpera() {
+    void financeiroRecebeAlugueisESecretariaOperaCadastros() {
         assertFalse(Perfil.FINANCEIRO.permite(Acao.CRIAR_IMOVEL));
-        assertFalse(Perfil.FINANCEIRO.permite(Acao.RECEBER_ALUGUEL));
+        assertTrue(Perfil.FINANCEIRO.permite(Acao.RECEBER_ALUGUEL));
         assertTrue(Perfil.SECRETARIA.permite(Acao.CRIAR_IMOVEL));
         assertTrue(Perfil.SECRETARIA.permite(Acao.RECEBER_ALUGUEL));
     }

@@ -6,8 +6,7 @@
   1. cabeçalho com o título e o resumo do mês;
   2. filtros: mês e busca (imóvel, inquilino ou contrato);
   3. cartão com abas por situação (com a contagem de cada uma) e a tabela.
-  O botão "Gerar aluguéis do mês" é da BOARD-37 e o "Receber" é da BOARD-39:
-  os lugares deles estão marcados abaixo.
+  O botão "Gerar cobranças do mês" é da BOARD-37; o "Receber" é da BOARD-39.
 -->
 
 <?import javafx.geometry.Insets?>
@@ -33,9 +32,13 @@
                 <Label text="Aluguéis" styleClass="titulo"/>
                 <Label fx:id="contagem" styleClass="texto"/>
             </VBox>
-            <!-- BOARD-37: o botão "Gerar aluguéis do mês" entra aqui, à direita do título. -->
+            <Button fx:id="botaoGerar" text="Gerar cobranças do mês" onAction="#gerarDoMes"
+                    styleClass="botao-primario" disable="true">
+                <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
+            </Button>
         </HBox>
 
+        <Label fx:id="mensagemOperacao" wrapText="true" visible="false" managed="false" styleClass="texto"/>
         <HBox spacing="12" alignment="CENTER_LEFT">
             <ComboBox fx:id="campoMes" prefWidth="235" accessibleText="Mês dos aluguéis"/>
             <TextField fx:id="campoBusca" promptText="Buscar por imóvel, inquilino ou contrato" HBox.hgrow="ALWAYS"
@@ -72,7 +75,7 @@
                     <TableColumn fx:id="colunaValor" text="Valor do mês" prefWidth="140" minWidth="130"
                                  styleClass="coluna-numero"/>
                     <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="150" minWidth="140"/>
-                    <!-- BOARD-39: a coluna com o botão "Receber" entra aqui. -->
+                    <TableColumn fx:id="colunaReceber" text="Recebimento" prefWidth="130" minWidth="120"/>
                 </columns>
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>

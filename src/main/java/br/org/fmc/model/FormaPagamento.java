@@ -2,9 +2,15 @@ package br.org.fmc.model;
 
 public enum FormaPagamento {
     DINHEIRO("Dinheiro"),
-    CHEQUE("Cheque"),
+    BOLETO("Boleto"),
     PIX("PIX"),
-    TRANSFERENCIA("Transferência");
+    TRANSFERENCIA("Transferência"),
+    /** Mantido para leitura de pagamentos históricos. */
+    CHEQUE("Cheque");
+
+    public static java.util.List<FormaPagamento> disponiveis() {
+        return java.util.List.of(DINHEIRO, BOLETO, PIX, TRANSFERENCIA);
+    }
 
     private final String descricao;
 
@@ -12,7 +18,7 @@ public enum FormaPagamento {
         this.descricao = descricao;
     }
 
-    /** Regra da Fundação: dinheiro e cheque entram no Caixa; PIX e transferência, no Banco. */
+    /** Dinheiro e cheques históricos entram no Caixa; boleto, PIX e transferência, no Banco. */
     public boolean vaiParaCaixa() {
         return this == DINHEIRO || this == CHEQUE;
     }

@@ -29,7 +29,7 @@ public enum Acao {
     ENCERRAR_CONTRATO("Contratos", "Encerrar contrato (saída do inquilino)", VER_CONTRATOS),
 
     VER_ALUGUEIS("Aluguéis", "Ver aluguéis e números financeiros", null),
-    GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),
+    GERAR_ALUGUEIS("Aluguéis", "Gerar cobranças do mês", VER_ALUGUEIS),
     RECEBER_ALUGUEL("Aluguéis", "Receber aluguel e emitir recibo", VER_ALUGUEIS),
 
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),

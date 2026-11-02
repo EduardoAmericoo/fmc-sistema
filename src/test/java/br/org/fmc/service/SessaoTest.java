@@ -29,7 +29,7 @@ class SessaoTest {
     void exigirBarraQuemNaoTemPermissao() {
         Sessao.iniciar(new Usuario("Contabilidade", "contabilidade@exemplo.org", Perfil.FINANCEIRO));
         assertDoesNotThrow(() -> Sessao.exigir(Acao.VER_ALUGUEIS));
-        assertThrows(AcessoNegadoException.class, () -> Sessao.exigir(Acao.RECEBER_ALUGUEL));
+        assertThrows(AcessoNegadoException.class, () -> Sessao.exigir(Acao.CRIAR_USUARIO));
     }
 
     @Test

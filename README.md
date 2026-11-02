@@ -101,8 +101,20 @@ Acessos depois da carga:
 | `admin@fmc.org` | `Fmc@2026` | Administrador inicial (o mesmo de sempre) |
 | `administrador@exemplo.org` | `teste123` | Administrador |
 | `secretaria@exemplo.org` | `teste123` | Secretaria |
-| `financeiro@exemplo.org` | `teste123` | Financeiro (só consulta) |
+| `financeiro@exemplo.org` | `teste123` | Financeiro (consulta, gera cobranças, PDF fictício e recebe aluguéis) |
 | `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
+
+Na tela **Aluguéis**, escolha um mês e clique em **Gerar cobranças do mês**.
+Repetir a geração preserva as cobranças existentes; contratos encerrados ficam de fora.
+Na linha de uma cobrança em aberto, clique em **Receber → Gerar boleto fictício (PDF)** para salvar uma
+demonstração com cliente, imóvel, vencimento e valores. O documento não é um boleto bancário,
+não pode ser pago e não registra recebimento. A geração mostra o resultado na própria tela.
+
+Para dar baixa, clique em **Receber** na linha do aluguel em aberto, informe a data e a forma
+de pagamento e confira o total antes de confirmar. Os primeiros 5 dias após o vencimento
+não têm encargos; depois disso são aplicados multa de 10%, juros de 1% ao mês ou fração
+e correção simulada de 0,35% ao mês. O recebimento salva os valores calculados e muda a situação
+para **Pago**, sem permitir receber a mesma cobrança duas vezes.
 
 Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC".
 

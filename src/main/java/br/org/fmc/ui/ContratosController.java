@@ -210,7 +210,7 @@ public class ContratosController {
         campoImovel.setConverter(texto(ContratosController::descreverImovel));
         campoPrazo.getItems().setAll(PrazoContrato.values());
         campoFiadorEstadoCivil.getItems().setAll(EstadoCivil.values());
-        campoCaucaoForma.getItems().setAll(FormaPagamento.values());
+        campoCaucaoForma.getItems().setAll(FormaPagamento.disponiveis());
 
         // Prévias que se atualizam enquanto a pessoa preenche.
         campoImovel.valueProperty().addListener((obs, antes, agora) -> imovelEscolhido(antes, agora));

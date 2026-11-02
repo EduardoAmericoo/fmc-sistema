@@ -65,13 +65,15 @@ class PermissoesUsuarioTest {
     }
 
     @Test
-    void financeiroSoConsulta() {
+    void financeiroConsultaGeraERecebeAlugueis() {
         Usuario financeiro = new Usuario("Contabilidade", "contabilidade@exemplo.org", Perfil.FINANCEIRO);
         for (Tela tela : Tela.values()) {
             assertEquals(tela != Tela.USUARIOS, financeiro.podeAbrir(tela), tela.name());
         }
         for (Acao acao : Acao.values()) {
-            assertEquals(acao.getRequisito() == null && acao != Acao.VER_USUARIOS, financeiro.pode(acao), acao.name());
+            assertEquals((acao.getRequisito() == null && acao != Acao.VER_USUARIOS)
+                    || acao == Acao.GERAR_ALUGUEIS || acao == Acao.RECEBER_ALUGUEL,
+                    financeiro.pode(acao), acao.name());
         }
     }
 

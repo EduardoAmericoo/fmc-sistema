@@ -1,10 +1,17 @@
 package br.org.fmc.ui;
 
 import br.org.fmc.model.Aluguel;
+import br.org.fmc.model.Acao;
 import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.RecebimentoAluguel;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoAlugueis;
 import br.org.fmc.service.ServicoAlugueis.Cobranca;
+import br.org.fmc.service.ServicoBoletoFicticio;
+import br.org.fmc.service.Sessao;
+import java.io.File;
+import java.nio.file.Files;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -18,10 +25,16 @@ import java.util.Map;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.concurrent.Task;
+import javafx.stage.FileChooser;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -118,12 +131,20 @@ public class AlugueisController {
     @FXML
     private Button botaoCobranca;
     @FXML
+    private Button botaoGerar;
+    @FXML
+    private Label mensagemOperacao;
+    @FXML
+    private TableColumn<Aluguel, Aluguel> colunaReceber;
+    private boolean gerando;
+    @FXML
     private TableColumn<Cobranca, Cobranca> cobrancaDevido;
     @FXML
     private TableColumn<Cobranca, Cobranca> cobrancaAcao;
 
     @FXML
     private void initialize() {
+        Permissoes.mostrarSe(botaoGerar, Acao.GERAR_ALUGUEIS);
         hoje = servico.hoje();
         montarTabela();
         montarTabelaCobranca();
@@ -155,7 +176,10 @@ public class AlugueisController {
                 return null; // a lista não é digitável
             }
         });
-        campoMes.valueProperty().addListener((obs, antes, agora) -> carregarMes());
+        campoMes.valueProperty().addListener((obs, antes, agora) -> {
+            botaoGerar.setDisable(gerando || agora == null || TODOS_EM_ABERTO.equals(agora));
+            carregarMes();
+        });
         campoBusca.textProperty().addListener((obs, antes, agora) -> aplicarFiltros());
         campoBusca.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
@@ -218,6 +242,15 @@ public class AlugueisController {
         });
         colunaSituacao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaSituacao.setCellFactory(c -> celula(a -> selo(a.getSituacao(hoje))));
+        colunaReceber.setVisible(Sessao.pode(Acao.RECEBER_ALUGUEL));
+        colunaReceber.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        colunaReceber.setCellFactory(c -> celula(a -> {
+            Button receber = new Button("Receber");
+            receber.getStyleClass().add("botao-secundario");
+            receber.setDisable(a.estaPago());
+            receber.setOnAction(e -> abrirRecebimento(a));
+            return receber;
+        }));
     }
 
     /** Lista de cobrança: quem é, quantos aluguéis deve, há quanto tempo e quanto deve hoje. */
@@ -303,6 +336,192 @@ public class AlugueisController {
 
     private long diasAte(Aluguel a) {
         return java.time.temporal.ChronoUnit.DAYS.between(hoje, a.getVencimento());
+    }
+
+    @FXML
+    private void gerarDoMes() {
+        YearMonth mes = campoMes.getValue();
+        if (gerando || mes == null || TODOS_EM_ABERTO.equals(mes)) {
+            return;
+        }
+        gerando = true;
+        botaoGerar.setDisable(true);
+        informar("Gerando cobranças de " + MES.format(mes) + "…");
+        Task<Integer> tarefa = new Task<>() {
+            @Override protected Integer call() throws Exception { return servico.gerarDoMes(mes); }
+        };
+        tarefa.setOnSucceeded(evento -> {
+            finalizarGeracao();
+            carregarMes();
+            contarCobranca();
+            int gerados = tarefa.getValue();
+            informar(gerados == 0 ? "Nenhuma cobrança nova para " + MES.format(mes)
+                    + ". As existentes foram mantidas. Para emitir uma demonstração, clique em Receber e depois em Gerar boleto fictício (PDF)."
+                    : gerados + " cobrança(s) gerada(s) para " + MES.format(mes) + ".");
+        });
+        tarefa.setOnFailed(evento -> {
+            finalizarGeracao();
+            informar(tarefa.getException() instanceof RegraNegocioException
+                    ? tarefa.getException().getMessage() : "Não foi possível gerar as cobranças. Tente novamente.");
+        });
+        iniciarTarefa(tarefa);
+    }
+
+    private void finalizarGeracao() {
+        gerando = false;
+        botaoGerar.setDisable(campoMes.getValue() == null || TODOS_EM_ABERTO.equals(campoMes.getValue()));
+    }
+
+    private void informar(String mensagem) {
+        mensagemOperacao.setText(mensagem);
+        mensagemOperacao.setVisible(true);
+        mensagemOperacao.setManaged(true);
+    }
+
+    private void salvarBoleto(Aluguel aluguel, Button botao, javafx.stage.Window janela,
+            java.util.function.Consumer<String> mensagem) {
+        FileChooser escolha = new FileChooser();
+        escolha.setTitle("Salvar boleto fictício — sem validade para pagamento");
+        escolha.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF", "*.pdf"));
+        escolha.setInitialFileName("boleto-ficticio-" + aluguel.getContrato().getNumero()
+                + "-" + aluguel.getCompetencia() + ".pdf");
+        File arquivo = escolha.showSaveDialog(janela);
+        if (arquivo == null) return;
+        botao.setDisable(true);
+        mensagem.accept("Preparando PDF fictício…");
+        Task<Void> tarefa = new Task<>() {
+            @Override protected Void call() throws Exception {
+                byte[] pdf = new ServicoBoletoFicticio().gerar(aluguel, servico.hoje());
+                Files.write(arquivo.toPath(), pdf);
+                return null;
+            }
+        };
+        tarefa.setOnSucceeded(e -> {
+            botao.setDisable(aluguel.estaPago());
+            mensagem.accept("PDF fictício salvo em " + arquivo.getAbsolutePath() + ". Sem validade para pagamento.");
+        });
+        tarefa.setOnFailed(e -> {
+            botao.setDisable(aluguel.estaPago());
+            mensagem.accept(tarefa.getException() instanceof RegraNegocioException ? tarefa.getException().getMessage()
+                    : "Não foi possível salvar o PDF. Verifique a pasta escolhida e tente novamente.");
+        });
+        iniciarTarefa(tarefa);
+    }
+
+    private static void iniciarTarefa(Task<?> tarefa) {
+        Thread executor = new Thread(tarefa, "fmc-cobrancas");
+        executor.setDaemon(true);
+        executor.start();
+    }
+
+    private void abrirRecebimento(Aluguel aluguel) {
+        Dialog<Void> janela = new Dialog<>();
+        janela.setTitle("Receber aluguel");
+        janela.setHeaderText(aluguel.getContrato().getInquilino().getNome() + " • "
+                + aluguel.getContrato().getNumero() + " • " + aluguel.getCompetencia());
+        janela.initOwner(tabela.getScene().getWindow());
+        DatePicker data = new DatePicker(servico.hoje());
+        ComboBox<FormaPagamento> forma = new ComboBox<>();
+        forma.getItems().setAll(FormaPagamento.disponiveis());
+        forma.setPromptText("Escolha a forma de pagamento");
+        Label resumo = new Label();
+        resumo.setWrapText(true);
+        Label erro = new Label();
+        erro.setWrapText(true);
+        erro.getStyleClass().add("erro");
+        Runnable atualizar = () -> {
+            try {
+                LocalDate dia = data.getValue();
+                if (dia == null || dia.isAfter(servico.hoje())) {
+                    resumo.setText("Informe uma data de pagamento válida, até hoje.");
+                    return;
+                }
+                var encargos = aluguel.encargosEm(dia);
+                resumo.setText("Vencimento: " + Formatos.data(aluguel.getVencimento())
+                        + "\nValor base: " + Formatos.moeda(aluguel.base())
+                        + "\nMulta (10%): " + Formatos.moeda(encargos.getMulta())
+                        + "\nJuros (1% ao mês ou fração): " + Formatos.moeda(encargos.getJuros())
+                        + "\nCorreção simulada (0,35% ao mês): " + Formatos.moeda(encargos.getCorrecao())
+                        + "\nTotal a receber: " + Formatos.moeda(aluguel.base().add(encargos.total()))
+                        + "\nAté 5 dias após o vencimento: sem encargos.");
+            } catch (RuntimeException e) {
+                resumo.setText("Informe uma data válida.");
+            }
+        };
+        data.valueProperty().addListener((obs, antes, agora) -> atualizar.run());
+        data.getEditor().focusedProperty().addListener((obs, antes, agora) -> {
+            if (!agora) {
+                try { data.commitValue(); atualizar.run(); }
+                catch (RuntimeException e) { resumo.setText("Informe uma data válida."); }
+            }
+        });
+        atualizar.run();
+        VBox campos = new VBox(10, new Label("Data do pagamento"), data, new Label("Forma de pagamento"),
+                forma, resumo, erro);
+        Button gerarBoleto = new Button("Gerar boleto fictício (PDF)", new FontIcon("fth-file-text"));
+        gerarBoleto.getStyleClass().add("botao-secundario");
+        Permissoes.mostrarSe(gerarBoleto, Acao.GERAR_ALUGUEIS);
+        Label orientacaoBoleto = new Label("Para cobrar antes de receber, gere o PDF fictício. "
+                + "Isso mantém o aluguel em aberto e não exige escolher a forma de pagamento. "
+                + "O PDF usa a data de emissão de hoje e não tem validade para pagamento.");
+        orientacaoBoleto.setWrapText(true);
+        Permissoes.mostrarSe(orientacaoBoleto, Acao.GERAR_ALUGUEIS);
+        Label resultadoBoleto = new Label();
+        resultadoBoleto.setWrapText(true);
+        gerarBoleto.setOnAction(e -> salvarBoleto(aluguel, gerarBoleto,
+                janela.getDialogPane().getScene().getWindow(), resultadoBoleto::setText));
+        campos.getChildren().addAll(gerarBoleto, orientacaoBoleto, resultadoBoleto);
+        campos.setPrefWidth(480);
+        janela.getDialogPane().setContent(campos);
+        ButtonType confirmar = new ButtonType("Confirmar recebimento", ButtonBar.ButtonData.OK_DONE);
+        janela.getDialogPane().getButtonTypes().addAll(confirmar, ButtonType.CANCEL);
+        Button confirmarBotao = (Button) janela.getDialogPane().lookupButton(confirmar);
+        Button cancelarBotao = (Button) janela.getDialogPane().lookupButton(ButtonType.CANCEL);
+        final boolean[] salvando = {false};
+        janela.setOnCloseRequest(e -> { if (salvando[0]) e.consume(); });
+        confirmarBotao.addEventFilter(javafx.event.ActionEvent.ACTION, evento -> {
+            evento.consume();
+            try { data.commitValue(); }
+            catch (RuntimeException e) { erro.setText("Informe uma data válida."); return; }
+            if (data.getValue() == null || data.getValue().isAfter(servico.hoje()) || forma.getValue() == null) {
+                erro.setText("Informe a data até hoje e escolha a forma de pagamento.");
+                return;
+            }
+            LocalDate dia = data.getValue();
+            FormaPagamento meio = forma.getValue();
+            salvando[0] = true;
+            gerarBoleto.setDisable(true);
+            confirmarBotao.setDisable(true);
+            cancelarBotao.setDisable(true);
+            data.setDisable(true);
+            forma.setDisable(true);
+            erro.setText("Registrando pagamento…");
+            Task<RecebimentoAluguel> tarefa = new Task<>() {
+                @Override protected RecebimentoAluguel call() throws Exception {
+                    return servico.receber(aluguel.getId(), dia, meio);
+                }
+            };
+            tarefa.setOnSucceeded(e -> {
+                salvando[0] = false;
+                janela.close();
+                carregarMes();
+                contarCobranca();
+                informar("Pagamento registrado: " + Formatos.moeda(tarefa.getValue().total()) + " • "
+                        + meio + " • " + Formatos.data(dia) + ". Situação: Pago.");
+            });
+            tarefa.setOnFailed(e -> {
+                salvando[0] = false;
+                confirmarBotao.setDisable(false);
+                gerarBoleto.setDisable(false);
+                cancelarBotao.setDisable(false);
+                data.setDisable(false);
+                forma.setDisable(false);
+                erro.setText(tarefa.getException() instanceof RegraNegocioException
+                        ? tarefa.getException().getMessage() : "Não foi possível registrar. Tente novamente.");
+            });
+            iniciarTarefa(tarefa);
+        });
+        janela.show();
     }
 
     /** Ao trocar de mês: busca os aluguéis do mês no banco. */

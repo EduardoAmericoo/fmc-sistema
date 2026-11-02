@@ -7,6 +7,11 @@ import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Fianca;
 import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.StatusContrato;
+import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.RecebimentoAluguel;
+import br.org.fmc.model.Encargos;
+import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.AluguelRepository;
 import br.org.fmc.util.TextoBusca;
 import java.math.BigDecimal;
@@ -28,9 +33,39 @@ import java.util.stream.Collectors;
  * (Aluguel.getSituacao): a vencer até o dia do vencimento; em tolerância até 5 dias
  * depois; em atraso a partir do 6º dia; paga quando o pagamento foi registrado.
  *
- * A geração dos aluguéis do mês é a BOARD-37 e o recebimento é a BOARD-39.
+ * Gera os aluguéis do mês (BOARD-37); o recebimento é a BOARD-39.
  */
 public class ServicoAlugueis {
+
+    public RecebimentoAluguel receber(long aluguelId, LocalDate data, FormaPagamento forma) throws SQLException {
+        Sessao.exigir(Acao.RECEBER_ALUGUEL);
+        if (data == null) throw new RegraNegocioException("Informe a data do pagamento.");
+        if (forma == null) throw new RegraNegocioException("Escolha a forma de pagamento.");
+        if (data.isAfter(hoje())) throw new RegraNegocioException("A data do pagamento não pode ser futura.");
+        Aluguel aluguel = alugueis.buscarPorId(aluguelId)
+                .orElseThrow(() -> new RegraNegocioException("Aluguel não encontrado."));
+        if (aluguel.estaPago()) throw new RegraNegocioException("Este aluguel já foi pago.");
+        Encargos encargos = aluguel.encargosEm(data);
+        RecebimentoAluguel recebido = new RecebimentoAluguel(aluguelId, data, forma, aluguel.base(),
+                encargos.getMulta(), encargos.getJuros(), encargos.getCorrecao(), aluguel.base().add(encargos.total()));
+        if (!alugueis.registrarRecebimento(recebido)) {
+            throw new RegraNegocioException("Este aluguel já foi pago. Atualize a lista.");
+        }
+        return recebido;
+    }
+
+    /** Gera somente as cobranças ausentes, usando os valores e o vencimento do contrato. */
+    public int gerarDoMes(YearMonth mes) throws SQLException {
+        Sessao.exigir(Acao.GERAR_ALUGUEIS);
+        if (mes == null) {
+            throw new RegraNegocioException("Escolha o mês.");
+        }
+        List<Aluguel> novos = new ContratoRepository().listarTodos().stream()
+                .filter(c -> c.getStatus() == StatusContrato.ATIVO && c.cobreCompetencia(mes))
+                .map(c -> new Aluguel(c, mes))
+                .toList();
+        return alugueis.inserirAusentes(novos);
+    }
 
     /** Quantos aluguéis e quanto somam (sem encargos) numa situação. */
     public record Total(int quantidade, BigDecimal valor) {

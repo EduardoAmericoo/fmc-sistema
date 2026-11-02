@@ -15,7 +15,7 @@ class PerfilTest {
         assertTrue(Perfil.SECRETARIA.permite(Acao.RECEBER_ALUGUEL));
         assertFalse(Perfil.SECRETARIA.permite(Acao.EDITAR_PERMISSOES));
         assertTrue(Perfil.FINANCEIRO.permite(Acao.VER_ALUGUEIS));
-        assertFalse(Perfil.FINANCEIRO.permite(Acao.RECEBER_ALUGUEL));
+        assertTrue(Perfil.FINANCEIRO.permite(Acao.RECEBER_ALUGUEL));
     }
 
     @Test
@@ -32,6 +32,9 @@ class PerfilTest {
         assertTrue(FormaPagamento.DINHEIRO.vaiParaCaixa());
         assertTrue(FormaPagamento.CHEQUE.vaiParaCaixa());
         assertFalse(FormaPagamento.PIX.vaiParaCaixa());
+        assertFalse(FormaPagamento.BOLETO.vaiParaCaixa());
+        assertTrue(FormaPagamento.disponiveis().contains(FormaPagamento.BOLETO));
+        assertFalse(FormaPagamento.disponiveis().contains(FormaPagamento.CHEQUE));
         assertFalse(FormaPagamento.TRANSFERENCIA.vaiParaCaixa());
     }
 }
