@@ -9,6 +9,7 @@ import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.RegrasNegocio;
+import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.model.StatusContrato;
 import br.org.fmc.service.DadosContrato;
 import br.org.fmc.service.RegraNegocioException;
@@ -32,14 +33,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -61,50 +67,20 @@ public class ContratosController {
 
     @FXML
     private Label contagem;
+    /** Busca e filtro por situação (BOARD-59). */
     @FXML
-    private HBox faixaRecorte;
+    private TextField campoBusca;
     @FXML
-    private Label textoRecorte;
+    private ComboBox<SituacaoContrato> filtroSituacao;
 
-    /**
-     * Recortes que o Painel pede ao abrir esta tela (BOARD-40/61). Quando a busca e os filtros da
-     * BOARD-59 chegarem, eles podem passar a usar estes mesmos recortes.
-     */
-    public enum Recorte {
-        VENCIDOS("os contratos vencidos, que não geram aluguel até serem prorrogados ou encerrados"),
-        VENCENDO("os contratos que vencem nos próximos " + RegrasNegocio.DIAS_AVISO_VENCIMENTO + " dias");
+    /** Todos os contratos carregados do banco; a tabela mostra só os que passam na busca e no filtro. */
+    private List<Contrato> todos = List.of();
 
-        private final String descricao;
-
-        Recorte(String descricao) {
-            this.descricao = descricao;
-        }
-
-        public String getDescricao() {
-            return descricao;
-        }
-
-        boolean inclui(Contrato c) {
-            if (c.getStatus() != StatusContrato.ATIVO) {
-                return false;
-            }
-            LocalDate hoje = LocalDate.now();
-            return this == VENCIDOS
-                    ? c.getDataTermino().isBefore(hoje)
-                    : !c.getDataTermino().isBefore(hoje)
-                            && !c.getDataTermino().isAfter(hoje.plusDays(RegrasNegocio.DIAS_AVISO_VENCIMENTO));
-        }
-    }
-
-    /** O recorte em uso, ou null para mostrar todos. */
-    private Recorte recorte;
-
-    /** Botão "Ver todos" da faixa do recorte. */
-    @FXML
-    private void verTodos() {
-        recorte = null;
-        carregarLista();
-    }
+    /** O que a tabela mostra quando não há contrato nenhum, e quando a busca ou o filtro não achou nada. */
+    private VBox vazioSemCadastro;
+    private VBox vazioBusca;
+    private Label tituloVazioBusca;
+    private Label dicaVazioBusca;
     @FXML
     private Button botaoNovo;
     @FXML
@@ -238,9 +214,38 @@ public class ContratosController {
 
         esconder(veu);
         esconder(toast);
-        // Vindo do Painel (ex.: "Contratos vencidos"): mostra só esses, com a faixa "Ver todos".
-        if (Navegador.filtroRecebido() instanceof Recorte pedido) {
-            recorte = pedido;
+
+        // Busca e filtro: atualizam enquanto a pessoa digita ou escolhe; Esc limpa a busca;
+        // Ctrl+F leva o cursor para a busca (igual às telas de Imóveis e Inquilinos).
+        filtroSituacao.getItems().setAll(SituacaoContrato.values());
+        filtroSituacao.setButtonCell(celulaSituacao());
+        filtroSituacao.setCellFactory(l -> celulaSituacao());
+        filtroSituacao.valueProperty().addListener((obs, antes, agora) -> aplicarFiltros());
+        campoBusca.textProperty().addListener((obs, antes, agora) -> aplicarFiltros());
+        campoBusca.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                limparFiltros();
+            }
+        });
+        campoBusca.sceneProperty().addListener((obs, antes, cena) -> {
+            if (cena != null) {
+                cena.getAccelerators().put(new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN),
+                        () -> campoBusca.requestFocus());
+            }
+        });
+
+        // Clicar na linha (ou Enter na linha escolhida) abre os detalhes do contrato.
+        tabela.setRowFactory(t -> linhaClicavel());
+        tabela.setOnKeyPressed(e -> {
+            Contrato escolhido = tabela.getSelectionModel().getSelectedItem();
+            if (e.getCode() == KeyCode.ENTER && escolhido != null) {
+                DetalhesContratoController.abrir(escolhido);
+            }
+        });
+
+        // Vindo do Painel (ex.: "Contratos vencidos"): já abre filtrado por essa situação.
+        if (Navegador.filtroRecebido() instanceof SituacaoContrato pedida) {
+            filtroSituacao.setValue(pedida);
         }
         carregarLista();
     }
@@ -297,7 +302,51 @@ public class ContratosController {
         VBox vazio = new VBox(8, icone, titulo, dica);
         vazio.setAlignment(Pos.CENTER);
         vazio.getStyleClass().add("tabela-vazia");
-        tabela.setPlaceholder(vazio);
+        vazioSemCadastro = vazio;
+
+        // Busca ou filtro sem resultado: diz o que foi pedido e oferece limpar.
+        tituloVazioBusca = new Label();
+        tituloVazioBusca.getStyleClass().add("tabela-vazia-titulo");
+        dicaVazioBusca = new Label();
+        dicaVazioBusca.getStyleClass().add("texto");
+        Button limpar = new Button("Limpar filtros");
+        limpar.getStyleClass().add("botao-secundario");
+        limpar.setOnAction(e -> limparFiltros());
+        vazioBusca = new VBox(8, new FontIcon("fth-search"), tituloVazioBusca, dicaVazioBusca, limpar);
+        vazioBusca.setAlignment(Pos.CENTER);
+        vazioBusca.getStyleClass().add("tabela-vazia");
+        tabela.setPlaceholder(vazioSemCadastro);
+    }
+
+    /** Linha da tabela que abre os detalhes ao clicar, menos quando o clique foi num botão da linha. */
+    private TableRow<Contrato> linhaClicavel() {
+        TableRow<Contrato> linha = new TableRow<>();
+        linha.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY && !linha.isEmpty() && !clicouEmBotao(e.getTarget())) {
+                DetalhesContratoController.abrir(linha.getItem());
+            }
+        });
+        return linha;
+    }
+
+    private static boolean clicouEmBotao(Object alvo) {
+        for (Node no = alvo instanceof Node n ? n : null; no != null; no = no.getParent()) {
+            if (no instanceof Button) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Mostra "Todas as situações" quando nada está escolhido no filtro. */
+    private ListCell<SituacaoContrato> celulaSituacao() {
+        return new ListCell<>() {
+            @Override
+            protected void updateItem(SituacaoContrato item, boolean vazia) {
+                super.updateItem(item, vazia);
+                setText(vazia || item == null ? "Todas as situações" : item.toString());
+            }
+        };
     }
 
     /**
@@ -500,25 +549,47 @@ public class ContratosController {
 
     private void carregarLista() {
         try {
-            List<Contrato> todos = servico.listar();
-            tabela.getItems().setAll(recorte == null ? todos : todos.stream().filter(recorte::inclui).toList());
-            mostrar(faixaRecorte, recorte != null);
-            if (recorte != null) {
-                textoRecorte.setText("Mostrando só " + recorte.getDescricao() + " (" + tabela.getItems().size() + ").");
-            }
-            int total = todos.size();
-            long ativos = todos.stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).count();
-            long vencidos = todos.stream()
-                    .filter(c -> c.getStatus() == StatusContrato.ATIVO && c.getDataTermino().isBefore(LocalDate.now()))
-                    .count();
-            contagem.setText((total == 1 ? "1 contrato cadastrado" : total + " contratos cadastrados, " + ativos + " ativos")
-                    + (vencidos == 0 ? "" : " · " + vencidos + (vencidos == 1 ? " vencido" : " vencidos")
-                            + ", sem gerar aluguel até serem prorrogados"));
+            todos = servico.listar();
+            aplicarFiltros();
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
             contagem.setText("Erro no banco de dados: " + e.getMessage());
         }
+    }
+
+    /** Mostra na tabela só os contratos que passam na busca e no filtro e atualiza a contagem. */
+    private void aplicarFiltros() {
+        SituacaoContrato situacao = filtroSituacao.getValue();
+        String busca = campoBusca.getText();
+        boolean filtrando = situacao != null || !busca.isBlank();
+        List<Contrato> filtrados = ServicoContratos.filtrar(todos, situacao, busca, LocalDate.now());
+        tabela.getItems().setAll(filtrados);
+
+        int total = todos.size();
+        if (filtrando) {
+            contagem.setText(filtrados.size() + " de " + total + (total == 1 ? " contrato" : " contratos"));
+            tituloVazioBusca.setText(busca.isBlank() ? "Nenhum contrato " + situacao.getDescricao().toLowerCase()
+                    : "Nenhum contrato encontrado para \"" + busca.trim() + "\"");
+            dicaVazioBusca.setText("Dá para buscar por número do contrato, imóvel, nome do inquilino ou CPF.");
+            tabela.setPlaceholder(vazioBusca);
+        } else {
+            long ativos = todos.stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).count();
+            long vencidos = todos.stream()
+                    .filter(c -> SituacaoContrato.de(c, LocalDate.now()) == SituacaoContrato.VENCIDO).count();
+            contagem.setText((total == 1 ? "1 contrato cadastrado" : total + " contratos cadastrados, " + ativos + " ativos")
+                    + (vencidos == 0 ? "" : " · " + vencidos + (vencidos == 1 ? " vencido" : " vencidos")
+                            + ", sem gerar aluguel até serem prorrogados"));
+            tabela.setPlaceholder(vazioSemCadastro);
+        }
+    }
+
+    /** Botão "Limpar filtros" (ao lado da busca e na lista vazia) e a tecla Esc na busca. */
+    @FXML
+    private void limparFiltros() {
+        filtroSituacao.setValue(null);
+        campoBusca.clear();
+        campoBusca.requestFocus();
     }
 
     private void mostrarErros(String texto) {

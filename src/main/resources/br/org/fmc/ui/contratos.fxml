@@ -2,6 +2,7 @@
 
 <!--
   BOARD-36 · Tela "Contratos", no mesmo modelo da tela de Inquilinos.
+  BOARD-59 · Busca, filtro por situação e janela de detalhes (clique na linha).
 
   Três camadas empilhadas (StackPane), de baixo para cima:
   1. a página: cabeçalho (título + botão "Novo contrato") e a tabela num cartão;
@@ -43,11 +44,12 @@
             </Button>
         </HBox>
 
-        <!-- Faixa que aparece quando a tela vem do Painel já filtrada (ex.: só os vencidos) -->
-        <HBox fx:id="faixaRecorte" styleClass="resumo-calculado" spacing="10" alignment="CENTER_LEFT">
-            <FontIcon iconLiteral="fth-filter"/>
-            <Label fx:id="textoRecorte" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            <Button text="Ver todos" onAction="#verTodos" styleClass="botao-secundario, botao-pequeno"/>
+        <!-- Busca e filtro por situação (BOARD-59), no mesmo formato das telas de Imóveis e Inquilinos -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="campoBusca" promptText="Buscar por contrato, imóvel, inquilino ou CPF"
+                       HBox.hgrow="ALWAYS" accessibleText="Buscar contrato"/>
+            <ComboBox fx:id="filtroSituacao" prefWidth="210" promptText="Todas as situações"/>
+            <Button text="Limpar filtros" onAction="#limparFiltros"/>
         </HBox>
 
         <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
