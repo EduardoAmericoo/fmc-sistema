@@ -6,28 +6,39 @@ import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Encerramento;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Fianca;
-import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.Prorrogacao;
+import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.util.Formatos;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
  * Controla a janela "Detalhes do contrato" (ui/detalhes-contrato.fxml), BOARD-59.
  * Só mostra o que já está no contrato carregado: não grava nada nem chama o banco.
+ *
+ * O desenho segue a janela "Contrato" do protótipo: três colunas (Imóvel, Locatário e
+ * Garantia), com o rótulo à esquerda e o valor à direita; embaixo, prazo, vigência e
+ * vencimento; e a situação do contrato em caixas coloridas (verde, amarela, vermelha, cinza).
  */
 public class DetalhesContratoController {
 
@@ -37,8 +48,6 @@ public class DetalhesContratoController {
     private StackPane veu;
     @FXML
     private Label titulo;
-    @FXML
-    private Label subtitulo;
     @FXML
     private Label seloSituacao;
     @FXML
@@ -70,10 +79,9 @@ public class DetalhesContratoController {
     }
 
     private void preencher(Contrato c) {
+        LocalDate hoje = LocalDate.now();
+        SituacaoContrato situacao = SituacaoContrato.de(c, hoje);
         titulo.setText("Contrato " + c.getNumero());
-        subtitulo.setText(c.getImovel().getCodigo() + " · " + c.getInquilino().getNome());
-
-        SituacaoContrato situacao = SituacaoContrato.de(c, LocalDate.now());
         seloSituacao.setText(switch (situacao) {
             case ATIVO -> "Ativo";
             case VENCENDO -> "Vencendo";
@@ -88,107 +96,166 @@ public class DetalhesContratoController {
         });
 
         corpo.getChildren().addAll(
-                secaoContrato(c),
-                secao("Valores no dia da assinatura",
-                        "Aluguel", Formatos.moeda(c.getValorAluguel()),
-                        "Taxa de luz", Formatos.moeda(c.getTaxaLuz()),
-                        "IPTU", Formatos.moeda(c.getValorIptu())),
-                secaoImovel(c.getImovel()),
-                secaoInquilino(c.getInquilino()),
-                secaoGarantia(c.getGarantia()));
-        if (c.getEncerramento() != null) {
-            corpo.getChildren().add(secaoEncerramento(c.getEncerramento()));
+                tresColunas(colunaImovel(c), colunaLocatario(c.getInquilino()), colunaGarantia(c)),
+                tresColunas(linha("Prazo", c.getPrazo().toString()),
+                        linha("Vigência", Formatos.data(c.getDataEntregaChaves()) + " a "
+                                + Formatos.data(c.getDataTermino())),
+                        linha("Vencimento", "Todo dia " + c.getDiaVencimento())),
+                secaoSituacao(c, situacao, hoje));
+    }
+
+    // ---------- as três colunas ----------
+
+    private static VBox colunaImovel(Contrato c) {
+        Imovel i = c.getImovel();
+        String endereco = i.getEndereco() + (i.getBairro() == null || i.getBairro().isBlank() ? "" : " · " + i.getBairro());
+        return coluna("Imóvel",
+                linha("Código", i.getCodigo()),
+                linha("Unidade", texto(i.getUnidade())),
+                linha("Endereço", endereco),
+                linha("Aluguel", Formatos.moeda(c.getValorAluguel())),
+                linha("Taxa de luz", Formatos.moeda(c.getTaxaLuz())),
+                linha("IPTU", Formatos.moeda(c.getValorIptu())));
+    }
+
+    private static VBox colunaLocatario(Inquilino i) {
+        List<Node> linhas = new ArrayList<>(List.of(
+                linha("Nome", i.getNome()),
+                linha("CPF", i.getCpf().formatado()),
+                linha("Telefone", texto(i.getTelefone()))));
+        if (i.getConjuge() != null) {
+            linhas.add(linha("Cônjuge", i.getConjuge().getNome()));
         }
+        linhas.add(linha("Renda familiar", Formatos.moeda(i.rendaConsiderada())));
+        return coluna("Locatário", linhas.toArray(Node[]::new));
     }
 
-    private static Node secaoContrato(Contrato c) {
-        return secao("Contrato",
-                "Número", c.getNumero(),
-                "Situação", SituacaoContrato.de(c, LocalDate.now()) == SituacaoContrato.ENCERRADO
-                        ? "Encerrado" : c.getProrrogacoes().isEmpty() ? "Ativo" : "Prorrogado",
-                "Entrega das chaves", Formatos.data(c.getDataEntregaChaves()),
-                "Término", Formatos.data(c.getDataTermino()),
-                "Prazo", c.getPrazo().toString(),
-                "1º vencimento", Formatos.data(c.primeiroVencimento()),
-                "Dia de vencimento", "Todo dia " + c.getDiaVencimento());
-    }
-
-    private static Node secaoImovel(Imovel i) {
-        return secao("Imóvel",
-                "Código", i.getCodigo(),
-                "Unidade", texto(i.getUnidade()),
-                "Tipo", i.getTipo().toString(),
-                "Endereço", i.getEndereco(),
-                "Bairro", texto(i.getBairro()));
-    }
-
-    private static Node secaoInquilino(Inquilino i) {
-        return secao("Inquilino",
-                "Nome", i.getNome(),
-                "CPF", i.getCpf().formatado(),
-                "Telefone", texto(i.getTelefone()),
-                "E-mail", texto(i.getEmail()));
-    }
-
-    private static Node secaoGarantia(Garantia g) {
-        if (g instanceof Caucao caucao) {
-            return secao("Garantia: caução",
-                    "Valor", Formatos.moeda(caucao.getValor()),
-                    "Data de recebimento", Formatos.data(caucao.getDataRecebimento()),
-                    "Forma de pagamento", caucao.getFormaPagamento().toString(),
-                    "Recibo", texto(caucao.getNumeroRecibo()));
+    private static VBox colunaGarantia(Contrato c) {
+        if (c.getGarantia() instanceof Caucao caucao) {
+            return coluna("Garantia · caução",
+                    linha("Valor", Formatos.moeda(caucao.getValor())),
+                    linha("Recebida em", Formatos.data(caucao.getDataRecebimento())),
+                    linha("Forma", caucao.getFormaPagamento().toString()),
+                    linha("Recibo", texto(caucao.getNumeroRecibo())));
         }
-        Fiador fiador = ((Fianca) g).getFiador();
-        VBox bloco = new VBox(14, secao("Garantia: fiador",
-                "Nome", fiador.getNome(),
-                "CPF", fiador.getCpf().formatado(),
-                "Telefone", texto(fiador.getTelefone()),
-                "Estado civil", fiador.getEstadoCivil().toString(),
-                "Renda mensal", Formatos.moeda(fiador.getRendaMensal()),
-                "Endereço", texto(fiador.getEndereco())));
+        Fiador fiador = ((Fianca) c.getGarantia()).getFiador();
+        List<Node> linhas = new ArrayList<>(List.of(
+                linha("Nome", fiador.getNome()),
+                linha("CPF", fiador.getCpf().formatado()),
+                linha("Telefone", texto(fiador.getTelefone()))));
         Conjuge conjuge = fiador.getConjuge();
         if (conjuge != null) {
-            bloco.getChildren().add(secao("Cônjuge do fiador",
-                    "Nome", conjuge.getNome(),
-                    "CPF", conjuge.getCpf() == null ? SEM_DADO : conjuge.getCpf().formatado()));
+            linhas.add(linha("Cônjuge", conjuge.getNome()));
         }
-        return bloco;
+        linhas.add(linha("Renda", Formatos.moeda(fiador.rendaConsiderada())));
+        linhas.add(linha("Endereço", texto(fiador.getEndereco())));
+        return coluna("Garantia · fiador", linhas.toArray(Node[]::new));
     }
 
-    private static Node secaoEncerramento(Encerramento e) {
-        return secao("Encerramento",
-                "Chaves devolvidas em", Formatos.data(e.getDataSaida()),
-                "Motivo", e.getMotivo().toString(),
-                "Observação", texto(e.getObservacao()));
+    // ---------- situação do contrato ----------
+
+    /**
+     * A situação em caixas: a primeira diz o que está acontecendo com o contrato (mesma cor do
+     * selo do topo); depois a regra de renda e o histórico (prorrogações e encerramento).
+     */
+    private static VBox secaoSituacao(Contrato c, SituacaoContrato situacao, LocalDate hoje) {
+        long dias = ChronoUnit.DAYS.between(hoje, c.getDataTermino());
+        VBox secao = new VBox(8, titulo("Situação do contrato"), switch (situacao) {
+            case ATIVO -> veredito("veredito-ok", "Ativo até " + Formatos.data(c.getDataTermino())
+                    + ". Gera aluguel todo mês, com vencimento no dia " + c.getDiaVencimento() + ".");
+            case VENCENDO -> veredito("veredito-alerta", "Vence em " + Formatos.data(c.getDataTermino())
+                    + (dias == 0 ? ", hoje." : ", daqui a " + dias + (dias == 1 ? " dia." : " dias."))
+                    + " Combine com o inquilino se vai prorrogar ou sair.");
+            case VENCIDO -> veredito("veredito-erro", "Venceu em " + Formatos.data(c.getDataTermino())
+                    + " e não gera aluguel até ser prorrogado ou encerrado.");
+            case ENCERRADO -> veredito("veredito-neutro", encerrado(c.getEncerramento()));
+        });
+
+        BigDecimal minimo = c.getValorAluguel().multiply(BigDecimal.valueOf(RegrasNegocio.MULTIPLO_RENDA));
+        boolean rendaOk = c.atendeRegraRenda();
+        secao.getChildren().add(veredito(rendaOk ? "veredito-ok" : "veredito-erro",
+                "Renda familiar " + Formatos.moeda(c.getInquilino().rendaConsiderada()) + (rendaOk ? " ≥ " : " < ")
+                        + RegrasNegocio.MULTIPLO_RENDA + "× o aluguel (" + Formatos.moeda(minimo) + ")"));
+
+        if (c.getProrrogacoes().isEmpty()) {
+            secao.getChildren().add(veredito("veredito-neutro", "✓ Contrato original, sem prorrogações"));
+        }
+        for (Prorrogacao p : c.getProrrogacoes()) {
+            secao.getChildren().add(veredito("veredito-neutro", "✓ Prorrogado em " + Formatos.data(p.getData())
+                    + " por " + p.getPrazo() + ": o término passou de " + Formatos.data(p.getTerminoAnterior())
+                    + " para " + Formatos.data(p.getNovoTermino())));
+        }
+        Encerramento e = c.getEncerramento();
+        if (e != null && e.getObservacao() != null && !e.getObservacao().isBlank()) {
+            secao.getChildren().add(veredito("veredito-neutro", "Observação do encerramento: " + e.getObservacao()));
+        }
+        return secao;
     }
 
-    /** Uma seção: título e, embaixo, os pares "rótulo / valor" em duas colunas. */
-    private static Node secao(String titulo, String... paresRotuloValor) {
-        Label cabecalho = new Label(titulo);
-        cabecalho.getStyleClass().add("secao-formulario");
+    private static String encerrado(Encerramento e) {
+        if (e == null) {
+            return "Contrato encerrado.";
+        }
+        return "Encerrado: chaves devolvidas em " + Formatos.data(e.getDataSaida()) + " · " + e.getMotivo()
+                + ". Não gera mais aluguel; os aluguéis em aberto continuam sendo cobrados.";
+    }
 
+    // ---------- peças do desenho ----------
+
+    /** Três blocos lado a lado, com a mesma largura e um espaço entre eles. */
+    private static GridPane tresColunas(Node a, Node b, Node c) {
         GridPane grade = new GridPane();
-        grade.setHgap(24);
-        grade.setVgap(14);
-        for (int coluna = 0; coluna < 2; coluna++) {
+        grade.setHgap(28);
+        for (int n = 0; n < 3; n++) {
             ColumnConstraints largura = new ColumnConstraints();
-            largura.setPercentWidth(50);
+            largura.setPercentWidth(100.0 / 3);
+            largura.setHgrow(Priority.ALWAYS);
             grade.getColumnConstraints().add(largura);
         }
-        for (int n = 0; n < paresRotuloValor.length / 2; n++) {
-            Label rotulo = new Label(paresRotuloValor[2 * n]);
-            rotulo.getStyleClass().add("rotulo");
-            Label valor = new Label(paresRotuloValor[2 * n + 1]);
-            valor.getStyleClass().add("celula-nome");
-            valor.setWrapText(true);
-            valor.setMinHeight(Label.USE_PREF_SIZE);
-            VBox campo = new VBox(4, rotulo, valor);
-            GridPane.setHgrow(campo, Priority.ALWAYS);
-            grade.add(campo, n % 2, n / 2);
-        }
-        VBox secao = new VBox(10, cabecalho, grade);
-        secao.setPadding(new Insets(0));
-        return secao;
+        grade.addRow(0, a, b, c);
+        return grade;
+    }
+
+    /** Uma coluna: o título em maiúsculas e as linhas embaixo. */
+    private static VBox coluna(String nome, Node... linhas) {
+        VBox coluna = new VBox(titulo(nome));
+        coluna.getChildren().addAll(linhas);
+        return coluna;
+    }
+
+    private static Label titulo(String nome) {
+        Label titulo = new Label(nome.toUpperCase());
+        titulo.getStyleClass().add("detalhe-secao");
+        return titulo;
+    }
+
+    /** Uma linha: rótulo à esquerda, valor à direita, com uma linha fina embaixo. */
+    private static HBox linha(String rotulo, String valor) {
+        Label r = new Label(rotulo);
+        r.getStyleClass().add("detalhe-rotulo");
+        r.setMinWidth(Region.USE_PREF_SIZE);
+        Label v = new Label(valor);
+        v.getStyleClass().add("detalhe-valor");
+        v.setWrapText(true);
+        v.setMinHeight(Region.USE_PREF_SIZE);
+        v.setAlignment(Pos.TOP_RIGHT);
+        v.setTextAlignment(javafx.scene.text.TextAlignment.RIGHT);
+        v.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(v, Priority.ALWAYS);
+        HBox linha = new HBox(12, r, v);
+        linha.setAlignment(Pos.TOP_LEFT);
+        linha.getStyleClass().add("detalhe-linha");
+        return linha;
+    }
+
+    /** Uma caixa colorida com uma frase (como os avisos da análise no protótipo). */
+    private static HBox veredito(String tipo, String texto) {
+        Label frase = new Label(texto);
+        frase.setWrapText(true);
+        frase.setMinHeight(Region.USE_PREF_SIZE);
+        HBox caixa = new HBox(frase);
+        caixa.getStyleClass().addAll("veredito", tipo);
+        return caixa;
     }
 
     private static String texto(String valor) {

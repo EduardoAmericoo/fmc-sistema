@@ -3,9 +3,11 @@
 <!--
   BOARD-59 · Janela "Detalhes do contrato", aberta ao clicar numa linha da tela Contratos.
   Só para consulta: mostra tudo do contrato sem precisar procurar o papel.
+  Segue a janela "Contrato" do protótipo: título com o selo da situação embaixo; três colunas
+  (Imóvel, Locatário e Garantia) com rótulo à esquerda e valor à direita; prazo e vigência;
+  e a situação do contrato em caixas coloridas. O corpo é montado pelo DetalhesContratoController.
   Fica num arquivo próprio, como as janelas de prorrogar e encerrar, para a tela de Contratos
-  continuar pequena. As seções são montadas pelo DetalhesContratoController.
-  Os botões de ação (ex.: Prorrogar, BOARD-169) podem entrar no rodapé desta janela depois.
+  continuar pequena. Os botões de ação (ex.: Prorrogar, BOARD-169) podem entrar no rodapé depois.
 -->
 
 <?import javafx.geometry.Insets?>
@@ -20,22 +22,21 @@
 
 <StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
            fx:controller="br.org.fmc.ui.DetalhesContratoController">
-    <VBox styleClass="janela" maxWidth="680" maxHeight="-Infinity">
+    <VBox styleClass="janela" maxWidth="980" maxHeight="-Infinity">
         <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
 
         <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
-            <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
                 <Label fx:id="titulo" styleClass="janela-titulo" wrapText="true"/>
-                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+                <HBox><Label fx:id="seloSituacao"/></HBox>
             </VBox>
-            <Label fx:id="seloSituacao"/>
             <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
                 <graphic><FontIcon iconLiteral="fth-x"/></graphic>
             </Button>
         </HBox>
 
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
-            <VBox fx:id="corpo" styleClass="janela-corpo" spacing="22"/>
+            <VBox fx:id="corpo" styleClass="janela-corpo" spacing="20"/>
         </ScrollPane>
 
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
