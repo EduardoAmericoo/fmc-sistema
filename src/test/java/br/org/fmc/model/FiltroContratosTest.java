@@ -116,6 +116,14 @@ class FiltroContratosTest {
     }
 
     @Test
+    void buscaSoPeloNumeroDoImovel() {
+        // "005" é só número, mas não é CPF de ninguém: acha o imóvel IM-005.
+        Contrato im005 = contrato("CT-1010", "IM-005", "Apto 301", "Rua A, 1", "Pedro Alves",
+                new Cpf("935.411.347-80"), HOJE.plusMonths(6));
+        assertEquals(List.of(im005), ServicoContratos.filtrar(List.of(ativo, im005), null, "005", HOJE));
+    }
+
+    @Test
     void combinaSituacaoEBusca() {
         assertEquals(List.of(vencendo),
                 ServicoContratos.filtrar(todos, SituacaoContrato.VENCENDO, "flores", HOJE));

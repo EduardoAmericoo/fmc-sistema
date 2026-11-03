@@ -106,7 +106,8 @@ public class Contrato {
     /**
      * Este contrato atende à busca da tela (BOARD-59)? A busca ignora maiúsculas e acentos.
      * Busca vazia: todos atendem. Se parece um CPF (só números, pontos e traço), compara com o
-     * CPF do inquilino ou com os números do contrato. Senão, cada palavra digitada precisa
+     * CPF do inquilino, com os números do contrato ou com os do imóvel ("005" acha o IM-005).
+     * Senão, cada palavra digitada precisa
      * aparecer no número do contrato, no imóvel (código, unidade ou endereço) ou no nome do inquilino.
      */
     public boolean atendeBusca(String busca) {
@@ -117,7 +118,8 @@ public class Contrato {
         String digitos = TextoBusca.digitos(busca);
         if (digitos.length() >= 3 && busca.trim().matches("[\\d.\\-\\s]+")) {
             return inquilino.getCpf().getNumero().contains(digitos)
-                    || TextoBusca.digitos(numero).contains(digitos);
+                    || TextoBusca.digitos(numero).contains(digitos)
+                    || TextoBusca.digitos(imovel.getCodigo()).contains(digitos);
         }
         String texto = TextoBusca.normalizar(String.join(" ", numero, imovel.getCodigo(),
                 imovel.getUnidade() == null ? "" : imovel.getUnidade(), imovel.getEndereco(), inquilino.getNome()));
