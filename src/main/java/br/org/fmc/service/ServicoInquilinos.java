@@ -1,16 +1,23 @@
 package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
+import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Conjuge;
+import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.RegrasNegocio;
+import br.org.fmc.model.StatusContrato;
+import br.org.fmc.repository.AluguelRepository;
 import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.InquilinoRepository;
 import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +34,10 @@ public class ServicoInquilinos {
 
     private final InquilinoRepository inquilinos;
     private final ContratoRepository contratos = new ContratoRepository();
+    private final AluguelRepository alugueis = new AluguelRepository();
+
+    /** Relógio do sistema; os testes trocam por um relógio parado (a ficha depende de "hoje"). */
+    private Clock relogio = Clock.systemDefaultZone();
 
     public ServicoInquilinos() {
         this(new InquilinoRepository());
@@ -34,6 +45,99 @@ public class ServicoInquilinos {
 
     public ServicoInquilinos(InquilinoRepository inquilinos) {
         this.inquilinos = inquilinos;
+    }
+
+    /** Só para os testes: faz o serviço usar outro relógio. */
+    void usarRelogio(Clock relogio) {
+        this.relogio = relogio;
+    }
+
+    // ---------- [D8] Ficha do inquilino (BOARD-45) ----------
+
+    /** Como foi (ou está) cada aluguel, para a faixa colorida mês a mês da ficha. */
+    public enum Pagamento {
+        PAGO_EM_DIA("Pago em dia"),
+        PAGO_COM_ATRASO("Pago com atraso"),
+        EM_ATRASO("Em atraso"),
+        EM_TOLERANCIA("Em tolerância"),
+        A_VENCER("A vencer");
+
+        private final String descricao;
+
+        Pagamento(String descricao) {
+            this.descricao = descricao;
+        }
+
+        public String getDescricao() {
+            return descricao;
+        }
+
+        /** Pago com atraso = pago depois dos dias de tolerância (aí houve multa e juros). */
+        public static Pagamento de(Aluguel a, LocalDate hoje) {
+            if (a.estaPago()) {
+                return a.diasAtraso(a.getDataPagamento()) > RegrasNegocio.TOLERANCIA_DIAS
+                        ? PAGO_COM_ATRASO : PAGO_EM_DIA;
+            }
+            return switch (a.getSituacao(hoje)) {
+                case EM_ATRASO -> EM_ATRASO;
+                case EM_TOLERANCIA -> EM_TOLERANCIA;
+                default -> A_VENCER;
+            };
+        }
+    }
+
+    /**
+     * Tudo de um inquilino num lugar só: o cadastro, os contratos (o mais recente primeiro)
+     * e os aluguéis desses contratos (o mais recente primeiro). Contratos e aluguéis só vêm
+     * para quem pode ver essas telas; para os outros, as listas vêm vazias.
+     */
+    public record Ficha(Inquilino inquilino, List<Contrato> contratos, List<Aluguel> alugueis, LocalDate hoje) {
+
+        /** O contrato que aparece em destaque: o ativo, ou o mais recente se não houver ativo. */
+        public Contrato contratoAtual() {
+            return contratos.stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).findFirst()
+                    .orElse(contratos.isEmpty() ? null : contratos.get(0));
+        }
+
+        /** Soma do que já foi pago (valor do aluguel, sem encargos). */
+        public BigDecimal totalPago() {
+            return alugueis.stream().filter(Aluguel::estaPago).map(Aluguel::base)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        /** Quanto deve hoje, com multa, juros e correção, dos aluguéis em atraso. */
+        public BigDecimal emAtrasoHoje() {
+            return alugueis.stream().filter(a -> Pagamento.de(a, hoje) == Pagamento.EM_ATRASO)
+                    .map(a -> a.base().add(a.encargosEm(hoje).total()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        public long pagos() {
+            return alugueis.stream().filter(Aluguel::estaPago).count();
+        }
+
+        public long pagosComAtraso() {
+            return alugueis.stream().filter(a -> Pagamento.de(a, hoje) == Pagamento.PAGO_COM_ATRASO).count();
+        }
+    }
+
+    /** Monta a ficha do inquilino ([D8] BOARD-45). Só leitura: não grava nada. */
+    public Ficha ficha(long id) throws SQLException {
+        Sessao.exigir(Acao.VER_INQUILINOS);
+        Inquilino inquilino = buscarPorId(id);
+        List<Contrato> doInquilino = !Sessao.pode(Acao.VER_CONTRATOS) ? List.of()
+                : contratos.listarTodos().stream()
+                        .filter(c -> c.getInquilino().getId().equals(id))
+                        .sorted(Comparator.comparing(Contrato::getDataEntregaChaves).reversed())
+                        .toList();
+        List<Aluguel> lista = new ArrayList<>();
+        if (Sessao.pode(Acao.VER_ALUGUEIS)) {
+            for (Contrato c : doInquilino) {
+                lista.addAll(alugueis.listarDoContrato(c));
+            }
+            lista.sort(Comparator.comparing(Aluguel::getVencimento).reversed());
+        }
+        return new Ficha(inquilino, doInquilino, lista, LocalDate.now(relogio));
     }
 
     /**

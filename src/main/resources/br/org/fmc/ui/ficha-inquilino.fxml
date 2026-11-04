@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  [D8] BOARD-45 · Janela "Ficha do inquilino", aberta ao clicar num inquilino na tela Inquilinos.
+  Segue a ficha do protótipo: três colunas (Locatário, Contrato e Garantia) e, embaixo, o financeiro:
+  números de pagamento, a faixa colorida mês a mês e a lista de aluguéis. O corpo é montado pelo
+  FichaInquilinoController com as mesmas peças da janela de detalhes do contrato (ui/Detalhe.java).
+  Só consulta; o botão "Editar cadastro" abre o formulário de sempre.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.FichaInquilinoController">
+    <VBox styleClass="janela" maxWidth="1000" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Ficha do inquilino" styleClass="janela-titulo"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
+            <VBox fx:id="corpo" styleClass="janela-corpo" spacing="20"/>
+        </ScrollPane>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="botaoEditar" text="Editar cadastro" onAction="#editar" styleClass="botao-secundario">
+                <graphic><FontIcon iconLiteral="fth-edit-2"/></graphic>
+            </Button>
+            <Button text="Fechar" onAction="#fechar" styleClass="botao-secundario" defaultButton="true"/>
+        </HBox>
+    </VBox>
+</StackPane>

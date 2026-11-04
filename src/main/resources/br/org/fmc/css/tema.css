@@ -1025,3 +1025,80 @@
 .veredito-neutro .label {
     -fx-text-fill: -fmc-texto-corpo;
 }
+
+/* ===================== Ficha do inquilino ([D8] BOARD-45) ===================== */
+/* Cartões de números e a faixa mês a mês, com as cores do protótipo (aba Financeiro da ficha). */
+
+.ficha-kpi {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-padding: 14 18 14 18;
+}
+
+.ficha-kpi-rotulo {
+    -fx-text-fill: -fmc-texto-corpo;
+}
+
+.ficha-kpi-valor {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.ficha-kpi-valor.erro {
+    -fx-text-fill: -fmc-erro;
+}
+
+/* Um quadrado por mês: azul pago em dia, laranja pago com atraso, vermelho em atraso,
+   amarelo tracejado em tolerância, cinza a vencer. */
+.mes {
+    -fx-min-width: 50;
+    -fx-pref-width: 50;
+    -fx-min-height: 40;
+    -fx-alignment: center;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.mes-legenda {
+    -fx-min-width: 10;
+    -fx-min-height: 10;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-max-width: 10;
+    -fx-max-height: 10;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+}
+
+.mes-pago-em-dia {
+    -fx-background-color: -fmc-azul;
+    -fx-text-fill: white;
+}
+
+.mes-pago-com-atraso {
+    -fx-background-color: #F2D3A6;
+    -fx-text-fill: -fmc-alerta;
+}
+
+.mes-em-atraso {
+    -fx-background-color: -fmc-erro;
+    -fx-text-fill: white;
+}
+
+.mes-em-tolerancia {
+    -fx-background-color: -fmc-alerta-fundo;
+    -fx-border-color: #B26A0C;
+    -fx-border-style: segments(4, 3);
+    -fx-text-fill: -fmc-alerta;
+}
+
+.mes-a-vencer {
+    -fx-background-color: -fmc-fundo;
+    -fx-border-color: -fmc-borda-forte;
+    -fx-text-fill: -fmc-texto-suave;
+}

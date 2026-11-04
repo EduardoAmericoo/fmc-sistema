@@ -263,15 +263,22 @@ public class InquilinosController {
             }
         });
 
-        // Clicar na linha também abre para editar (para quem pode; arquivado não se edita).
+        // Clicar na linha (ou Enter na linha escolhida) abre a ficha do inquilino ([D8] BOARD-45),
+        // como no protótipo. Para editar, o lápis da linha ou o botão "Editar cadastro" da ficha.
         tabela.setRowFactory(t -> {
             TableRow<Inquilino> linha = new TableRow<>();
             linha.setOnMouseClicked(e -> {
-                if (podeEditar && !linha.isEmpty() && !linha.getItem().estaArquivado() && !cliqueEmBotao(e.getTarget())) {
-                    abrirParaEditar(linha.getItem());
+                if (!linha.isEmpty() && !cliqueEmBotao(e.getTarget())) {
+                    abrirFicha(linha.getItem());
                 }
             });
             return linha;
+        });
+        tabela.setOnKeyPressed(e -> {
+            Inquilino escolhido = tabela.getSelectionModel().getSelectedItem();
+            if (e.getCode() == KeyCode.ENTER && escolhido != null) {
+                abrirFicha(escolhido);
+            }
         });
 
         FontIcon icone = new FontIcon("fth-users");
@@ -494,6 +501,14 @@ public class InquilinosController {
             avisarErro(String.join("\n", e.getErros()));
         } catch (SQLException e) {
             avisarErro("Não foi possível reativar no banco de dados. Tente de novo.");
+        }
+    }
+
+    /** Abre a ficha; o "Editar cadastro" de dentro dela abre o formulário de sempre. */
+    private void abrirFicha(Inquilino i) {
+        String erro = FichaInquilinoController.abrir(i, () -> abrirParaEditar(i));
+        if (erro != null) {
+            avisarErro(erro);
         }
     }
 
