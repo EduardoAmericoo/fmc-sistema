@@ -1017,3 +1017,72 @@
     -fx-icon-size: 14;
     -fx-icon-color: -fmc-texto-corpo;
 }
+
+/* ===================== Detalhes do contrato (BOARD-59) ===================== */
+/* Mesmo desenho da janela "Contrato" do protótipo: três colunas (Imóvel, Locatário, Garantia),
+   cada linha com o rótulo à esquerda e o valor à direita, separadas por uma linha fina,
+   e embaixo a situação do contrato em caixas coloridas. */
+
+.detalhe-secao {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-padding: 0 0 6 0;
+}
+
+.detalhe-linha {
+    -fx-padding: 10 0 10 0;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}
+
+.detalhe-rotulo {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.detalhe-valor {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+/* Caixas da situação: verde (ok), amarela (atenção), vermelha (problema) e cinza (informação) */
+.veredito {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 12 16 12 16;
+}
+
+.veredito-ok {
+    -fx-background-color: -fmc-sucesso-fundo;
+    -fx-border-color: #BFE0CC;
+}
+
+.veredito-ok .label {
+    -fx-text-fill: -fmc-sucesso;
+}
+
+.veredito-alerta {
+    -fx-background-color: -fmc-alerta-fundo;
+    -fx-border-color: #F2D3A6;
+}
+
+.veredito-alerta .label {
+    -fx-text-fill: -fmc-alerta;
+}
+
+.veredito-erro {
+    -fx-background-color: -fmc-erro-fundo;
+    -fx-border-color: -fmc-erro-borda;
+}
+
+.veredito-erro .label {
+    -fx-text-fill: -fmc-erro-escuro;
+}
+
+.veredito-neutro {
+    -fx-background-color: -fmc-fundo-afundado;
+    -fx-border-color: -fmc-borda;
+}
+
+.veredito-neutro .label {
+    -fx-text-fill: -fmc-texto-corpo;
+}
