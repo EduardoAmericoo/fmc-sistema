@@ -34,6 +34,9 @@ public class Contrato {
     /** Histórico de prorrogações, da mais antiga para a mais recente (BOARD-169). */
     private final List<Prorrogacao> prorrogacoes = new ArrayList<>();
 
+    /** Histórico de reajustes anuais, do mais antigo para o mais recente ([D9] BOARD-46). */
+    private final List<Reajuste> reajustes = new ArrayList<>();
+
     /** Preenchido quando o contrato é encerrado (BOARD-174). */
     private Encerramento encerramento;
 
@@ -251,6 +254,46 @@ public class Contrato {
         this.dataTermino = Valida.obrigatorio(terminoGravado, "o término do contrato");
         this.prorrogacoes.clear();
         this.prorrogacoes.addAll(historico);
+    }
+
+    // ---------- [D9] Reajuste anual (BOARD-46) ----------
+
+    /**
+     * Quando o próximo reajuste vence: o aniversário do contrato (entrega das chaves + 12 meses,
+     * depois + 24, + 36…), contando os reajustes que já foram aplicados.
+     */
+    public LocalDate proximoReajuste() {
+        return dataEntregaChaves.plusMonths(12L * (reajustes.size() + 1));
+    }
+
+    /** O reajuste do ano já venceu e ainda não foi aplicado? Só vale para contrato ativo. */
+    public boolean reajustePendente(LocalDate hoje) {
+        return status == StatusContrato.ATIVO && !hoje.isBefore(proximoReajuste());
+    }
+
+    /**
+     * Aplica o reajuste do aniversário pendente: o aluguel passa a ser o valor reajustado e o
+     * reajuste entra no histórico. Quem confere se pode reajustar é o ServicoContratos.
+     *
+     * @param percentual ex.: 4.80 para 4,80%
+     * @return o reajuste feito, para gravar no banco
+     */
+    public Reajuste reajustar(BigDecimal percentual, LocalDate hoje, String feitoPor) {
+        Reajuste r = new Reajuste(proximoReajuste(), hoje, percentual, valorAluguel, feitoPor);
+        valorAluguel = r.getValorNovo();
+        reajustes.add(r);
+        return r;
+    }
+
+    /** Histórico de reajustes, do mais antigo para o mais recente. Vazio se nunca foi reajustado. */
+    public List<Reajuste> getReajustes() {
+        return List.copyOf(reajustes);
+    }
+
+    /** Usado pelo repositório ao carregar do banco (o valor do aluguel gravado já está reajustado). */
+    public void restaurarReajustes(List<Reajuste> historico) {
+        this.reajustes.clear();
+        this.reajustes.addAll(historico);
     }
 
     @Override

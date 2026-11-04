@@ -180,6 +180,21 @@ CREATE TABLE IF NOT EXISTS contrato_prorrogacao (
     feita_por        TEXT    NOT NULL
 );
 
+-- [D9] BOARD-46 · Reajuste anual: no aniversário do contrato o aluguel é corrigido pela média
+-- do INPC e do IGP-DI (percentual digitado pela Fundação). Cada reajuste fica no histórico,
+-- e o valor_aluguel da tabela contrato passa a ser o valor novo.
+-- Os percentuais e valores ficam como texto (ex.: "4.80"), como nas outras tabelas.
+CREATE TABLE IF NOT EXISTS contrato_reajuste (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id    INTEGER NOT NULL REFERENCES contrato(id) ON DELETE CASCADE,
+    aniversario    TEXT    NOT NULL,
+    aplicado_em    TEXT    NOT NULL,
+    percentual     TEXT    NOT NULL,
+    valor_anterior TEXT    NOT NULL,
+    valor_novo     TEXT    NOT NULL,
+    feito_por      TEXT    NOT NULL
+);
+
 -- BOARD-174 · Encerramento de contrato: o inquilino devolveu as chaves e saiu do imóvel.
 -- Um por contrato. Ao encerrar, o status do contrato vira ENCERRADO e o imóvel volta a VAGO.
 -- O contrato encerrado não é apagado: ele é o histórico (contratos e recibos).

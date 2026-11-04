@@ -16,6 +16,7 @@ import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.MotivoEncerramento;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.Prorrogacao;
+import br.org.fmc.model.Reajuste;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
 import java.math.BigDecimal;
@@ -210,6 +211,7 @@ public class ContratoRepository implements Repositorio<Contrato> {
         inquilinos.listarTodos().forEach(i -> porInquilino.put(i.getId(), i));
 
         Map<Long, List<Prorrogacao>> porContrato = prorrogacoesPorContrato();
+        Map<Long, List<Reajuste>> reajustes = reajustesPorContrato();
         Map<Long, Encerramento> encerrados = encerramentosPorContrato();
 
         String sql = "SELECT c.*, g.* FROM contrato c JOIN garantia g ON g.contrato_id = c.id "
@@ -226,6 +228,7 @@ public class ContratoRepository implements Repositorio<Contrato> {
                     // O término gravado já inclui as prorrogações (BOARD-169).
                     c.restaurarProrrogacoes(LocalDate.parse(rs.getString("data_termino")),
                             porContrato.getOrDefault(c.getId(), List.of()));
+                    c.restaurarReajustes(reajustes.getOrDefault(c.getId(), List.of())); // [D9]
                     c.restaurarEncerramento(encerrados.get(c.getId())); // null se está ativo (BOARD-174)
                     lista.add(c);
                 }
@@ -320,6 +323,73 @@ public class ContratoRepository implements Repositorio<Contrato> {
                 mapa.put(rs.getLong("contrato_id"), new Encerramento(LocalDate.parse(rs.getString("data_saida")),
                         MotivoEncerramento.valueOf(rs.getString("motivo")), rs.getString("observacao"),
                         LocalDate.parse(rs.getString("registrado_em")), rs.getString("feito_por")));
+            }
+        }
+        return mapa;
+    }
+
+    /**
+     * Grava um reajuste anual ([D9] BOARD-46) numa transação: o histórico, o aluguel novo do
+     * contrato e o valor dos aluguéis ainda não pagos que vencem depois do aniversário.
+     * Tudo entra junto, ou nada entra.
+     */
+    public void salvarReajuste(Contrato contrato, Reajuste r) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try {
+                String sql = "INSERT INTO contrato_reajuste (contrato_id, aniversario, aplicado_em, percentual, "
+                        + "valor_anterior, valor_novo, feito_por) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement st = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                    st.setLong(1, contrato.getId());
+                    st.setString(2, r.getAniversario().toString());
+                    st.setString(3, r.getAplicadoEm().toString());
+                    st.setString(4, r.getPercentual().toPlainString());
+                    st.setString(5, r.getValorAnterior().toPlainString());
+                    st.setString(6, r.getValorNovo().toPlainString());
+                    st.setString(7, r.getFeitoPor());
+                    st.executeUpdate();
+                    try (ResultSet chaves = st.getGeneratedKeys()) {
+                        if (chaves.next()) {
+                            r.setId(chaves.getLong(1));
+                        }
+                    }
+                }
+                try (PreparedStatement st = conexao.prepareStatement(
+                        "UPDATE contrato SET valor_aluguel = ? WHERE id = ?")) {
+                    st.setString(1, r.getValorNovo().toPlainString());
+                    st.setLong(2, contrato.getId());
+                    st.executeUpdate();
+                }
+                // O aluguel que vence depois do aniversário já é do ano novo (o 1º aluguel vence
+                // 30 dias depois das chaves, então cada aluguel paga o mês que passou).
+                try (PreparedStatement st = conexao.prepareStatement("UPDATE aluguel SET valor_aluguel = ? "
+                        + "WHERE contrato_id = ? AND data_pagamento IS NULL AND vencimento > ?")) {
+                    st.setString(1, r.getValorNovo().toPlainString());
+                    st.setLong(2, contrato.getId());
+                    st.setString(3, r.getAniversario().toString());
+                    st.executeUpdate();
+                }
+                conexao.commit();
+            } catch (SQLException | RuntimeException e) {
+                conexao.rollback();
+                throw e;
+            }
+        }
+    }
+
+    /** Todos os reajustes, agrupados por contrato e em ordem de aniversário ([D9]). */
+    private Map<Long, List<Reajuste>> reajustesPorContrato() throws SQLException {
+        Map<Long, List<Reajuste>> mapa = new HashMap<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement("SELECT * FROM contrato_reajuste ORDER BY aniversario, id");
+             ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Reajuste r = new Reajuste(LocalDate.parse(rs.getString("aniversario")),
+                        LocalDate.parse(rs.getString("aplicado_em")), new BigDecimal(rs.getString("percentual")),
+                        new BigDecimal(rs.getString("valor_anterior")), new BigDecimal(rs.getString("valor_novo")),
+                        rs.getString("feito_por"));
+                r.setId(rs.getLong("id"));
+                mapa.computeIfAbsent(rs.getLong("contrato_id"), k -> new ArrayList<>()).add(r);
             }
         }
         return mapa;
