@@ -123,6 +123,22 @@ public class AluguelRepository {
         return lista;
     }
 
+    /** Todos os aluguéis de um contrato, do vencimento mais antigo para o mais recente ([D8] ficha do inquilino). */
+    public List<Aluguel> listarDoContrato(Contrato contrato) throws SQLException {
+        List<Aluguel> lista = new ArrayList<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement(
+                     "SELECT * FROM aluguel WHERE contrato_id = ? ORDER BY vencimento, id")) {
+            st.setLong(1, contrato.getId());
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(montar(rs, contrato));
+                }
+            }
+        }
+        return lista;
+    }
+
     /** Transforma uma linha do banco num objeto Aluguel, com os valores de quando foi gerado. */
     private Aluguel montar(ResultSet rs, Contrato contrato) throws SQLException {
         String pago = rs.getString("data_pagamento");
