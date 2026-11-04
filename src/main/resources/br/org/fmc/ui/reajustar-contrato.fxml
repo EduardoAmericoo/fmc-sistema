@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  [D9] BOARD-46 · Janela "Aplicar reajuste anual", aberta pelo botão da janela de detalhes do contrato.
+  Fica num arquivo próprio, como as janelas de prorrogar e encerrar.
+
+  Mostra o aluguel de hoje e o aniversário vencido, o campo do percentual (média do INPC e do
+  IGP-DI dos últimos 12 meses, digitada pela Fundação) e a prévia do aluguel novo.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.ReajustarContratoController">
+    <VBox styleClass="janela" maxWidth="580" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label fx:id="titulo" styleClass="janela-titulo" wrapText="true"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="janela-corpo" spacing="18">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Situação de hoje -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="Aluguel atual" styleClass="rotulo"/>
+                    <Label fx:id="aluguelAtual" styleClass="celula-nome"/>
+                </VBox>
+                <Label fx:id="seloAniversario" styleClass="selo, selo-erro"/>
+            </HBox>
+
+            <!-- Percentual -->
+            <VBox spacing="6">
+                <Label text="Percentual do reajuste *" labelFor="$campoPercentual" styleClass="rotulo"/>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="campoPercentual" promptText="Ex.: 4,80" styleClass="campo" prefWidth="140"/>
+                    <Label text="\%" styleClass="rotulo"/>
+                </HBox>
+                <Label text="Média do INPC e do IGP-DI dos últimos 12 meses. Se a média for negativa, digite 0: o aluguel não diminui."
+                       styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <HBox styleClass="resumo-calculado" spacing="10" alignment="CENTER_LEFT">
+                <FontIcon iconLiteral="fth-trending-up"/>
+                <Label fx:id="previa" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </VBox>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Aplicar reajuste" onAction="#confirmar" styleClass="botao-primario" defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-trending-up"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

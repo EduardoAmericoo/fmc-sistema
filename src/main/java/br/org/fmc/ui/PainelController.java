@@ -241,6 +241,7 @@ public class PainelController {
             case ALUGUEIS_EM_TOLERANCIA -> SituacaoAluguel.EM_TOLERANCIA;
             case CONTRATOS_VENCIDOS -> SituacaoContrato.VENCIDO;
             case CONTRATOS_VENCENDO -> SituacaoContrato.VENCENDO;
+            case CONTRATOS_COM_REAJUSTE -> ContratosController.REAJUSTE_VENCIDO;
             case IMOVEIS_VAGOS -> SituacaoImovel.VAGO;
         };
     }

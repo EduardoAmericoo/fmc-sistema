@@ -161,6 +161,7 @@ class PainelTest {
                 "MEDIA 1 Aluguel em tolerância",
                 "ALTA 1 Contrato vencido",
                 "MEDIA 1 Contrato vence nos próximos 60 dias",
+                "MEDIA 1 Contrato com reajuste vencido", // [D9] Ana: aniversário em 01/09/2026
                 "INFO 1 Imóvel vago"),
                 pendencias.stream().map(p -> p.gravidade() + " " + p.quantidade() + " " + p.titulo()).toList());
         assertEquals(Tela.CONTRATOS, pendencias.get(3).destino());
@@ -170,7 +171,8 @@ class PainelTest {
     @Test
     void abrirLevaParaATelaCertaEAListaDeAlugueisEmAbertoBateComOPainel() throws Exception {
         List<Pendencia> pendencias = servico.montar().pendencias();
-        assertEquals(List.of(Tela.ALUGUEIS, Tela.ALUGUEIS, Tela.ALUGUEIS, Tela.CONTRATOS, Tela.CONTRATOS, Tela.IMOVEIS),
+        assertEquals(List.of(Tela.ALUGUEIS, Tela.ALUGUEIS, Tela.ALUGUEIS, Tela.CONTRATOS, Tela.CONTRATOS,
+                        Tela.CONTRATOS, Tela.IMOVEIS),
                 pendencias.stream().map(Pendencia::destino).toList());
 
         // "Em aberto, todos os meses" na tela de Aluguéis: os 3 em atraso + o de Carlos em tolerância.

@@ -32,6 +32,12 @@ public final class RegrasNegocio {
     /** Contrato que vence nos próximos 60 dias já pode ser prorrogado (e aparece como "vencendo"). */
     public static final int DIAS_AVISO_VENCIMENTO = 60;
 
+    /**
+     * Teto do reajuste anual digitado ([D9] BOARD-46), para pegar erro de digitação
+     * (ex.: 48 no lugar de 4,8). Um índice negativo não reduz o aluguel: digita-se 0.
+     */
+    public static final BigDecimal REAJUSTE_MAXIMO_PERCENTUAL = new BigDecimal("30");
+
     private RegrasNegocio() {
     }
 }

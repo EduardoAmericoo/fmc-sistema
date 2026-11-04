@@ -91,6 +91,7 @@ public class ServicoPainel {
         ALUGUEIS_EM_TOLERANCIA(Tela.ALUGUEIS),
         CONTRATOS_VENCIDOS(Tela.CONTRATOS),
         CONTRATOS_VENCENDO(Tela.CONTRATOS),
+        CONTRATOS_COM_REAJUSTE(Tela.CONTRATOS),
         IMOVEIS_VAGOS(Tela.IMOVEIS);
 
         private final Tela destino;
@@ -223,6 +224,14 @@ public class ServicoPainel {
                     plural(vencendo, "Contrato vence", "Contratos vencem") + " nos próximos "
                             + RegrasNegocio.DIAS_AVISO_VENCIMENTO + " dias",
                     "Combine com o inquilino se vai renovar ou sair.", Tipo.CONTRATOS_VENCENDO));
+        }
+        // [D9] BOARD-46: o aluguel é corrigido todo ano, no aniversário do contrato.
+        long reajuste = ativos.stream().filter(c -> c.reajustePendente(hoje)).count();
+        if (reajuste > 0) {
+            pendencias.add(new Pendencia(Gravidade.MEDIA, (int) reajuste,
+                    plural(reajuste, "Contrato com reajuste vencido", "Contratos com reajuste vencido"),
+                    "O índice anual (INPC e IGP-DI) ainda não foi aplicado ao aluguel.",
+                    Tipo.CONTRATOS_COM_REAJUSTE));
         }
     }
 

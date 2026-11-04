@@ -30,6 +30,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -72,6 +73,12 @@ public class ContratosController {
     private TextField campoBusca;
     @FXML
     private ComboBox<SituacaoContrato> filtroSituacao;
+    /** Só os contratos com reajuste anual vencido ([D9] BOARD-46). */
+    @FXML
+    private CheckBox verReajuste;
+
+    /** O que o Painel manda para abrir a tela só com os contratos de reajuste vencido ([D9]). */
+    public static final String REAJUSTE_VENCIDO = "reajuste-vencido";
 
     /** Todos os contratos carregados do banco; a tabela mostra só os que passam na busca e no filtro. */
     private List<Contrato> todos = List.of();
@@ -239,13 +246,17 @@ public class ContratosController {
         tabela.setOnKeyPressed(e -> {
             Contrato escolhido = tabela.getSelectionModel().getSelectedItem();
             if (e.getCode() == KeyCode.ENTER && escolhido != null) {
-                DetalhesContratoController.abrir(escolhido);
+                DetalhesContratoController.abrir(escolhido, this::carregarLista);
             }
         });
+        verReajuste.selectedProperty().addListener((obs, antes, agora) -> aplicarFiltros());
 
         // Vindo do Painel (ex.: "Contratos vencidos"): já abre filtrado por essa situação.
-        if (Navegador.filtroRecebido() instanceof SituacaoContrato pedida) {
+        Object filtro = Navegador.filtroRecebido();
+        if (filtro instanceof SituacaoContrato pedida) {
             filtroSituacao.setValue(pedida);
+        } else if (REAJUSTE_VENCIDO.equals(filtro)) {
+            verReajuste.setSelected(true);
         }
         carregarLista();
     }
@@ -323,7 +334,7 @@ public class ContratosController {
         TableRow<Contrato> linha = new TableRow<>();
         linha.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY && !linha.isEmpty() && !clicouEmBotao(e.getTarget())) {
-                DetalhesContratoController.abrir(linha.getItem());
+                DetalhesContratoController.abrir(linha.getItem(), this::carregarLista);
             }
         });
         return linha;
@@ -562,24 +573,28 @@ public class ContratosController {
     private void aplicarFiltros() {
         SituacaoContrato situacao = filtroSituacao.getValue();
         String busca = campoBusca.getText();
-        boolean filtrando = situacao != null || !busca.isBlank();
-        List<Contrato> filtrados = ServicoContratos.filtrar(todos, situacao, busca, LocalDate.now());
+        boolean soReajuste = verReajuste.isSelected();
+        boolean filtrando = situacao != null || !busca.isBlank() || soReajuste;
+        List<Contrato> filtrados = ServicoContratos.filtrar(todos, situacao, busca, soReajuste, LocalDate.now());
         tabela.getItems().setAll(filtrados);
 
         int total = todos.size();
         if (filtrando) {
             contagem.setText(filtrados.size() + " de " + total + (total == 1 ? " contrato" : " contratos"));
-            tituloVazioBusca.setText(busca.isBlank() ? "Nenhum contrato " + situacao.getDescricao().toLowerCase()
-                    : "Nenhum contrato encontrado para \"" + busca.trim() + "\"");
+            tituloVazioBusca.setText(!busca.isBlank() ? "Nenhum contrato encontrado para \"" + busca.trim() + "\""
+                    : situacao != null ? "Nenhum contrato " + situacao.getDescricao().toLowerCase()
+                    : "Nenhum contrato com reajuste vencido");
             dicaVazioBusca.setText("Dá para buscar por número do contrato, imóvel, nome do inquilino ou CPF.");
             tabela.setPlaceholder(vazioBusca);
         } else {
             long ativos = todos.stream().filter(c -> c.getStatus() == StatusContrato.ATIVO).count();
             long vencidos = todos.stream()
                     .filter(c -> SituacaoContrato.de(c, LocalDate.now()) == SituacaoContrato.VENCIDO).count();
+            long reajuste = todos.stream().filter(c -> c.reajustePendente(LocalDate.now())).count();
             contagem.setText((total == 1 ? "1 contrato cadastrado" : total + " contratos cadastrados, " + ativos + " ativos")
                     + (vencidos == 0 ? "" : " · " + vencidos + (vencidos == 1 ? " vencido" : " vencidos")
-                            + ", sem gerar aluguel até serem prorrogados"));
+                            + ", sem gerar aluguel até serem prorrogados")
+                    + (reajuste == 0 ? "" : " · " + reajuste + " com reajuste vencido"));
             tabela.setPlaceholder(vazioSemCadastro);
         }
     }
@@ -588,6 +603,7 @@ public class ContratosController {
     @FXML
     private void limparFiltros() {
         filtroSituacao.setValue(null);
+        verReajuste.setSelected(false);
         campoBusca.clear();
         campoBusca.requestFocus();
     }

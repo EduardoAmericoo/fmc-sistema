@@ -15,6 +15,7 @@ import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.MotivoEncerramento;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.Prorrogacao;
+import br.org.fmc.model.Reajuste;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
@@ -112,6 +113,70 @@ public class ServicoContratos {
                 .filter(c -> situacao == null || SituacaoContrato.de(c, hoje) == situacao)
                 .filter(c -> c.atendeBusca(busca))
                 .toList();
+    }
+
+    /** Igual ao outro filtrar(), e com só os contratos de reajuste anual vencido, se pedido ([D9]). */
+    public static List<Contrato> filtrar(List<Contrato> contratos, SituacaoContrato situacao, String busca,
+            boolean soReajustePendente, LocalDate hoje) {
+        return filtrar(contratos, situacao, busca, hoje).stream()
+                .filter(c -> !soReajustePendente || c.reajustePendente(hoje))
+                .toList();
+    }
+
+    // ---------- [D9] Reajuste anual (BOARD-46) ----------
+
+    /**
+     * Aplica o reajuste anual vencido: o aluguel do contrato passa a ser o valor reajustado,
+     * e os aluguéis ainda não pagos que vencem depois do aniversário também.
+     *
+     * @param percentualDigitado ex.: "4,80" (média do INPC e do IGP-DI dos últimos 12 meses)
+     */
+    public Reajuste reajustar(long contratoId, String percentualDigitado) throws SQLException {
+        Sessao.exigir(Acao.REAJUSTAR_CONTRATO);
+        Contrato contrato = contratos.buscarPorId(contratoId)
+                .orElseThrow(() -> new RegraNegocioException("Contrato não encontrado."));
+        List<String> erros = new ArrayList<>();
+        if (contrato.getStatus() != StatusContrato.ATIVO) {
+            erros.add("Contrato encerrado não é reajustado.");
+        } else if (!contrato.reajustePendente(hoje())) {
+            erros.add("O próximo reajuste do contrato " + contrato.getNumero() + " só vence em "
+                    + Formatos.data(contrato.proximoReajuste()) + ".");
+        }
+        BigDecimal percentual = null;
+        try {
+            percentual = lerPercentual(percentualDigitado);
+        } catch (RegraNegocioException e) {
+            erros.addAll(e.getErros());
+        }
+        if (!erros.isEmpty()) {
+            throw new RegraNegocioException(erros);
+        }
+        Reajuste r = contrato.reajustar(percentual, hoje(), Sessao.usuario().getNome());
+        contratos.salvarReajuste(contrato, r); // histórico + aluguel novo, tudo junto
+        return r;
+    }
+
+    /**
+     * Lê o percentual digitado (ex.: "4,8", "4,80%" ou "4.8"). A tela usa isto também para
+     * mostrar o aluguel novo enquanto a pessoa digita.
+     *
+     * @throws RegraNegocioException com a explicação, se estiver vazio, inválido ou fora do limite
+     */
+    public static BigDecimal lerPercentual(String texto) {
+        if (texto == null || texto.replace("%", "").isBlank()) {
+            throw new RegraNegocioException("Informe o percentual do reajuste (média do INPC e do IGP-DI).");
+        }
+        BigDecimal p;
+        try {
+            p = Formatos.lerValor(texto.replace("%", ""));
+        } catch (IllegalArgumentException e) {
+            throw new RegraNegocioException("Percentual inválido: use só números, ex.: 4,80.");
+        }
+        if (p.compareTo(RegrasNegocio.REAJUSTE_MAXIMO_PERCENTUAL) > 0) {
+            throw new RegraNegocioException("O reajuste não pode passar de "
+                    + RegrasNegocio.REAJUSTE_MAXIMO_PERCENTUAL + "%. Confira se digitou certo (ex.: 4,80).");
+        }
+        return p;
     }
 
     /**
