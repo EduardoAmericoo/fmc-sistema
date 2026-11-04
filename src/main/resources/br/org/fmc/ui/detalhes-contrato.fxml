@@ -41,6 +41,10 @@
 
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
             <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="botaoReajustar" text="Aplicar reajuste" onAction="#reajustar" styleClass="botao-primario"
+                    managed="false" visible="false">
+                <graphic><FontIcon iconLiteral="fth-trending-up"/></graphic>
+            </Button>
             <Button fx:id="botaoFechar" text="Fechar" onAction="#fechar" styleClass="botao-secundario"
                     defaultButton="true"/>
         </HBox>
