@@ -7,9 +7,14 @@ import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Fianca;
 import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.StatusContrato;
 import br.org.fmc.repository.AluguelRepository;
+import br.org.fmc.repository.ContratoRepository;
+import br.org.fmc.util.DocumentoCobrancaPdf;
 import br.org.fmc.util.TextoBusca;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -17,8 +22,10 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +44,7 @@ public class ServicoAlugueis {
     }
 
     private final AluguelRepository alugueis = new AluguelRepository();
+    private final ContratoRepository contratos = new ContratoRepository();
 
     /** Relógio do sistema; os testes trocam por um relógio parado para testar cada situação. */
     private Clock relogio = Clock.systemDefaultZone();
@@ -58,6 +66,44 @@ public class ServicoAlugueis {
             throw new RegraNegocioException("Escolha o mês.");
         }
         return alugueis.listarDoMes(mes);
+    }
+
+    /** Gera os aluguéis ainda inexistentes para os contratos ativos que cobrem a competência. */
+    public List<Aluguel> gerarDoMes(YearMonth mes) throws SQLException {
+        Sessao.exigir(Acao.GERAR_ALUGUEIS);
+        if (mes == null) {
+            throw new RegraNegocioException("Escolha o mês.");
+        }
+
+        Set<Long> contratosComAluguel = new HashSet<>();
+        for (Aluguel aluguel : alugueis.listarDoMes(mes)) {
+            contratosComAluguel.add(aluguel.getContrato().getId());
+        }
+
+        List<Aluguel> gerados = new ArrayList<>();
+        for (Contrato contrato : contratos.listarTodos()) {
+            if (contrato.getStatus() != StatusContrato.ATIVO || !contrato.cobreCompetencia(mes)
+                    || contratosComAluguel.contains(contrato.getId())) {
+                continue;
+            }
+            Aluguel aluguel = new Aluguel(contrato, mes);
+            alugueis.salvar(aluguel);
+            contratosComAluguel.add(contrato.getId());
+            gerados.add(aluguel);
+        }
+        return List.copyOf(gerados);
+    }
+
+    /** Gera um demonstrativo PDF sem valor de pagamento para um aluguel selecionado. */
+    public void gerarDemonstrativo(Aluguel aluguel, LocalDate emitidoEm, Path destino) throws IOException {
+        Sessao.exigir(Acao.GERAR_ALUGUEIS);
+        if (aluguel == null) {
+            throw new RegraNegocioException("Escolha um aluguel.");
+        }
+        if (aluguel.estaPago()) {
+            throw new RegraNegocioException("Não é possível gerar demonstrativo para um aluguel já pago.");
+        }
+        DocumentoCobrancaPdf.gerar(aluguel, emitidoEm, destino);
     }
 
     /**

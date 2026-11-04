@@ -11,7 +11,7 @@ import java.util.Optional;
  */
 public enum Tela {
     PAINEL("painel", "Painel", null),
-    ALUGUEIS("alugueis", "Aluguéis", Acao.VER_ALUGUEIS),
+    ALUGUEIS("alugueis", "Aluguéis e cobrança", Acao.VER_ALUGUEIS),
     IMOVEIS("imoveis", "Imóveis", Acao.VER_IMOVEIS),
     INQUILINOS("inquilinos", "Inquilinos", Acao.VER_INQUILINOS),
     CONTRATOS("contratos", "Contratos", Acao.VER_CONTRATOS),

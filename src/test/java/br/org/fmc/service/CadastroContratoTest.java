@@ -230,8 +230,8 @@ class CadastroContratoTest {
         servico.cadastrar(comFiador(imovel, maria));
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> imoveis.excluir(imovel.getId()));
-        assertEquals(List.of("O imóvel IM-001 tem histórico de contrato e não pode ser excluído. "
-                + "Para tirá-lo das listas, use Arquivar."), e.getErros());
+        assertEquals(List.of("A exclusão de imóveis está desativada. Para tirá-lo das listas, use Arquivar."),
+            e.getErros());
     }
 
     /** Tudo ou nada: se o imóvel deixou de estar vago no meio do caminho, nem o contrato nem a garantia ficam gravados. */

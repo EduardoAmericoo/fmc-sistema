@@ -148,18 +148,10 @@ public class ServicoImoveis {
         return imovel;
     }
 
-    /**
-     * Apaga o imóvel de verdade. Só para cadastro feito por engano: se o imóvel já teve
-     * contrato, o histórico precisa ficar, e o caminho é arquivar.
-     */
+    /** A exclusão foi desativada. Imóveis que saem de uso devem ser arquivados para preservar o histórico. */
     public void excluir(long id) throws SQLException {
         Sessao.exigir(Acao.EXCLUIR_IMOVEL);
-        Imovel imovel = buscar(id);
-        if (contratos.existeNoImovel(id)) {
-            throw new RegraNegocioException("O imóvel " + imovel.getCodigo() + " tem histórico de contrato e não pode "
-                    + "ser excluído. Para tirá-lo das listas, use Arquivar.");
-        }
-        repositorio.excluir(id);
+        throw new RegraNegocioException("A exclusão de imóveis está desativada. Para tirá-lo das listas, use Arquivar.");
     }
 
     private Imovel buscar(long id) throws SQLException {
