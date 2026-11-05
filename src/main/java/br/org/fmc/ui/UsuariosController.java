@@ -181,9 +181,6 @@ public class UsuariosController {
     private void montarCaixinhas() {
         String telaAtual = null;
         for (Acao acao : Acao.values()) {
-            if (acao == Acao.EXCLUIR_IMOVEL) {
-                continue;
-            }
             if (!acao.getTela().equals(telaAtual)) {
                 telaAtual = acao.getTela();
                 Label grupo = new Label(telaAtual);

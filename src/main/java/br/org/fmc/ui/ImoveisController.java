@@ -38,7 +38,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * Controla a tela "Imóveis" (ui/imoveis.fxml), no mesmo modelo da tela de Inquilinos.
- * Só cuida da tela: as regras (código repetido, situação pelo contrato, arquivar, excluir)
+ * Só cuida da tela: as regras (código repetido, situação pelo contrato, arquivar)
  * ficam no ServicoImoveis.
  */
 public class ImoveisController {

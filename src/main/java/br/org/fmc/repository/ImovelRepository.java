@@ -33,14 +33,6 @@ public class ImovelRepository implements Repositorio<Imovel> {
         }
     }
 
-    public void excluir(long id) throws SQLException {
-        try (Connection c = Database.conectar();
-             PreparedStatement s = c.prepareStatement("DELETE FROM imovel WHERE id = ?")) {
-            s.setLong(1, id);
-            if (s.executeUpdate() != 1) throw new IllegalArgumentException("Imóvel não encontrado.");
-        }
-    }
-
     public boolean existeUnidade(String unidade, Long idAtual) throws SQLException {
         String sql = "SELECT 1 FROM imovel WHERE trim(unidade) = ? COLLATE NOCASE AND (? IS NULL OR id <> ?)";
         try (Connection c = Database.conectar(); PreparedStatement s = c.prepareStatement(sql)) {

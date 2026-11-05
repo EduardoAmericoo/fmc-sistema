@@ -173,11 +173,6 @@ public class ContratoRepository implements Repositorio<Contrato> {
         return existeAtivo("inquilino_id", inquilinoId);
     }
 
-    /** O imóvel já teve algum contrato (ativo ou encerrado)? Nesse caso ele não pode ser excluído. */
-    public boolean existeNoImovel(long imovelId) throws SQLException {
-        return existe("SELECT 1 FROM contrato WHERE imovel_id = ?", imovelId);
-    }
-
     private boolean existeAtivo(String coluna, long id) throws SQLException {
         return existe("SELECT 1 FROM contrato WHERE " + coluna + " = ? AND status = 'ATIVO'", id);
     }

@@ -94,29 +94,4 @@ class CadastroImovelTest {
                 "", "", "1000", "", "", SituacaoImovel.VAGO);
     }
 
-    @Test void exclusaoDeImovelEstaDesativada() throws Exception {
-        salvarUnidade(null, "01", "101", "Rua A");
-        salvarUnidade(null, "02", "102", "Rua A");
-        Long id = servico.listar().stream().filter(i -> i.getCodigo().equals("01"))
-                .findFirst().orElseThrow().getId();
-        var erro = assertThrows(RegraNegocioException.class, () -> servico.excluir(id));
-        assertTrue(erro.getMessage().contains("está desativada"));
-        assertEquals(2, servico.listar().size());
-        assertTrue(servico.listar().stream().anyMatch(i -> i.getId().equals(id)));
-    }
-
-    @Test void naoExcluiSemPermissao() throws Exception {
-        salvarUnidade(null, "01", "101", "Rua A");
-        Long id = servico.listar().getFirst().getId();
-        Sessao.iniciar(new Usuario("Consulta", "consulta@example.org", Perfil.FINANCEIRO));
-        assertThrows(AcessoNegadoException.class, () -> servico.excluir(id));
-        assertEquals(1, servico.listar().size());
-    }
-
-    @Test void administradorTambemNaoPodeExcluir() throws Exception {
-        salvarUnidade(null, "01", "101", "Rua A");
-        Long id = servico.listar().getFirst().getId();
-        assertThrows(RegraNegocioException.class, () -> servico.excluir(id));
-        assertEquals(1, servico.listar().size());
-    }
 }
