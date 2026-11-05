@@ -125,12 +125,14 @@ class ListaAlugueisTest {
     }
 
     @Test
-    void filtroPorMesTrazOsMesesComAlugueisEOMesAtual() throws Exception {
+    void filtroPorMesTrazOsMesesComAlugueisOMesAtualEOSeguinte() throws Exception {
         aluguel(maria, SETEMBRO, LocalDate.of(2026, 9, 1));
         aluguel(maria, OUTUBRO, null);
-        hojeE(LocalDate.of(2026, 11, 3)); // novembro ainda sem aluguéis gerados
+        hojeE(LocalDate.of(2026, 11, 3)); // novembro e dezembro ainda sem aluguéis gerados
 
-        assertEquals(List.of(YearMonth.of(2026, 11), OUTUBRO, SETEMBRO), servico.mesesDisponiveis());
+        // Dezembro aparece para dar para gerar as cobranças com antecedência (BOARD-37).
+        assertEquals(List.of(YearMonth.of(2026, 12), YearMonth.of(2026, 11), OUTUBRO, SETEMBRO),
+                servico.mesesDisponiveis());
     }
 
     @Test

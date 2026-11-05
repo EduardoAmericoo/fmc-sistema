@@ -187,8 +187,8 @@ public class ServicoDadosTeste {
     }
 
     /**
-        * Aluguéis de teste (BOARD-38): os de dois meses atrás de cada contrato,
-        * para a tela de Aluguéis ter histórico sem pré-gerar os meses atual e anterior.
+     * Aluguéis de teste (BOARD-38): os dos 2 meses anteriores e do mês atual de cada contrato,
+     * para a tela de Aluguéis ter o que mostrar em todas as situações.
      * Não é a geração do mês (BOARD-37): são gravados direto, como massa de teste.
      *
      * Os já vencidos ficam pagos, menos os que a coluna "situacao_financeira" do contratos.csv
@@ -205,9 +205,10 @@ public class ServicoDadosTeste {
             String situacao = financeira.getOrDefault(contrato.getNumero(), "Em dia");
             int emAberto = situacao.startsWith("2") ? 2 : situacao.startsWith("1") ? 1 : 0;
             List<Aluguel> doContrato = new ArrayList<>();
-            YearMonth mesHistorico = atual.minusMonths(2);
-            if (contrato.cobreCompetencia(mesHistorico)) {
-                doContrato.add(new Aluguel(contrato, mesHistorico));
+            for (YearMonth mes = atual.minusMonths(2); !mes.isAfter(atual); mes = mes.plusMonths(1)) {
+                if (contrato.cobreCompetencia(mes)) {
+                    doContrato.add(new Aluguel(contrato, mes));
+                }
             }
             List<Aluguel> vencidos = doContrato.stream().filter(a -> a.getVencimento().isBefore(hoje)).toList();
             for (int i = 0; i < vencidos.size() - emAberto; i++) {

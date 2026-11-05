@@ -116,15 +116,19 @@ public class ServicoAlugueis {
     }
 
     /**
-     * Os meses para o filtro:os que já têm aluguéis, do mais recente para o mais antigo,
-     * e sempre o mês atual (mesmo antes de os aluguéis dele serem gerados).
+     * Os meses para o filtro: os que já têm aluguéis, do mais recente para o mais antigo,
+     * e sempre o mês atual e o seguinte (mesmo antes de os aluguéis deles serem gerados).
      */
     public List<YearMonth> mesesDisponiveis() throws SQLException {
         Sessao.exigir(Acao.VER_ALUGUEIS);
         List<YearMonth> meses = new ArrayList<>(alugueis.mesesComAluguel());
         YearMonth atual = YearMonth.from(hoje());
-        if (!meses.contains(atual)) {
-            meses.add(atual);
+        // O mês atual e o seguinte sempre aparecem, mesmo antes de gerados (BOARD-37: dá para gerar
+        // as cobranças do mês que vem com antecedência).
+        for (YearMonth mes : List.of(atual, atual.plusMonths(1))) {
+            if (!meses.contains(mes)) {
+                meses.add(mes);
+            }
         }
         meses.sort((a, b) -> b.compareTo(a));
         return meses;

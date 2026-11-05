@@ -104,7 +104,7 @@ Acessos depois da carga:
 | `financeiro@exemplo.org` | `teste123` | Financeiro (consulta e geração de cobranças) |
 | `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
 
-Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os aluguéis de demonstração ficam apenas em dois meses atrás; o mês anterior e o atual ficam sem cobranças para que a geração mensal possa ser testada na tela **Aluguéis**.
+Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os aluguéis de demonstração são os dos 2 meses anteriores e do mês atual; para testar a geração (BOARD-37), escolha o mês seguinte na tela **Aluguéis e cobrança** e clique em "Gerar cobranças do mês".
 
 Na tabela de aluguéis, a ação **PDF simulado** salva um demonstrativo fictício para apresentação. O arquivo traz o aviso **SIMULAÇÃO — SEM VALOR PARA PAGAMENTO** e não contém linha digitável, código de barras, PIX ou dados bancários. Não deve ser enviado como boleto para cobrança real.
 
