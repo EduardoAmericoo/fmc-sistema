@@ -9,7 +9,7 @@ import java.util.Set;
  * liberadas, e o Administrador pode ajustar pessoa a pessoa (BOARD-41).
  *
  * Administrador: tudo. Secretaria: tudo, menos a tela de Usuários.
- * Financeiro: só consulta (vê as telas, não cria nem edita nada).
+ * Financeiro: consulta e gera as cobranças mensais, sem receber pagamentos ou editar cadastros.
  */
 public enum Perfil {
     ADMINISTRADOR("Administrador", EnumSet.allOf(Acao.class)),
@@ -18,9 +18,11 @@ public enum Perfil {
             Acao.VER_INQUILINOS, Acao.CRIAR_INQUILINO, Acao.EDITAR_INQUILINO, Acao.ARQUIVAR_INQUILINO,
             Acao.VER_CONTRATOS, Acao.CRIAR_CONTRATO, Acao.PRORROGAR_CONTRATO, Acao.ENCERRAR_CONTRATO,
             Acao.REAJUSTAR_CONTRATO,
-            Acao.VER_ALUGUEIS, Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL)),
+            Acao.VER_ALUGUEIS, Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL,
+            Acao.REGISTRAR_CONTATO_COBRANCA)),
     FINANCEIRO("Financeiro", EnumSet.of(
-            Acao.VER_IMOVEIS, Acao.VER_INQUILINOS, Acao.VER_CONTRATOS, Acao.VER_ALUGUEIS));
+            Acao.VER_IMOVEIS, Acao.VER_INQUILINOS, Acao.VER_CONTRATOS, Acao.VER_ALUGUEIS,
+            Acao.GERAR_ALUGUEIS, Acao.REGISTRAR_CONTATO_COBRANCA));
 
     private final String descricao;
     private final Set<Acao> permissoes;

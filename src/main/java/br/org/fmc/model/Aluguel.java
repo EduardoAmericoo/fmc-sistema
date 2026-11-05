@@ -22,6 +22,7 @@ public class Aluguel {
     private BigDecimal valorIptu;
     private BigDecimal outros = BigDecimal.ZERO;
     private LocalDate dataPagamento; // nulo enquanto não for pago
+    private String numeroRecibo;
 
     public Aluguel(Contrato contrato, YearMonth competencia) {
         this(contrato, competencia, true);
@@ -137,5 +138,13 @@ public class Aluguel {
 
     public LocalDate getDataPagamento() {
         return dataPagamento;
+    }
+
+    public String getNumeroRecibo() {
+        return numeroRecibo;
+    }
+
+    public void setNumeroRecibo(String numeroRecibo) {
+        this.numeroRecibo = Valida.textoOpcional(numeroRecibo);
     }
 }

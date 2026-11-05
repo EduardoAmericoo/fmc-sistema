@@ -480,6 +480,67 @@
     -fx-icon-size: 16px;
 }
 
+.barra-situacoes {
+    -fx-min-height: 10px;
+    -fx-pref-height: 10px;
+    -fx-max-height: 10px;
+}
+
+.barra-status-pago,
+.barra-status-vencer,
+.barra-status-tolerancia,
+.barra-status-atraso {
+    -fx-min-height: 10px;
+    -fx-max-height: 10px;
+    -fx-background-radius: 6;
+}
+
+.barra-status-pago {
+    -fx-background-color: -fmc-azul;
+}
+
+.barra-status-vencer {
+    -fx-background-color: -fmc-azul-claro;
+}
+
+.barra-status-tolerancia {
+    -fx-background-color: -fmc-alerta;
+}
+
+.barra-status-atraso {
+    -fx-background-color: -fmc-erro;
+}
+
+.resumo-status .label {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.numero-resumo {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.linha-detalhe {
+    -fx-padding: 7 0 7 0;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}
+
+.linha-detalhe .label {
+    -fx-text-fill: -fmc-texto-corpo;
+}
+
+.rotulo-secao {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.texto-forte {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
 /* ===================== Janela (Dialog) ===================== */
 
 /* Véu escuro por trás da janela */

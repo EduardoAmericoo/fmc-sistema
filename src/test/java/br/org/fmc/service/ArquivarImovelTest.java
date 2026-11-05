@@ -102,18 +102,17 @@ class ArquivarImovelTest {
         contratoAtivo(imovel);
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.excluir(imovel.getId()));
-        assertEquals(List.of("O imóvel IM-200 tem histórico de contrato e não pode ser excluído. "
-                + "Para tirá-lo das listas, use Arquivar."), e.getErros());
+        assertEquals(List.of("A exclusão de imóveis está desativada. Para tirá-lo das listas, use Arquivar."), e.getErros());
     }
 
     @Test
-    void cadastroFeitoPorEnganoPodeSerExcluidoMesmoArquivado() throws Exception {
+    void cadastroArquivadoTambemNaoPodeSerExcluido() throws Exception {
         Imovel imovel = novoImovel("IM-200", SituacaoImovel.VAGO);
         servico.arquivar(imovel.getId(), "Cadastrado duas vezes");
 
-        servico.excluir(imovel.getId());
+        assertThrows(RegraNegocioException.class, () -> servico.excluir(imovel.getId()));
 
-        assertTrue(repo.buscarPorId(imovel.getId()).isEmpty());
+        assertTrue(repo.buscarPorId(imovel.getId()).orElseThrow().estaArquivado());
     }
 
     @Test

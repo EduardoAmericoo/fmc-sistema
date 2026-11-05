@@ -2,7 +2,7 @@ package br.org.fmc.model;
 
 public enum FormaPagamento {
     DINHEIRO("Dinheiro"),
-    CHEQUE("Cheque"),
+    BOLETO_BANCARIO("Boleto bancário"),
     PIX("PIX"),
     TRANSFERENCIA("Transferência");
 
@@ -12,9 +12,9 @@ public enum FormaPagamento {
         this.descricao = descricao;
     }
 
-    /** Regra da Fundação: dinheiro e cheque entram no Caixa; PIX e transferência, no Banco. */
+    /** Regra da Fundação: dinheiro entra no Caixa; boleto, PIX e transferência, no Banco. */
     public boolean vaiParaCaixa() {
-        return this == DINHEIRO || this == CHEQUE;
+        return this == DINHEIRO;
     }
 
     public String getDescricao() {
