@@ -15,8 +15,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,41 +49,21 @@ public class ServicoCobranca {
         return LocalDate.now(relogio);
     }
 
-    /** Mais de um mês em aberto: agrupa dois ou mais aluguéis não recebidos por contrato. */
+    /**
+     * Mais de um mês em aberto: dois ou mais aluguéis EM ATRASO (passada a tolerância) no mesmo
+     * contrato. A escolha de quem entra e a ordem vêm do ServicoAlugueis.listaDeCobranca, a mesma
+     * regra do Painel (BOARD-61), para os números da aba e do Painel sempre baterem; aqui só se
+     * junta o último contato registrado ([D7] BOARD-64).
+     */
     public List<Linha> listarParaCobranca() throws SQLException {
         Sessao.exigir(Acao.VER_ALUGUEIS);
         LocalDate hoje = hoje();
-        Map<Long, Contrato> contratosPorId = new HashMap<>();
-        for (Contrato contrato : contratos.listarTodos()) {
-            contratosPorId.put(contrato.getId(), contrato);
-        }
-        Map<Long, List<Aluguel>> abertos = new HashMap<>();
-        for (Aluguel aluguel : alugueis.listarEmAberto()) {
-            if (!aluguel.getVencimento().isAfter(hoje)) {
-                abertos.computeIfAbsent(aluguel.getContrato().getId(), ignorado -> new ArrayList<>()).add(aluguel);
-            }
-        }
         Map<Long, ContatoCobranca> ultimos = contatos.ultimosPorContrato();
         List<Linha> linhas = new ArrayList<>();
-        for (Map.Entry<Long, List<Aluguel>> item : abertos.entrySet()) {
-            List<Aluguel> doContrato = item.getValue();
-            if (doContrato.size() < 2) {
-                continue;
-            }
-            doContrato.sort(Comparator.comparing(Aluguel::getVencimento));
-            BigDecimal original = doContrato.stream().map(Aluguel::base).reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal atualizado = doContrato.stream()
-                    .map(a -> a.base().add(a.encargosEm(hoje).total()))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            Contrato contrato = contratosPorId.get(item.getKey());
-            if (contrato != null) {
-                linhas.add(new Linha(contrato, List.copyOf(doContrato), original, atualizado,
-                        ultimos.get(item.getKey())));
-            }
+        for (ServicoAlugueis.Cobranca c : ServicoAlugueis.listaDeCobranca(alugueis.listarEmAberto(), hoje)) {
+            linhas.add(new Linha(c.contrato(), c.alugueis(), c.base(), c.devidoHoje(hoje),
+                    ultimos.get(c.contrato().getId())));
         }
-        linhas.sort(Comparator.comparingInt(Linha::mesesEmAberto).reversed()
-                .thenComparing(l -> l.aluguelMaisAntigo().getVencimento())
-                .thenComparing(l -> l.contrato().getImovel().getCodigo()));
         return List.copyOf(linhas);
     }
 
