@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -52,7 +51,6 @@ public class ReceberAluguelController {
     @FXML private DatePicker campoData;
     @FXML private ComboBox<FormaPagamento> campoForma;
     @FXML private TextField campoDocumento;
-    @FXML private CheckBox dispensar;
     @FXML private HBox avisoErros;
     @FXML private Label textoErros;
 
@@ -90,7 +88,6 @@ public class ReceberAluguelController {
             }
         });
         campoData.valueProperty().addListener((obs, antes, agora) -> atualizarEncargos());
-        dispensar.selectedProperty().addListener((obs, antes, agora) -> atualizarEncargos());
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
                 fechar();
@@ -122,9 +119,9 @@ public class ReceberAluguelController {
             return;
         }
         try {
-            Encargos encargos = servico.calcularEncargos(aluguel, campoData.getValue(), dispensar.isSelected());
+            Encargos encargos = servico.calcularEncargos(aluguel, campoData.getValue());
             valorDevido.setText(Formatos.moeda(aluguel.base()));
-            atraso.setText(encargos.getDiasAtraso() + " dias · " + encargos.getMeses() + " meses (ou fracao)");
+            atraso.setText(encargos.getDiasAtraso() + " dias · " + encargos.getMeses() + " meses (ou fração)");
             multa.setText(Formatos.moeda(encargos.getMulta()));
             juros.setText(Formatos.moeda(encargos.getJuros()));
             correcao.setText(Formatos.moeda(encargos.getCorrecao()));
@@ -142,8 +139,7 @@ public class ReceberAluguelController {
             return;
         }
         try {
-            Recibo recibo = servico.receber(aluguel, data, campoForma.getValue(), campoDocumento.getText(),
-                    dispensar.isSelected());
+            Recibo recibo = servico.receber(aluguel, data, campoForma.getValue(), campoDocumento.getText());
             fechar();
             depoisDeReceber.accept(recibo);
         } catch (RegraNegocioException e) {

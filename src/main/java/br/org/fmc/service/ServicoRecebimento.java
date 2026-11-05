@@ -24,15 +24,19 @@ public class ServicoRecebimento {
         return LocalDate.now(relogio);
     }
 
-    public Encargos calcularEncargos(Aluguel aluguel, LocalDate dataPagamento, boolean dispensarEncargos) {
+    /**
+     * Multa, juros e correção se o aluguel for pago na data informada. Dispensar encargos é a
+     * [D11] BOARD-66 (com motivo e registro de quem dispensou): ainda não existe.
+     */
+    public Encargos calcularEncargos(Aluguel aluguel, LocalDate dataPagamento) {
         if (aluguel == null || dataPagamento == null) {
             throw new RegraNegocioException("Informe o aluguel e a data do pagamento.");
         }
-        return dispensarEncargos ? Encargos.nenhum() : aluguel.encargosEm(dataPagamento);
+        return aluguel.encargosEm(dataPagamento);
     }
 
     public Recibo receber(Aluguel aluguel, LocalDate dataPagamento, FormaPagamento formaPagamento,
-            String documento, boolean dispensarEncargos) throws SQLException {
+            String documento) throws SQLException {
         Sessao.exigir(Acao.RECEBER_ALUGUEL);
         if (aluguel == null) {
             throw new RegraNegocioException("Escolha um aluguel.");
@@ -49,7 +53,7 @@ public class ServicoRecebimento {
         if (formaPagamento == null) {
             throw new RegraNegocioException("Escolha a forma de pagamento.");
         }
-        Encargos encargos = calcularEncargos(aluguel, dataPagamento, dispensarEncargos);
+        Encargos encargos = calcularEncargos(aluguel, dataPagamento);
         return recibos.registrar(aluguel, dataPagamento, formaPagamento, encargos, documento, Sessao.usuario());
     }
 }

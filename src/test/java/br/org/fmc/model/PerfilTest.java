@@ -31,6 +31,7 @@ class PerfilTest {
     @Test
     void formaDePagamentoDefineCaixaOuBanco() {
         assertTrue(FormaPagamento.DINHEIRO.vaiParaCaixa());
+        assertTrue(FormaPagamento.CHEQUE.vaiParaCaixa());
         assertFalse(FormaPagamento.BOLETO_BANCARIO.vaiParaCaixa());
         assertFalse(FormaPagamento.PIX.vaiParaCaixa());
         assertFalse(FormaPagamento.TRANSFERENCIA.vaiParaCaixa());

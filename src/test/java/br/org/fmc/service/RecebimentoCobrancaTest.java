@@ -74,7 +74,7 @@ class RecebimentoCobrancaTest {
     void recebeGravaAluguelReciboEReferenciaEmUmaOperacao() throws Exception {
         Aluguel aluguel = alugueis.listarDoMes(YearMonth.of(2026, 8)).get(0);
 
-        var recibo = recebimento.receber(aluguel, HOJE, FormaPagamento.PIX, "TX-123", false);
+        var recibo = recebimento.receber(aluguel, HOJE, FormaPagamento.PIX, "TX-123");
 
         assertEquals("00001/2026", recibo.getNumero());
         assertEquals("TX-123", recibo.getDocumento());
@@ -83,17 +83,7 @@ class RecebimentoCobrancaTest {
         assertTrue(persistido.estaPago());
         assertEquals("00001/2026", persistido.getNumeroRecibo());
         assertThrows(RegraNegocioException.class, () ->
-                recebimento.receber(persistido, HOJE, FormaPagamento.PIX, "TX-123", false));
-    }
-
-    @Test
-    void dispensaEncargosERegistraTotalSemAcrescimos() throws Exception {
-        Aluguel aluguel = alugueis.listarDoMes(YearMonth.of(2026, 8)).get(0);
-
-        var recibo = recebimento.receber(aluguel, HOJE, FormaPagamento.DINHEIRO, "", true);
-
-        assertEquals(0, recibo.getEncargos().total().compareTo(BigDecimal.ZERO));
-        assertEquals(aluguel.base(), recibo.getValorTotal());
+                recebimento.receber(persistido, HOJE, FormaPagamento.PIX, "TX-123"));
     }
 
     @Test
@@ -116,6 +106,6 @@ class RecebimentoCobrancaTest {
         assertEquals(1, cobranca.listarParaCobranca().size());
         assertThrows(AcessoNegadoException.class, () ->
                 recebimento.receber(alugueis.listarDoMes(YearMonth.of(2026, 8)).get(0), HOJE,
-                        FormaPagamento.PIX, "", false));
+                        FormaPagamento.PIX, ""));
     }
 }
