@@ -74,7 +74,28 @@ public class ServicoAlugueis {
         if (mes == null) {
             throw new RegraNegocioException("Escolha o mês.");
         }
+        return gerar(mes);
+    }
 
+    /**
+     * Geração automática (BOARD-37): chamada ao entrar no sistema, sem botão. Gera os aluguéis do
+     * mês atual e de algum mês anterior que tenha ficado sem gerar (por exemplo, se ninguém abriu o
+     * sistema no mês passado). Como não duplica, rodar várias vezes não muda nada. É uma tarefa do
+     * próprio sistema, por isso não depende da permissão de quem entrou.
+     */
+    public List<Aluguel> gerarAutomatico() throws SQLException {
+        YearMonth atual = YearMonth.from(hoje());
+        YearMonth mes = alugueis.mesesComAluguel().stream()
+                .filter(m -> m.isBefore(atual)).max(YearMonth::compareTo)
+                .map(m -> m.plusMonths(1)).orElse(atual);
+        List<Aluguel> gerados = new ArrayList<>();
+        for (; !mes.isAfter(atual); mes = mes.plusMonths(1)) {
+            gerados.addAll(gerar(mes));
+        }
+        return List.copyOf(gerados);
+    }
+
+    private List<Aluguel> gerar(YearMonth mes) throws SQLException {
         Set<Long> contratosComAluguel = new HashSet<>();
         for (Aluguel aluguel : alugueis.listarDoMes(mes)) {
             contratosComAluguel.add(aluguel.getContrato().getId());
@@ -123,12 +144,8 @@ public class ServicoAlugueis {
         Sessao.exigir(Acao.VER_ALUGUEIS);
         List<YearMonth> meses = new ArrayList<>(alugueis.mesesComAluguel());
         YearMonth atual = YearMonth.from(hoje());
-        // O mês atual e o seguinte sempre aparecem, mesmo antes de gerados (BOARD-37: dá para gerar
-        // as cobranças do mês que vem com antecedência).
-        for (YearMonth mes : List.of(atual, atual.plusMonths(1))) {
-            if (!meses.contains(mes)) {
-                meses.add(mes);
-            }
+        if (!meses.contains(atual)) {
+            meses.add(atual); // o mês atual sempre aparece
         }
         meses.sort((a, b) -> b.compareTo(a));
         return meses;

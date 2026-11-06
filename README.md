@@ -101,10 +101,10 @@ Acessos depois da carga:
 | `admin@fmc.org` | `Fmc@2026` | Administrador inicial (o mesmo de sempre) |
 | `administrador@exemplo.org` | `teste123` | Administrador |
 | `secretaria@exemplo.org` | `teste123` | Secretaria |
-| `financeiro@exemplo.org` | `teste123` | Financeiro (consulta e geração de cobranças) |
+| `financeiro@exemplo.org` | `teste123` | Financeiro (consulta, demonstrativo em PDF e contato de cobrança) |
 | `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
 
-Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os aluguéis de demonstração são os dos 2 meses anteriores e do mês atual; para testar a geração (BOARD-37), escolha o mês seguinte na tela **Aluguéis e cobrança** e clique em "Gerar cobranças do mês".
+Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os aluguéis de demonstração são os dos 2 meses anteriores e do mês atual. Não há botão de gerar (BOARD-37): ao entrar, o sistema gera sozinho os aluguéis do mês atual e de algum mês que tenha ficado para trás, sem duplicar.
 
 Na tabela de aluguéis, a ação **PDF simulado** salva um demonstrativo fictício para apresentação. O arquivo traz o aviso **SIMULAÇÃO — SEM VALOR PARA PAGAMENTO** e não contém linha digitável, código de barras, PIX ou dados bancários. Não deve ser enviado como boleto para cobrança real.
 

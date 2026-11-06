@@ -97,6 +97,12 @@ public final class Navegador {
 
     /** Mostra o sistema (menu + telas), depois do login. */
     public static void mostrarSistema() {
+        // BOARD-37: os aluguéis do mês são gerados sozinhos ao entrar (sem duplicar).
+        try {
+            new br.org.fmc.service.ServicoAlugueis().gerarAutomatico();
+        } catch (java.sql.SQLException e) {
+            System.err.println("Não foi possível gerar os aluguéis do mês: " + e.getMessage());
+        }
         trocarCena("principal");
     }
 

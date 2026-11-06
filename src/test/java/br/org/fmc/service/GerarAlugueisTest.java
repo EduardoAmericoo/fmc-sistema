@@ -21,7 +21,9 @@ import br.org.fmc.util.DocumentoCobrancaPdf;
 import br.org.fmc.model.Usuario;
 import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.YearMonth;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -140,5 +142,31 @@ class GerarAlugueisTest {
 
         assertThrows(RegraNegocioException.class, () ->
                 servico.gerarDemonstrativo(pago, LocalDate.of(2026, 10, 2), pasta.resolve("pago.pdf")));
+    }
+
+    @Test
+    void aoEntrarGeraSozinhoOMesAtualEOsMesesQueFicaramParaTras() throws Exception {
+        hojeE(LocalDate.of(2026, 11, 3));
+        servico.gerarDoMes(SETEMBRO); // ninguém gerou outubro
+
+        List<Aluguel> gerados = servico.gerarAutomatico();
+
+        assertEquals(4, gerados.size()); // outubro e novembro, dos dois contratos
+        assertEquals(2, servico.listarDoMes(OUTUBRO).size());
+        assertEquals(2, servico.listarDoMes(YearMonth.of(2026, 11)).size());
+        assertTrue(servico.gerarAutomatico().isEmpty()); // entrar de novo não duplica
+    }
+
+    @Test
+    void geracaoAutomaticaNaoDependeDaPermissaoDeQuemEntrou() throws Exception {
+        hojeE(LocalDate.of(2026, 10, 3));
+        Sessao.encerrar();
+
+        assertEquals(2, servico.gerarAutomatico().size());
+    }
+
+    private void hojeE(LocalDate dia) {
+        ZoneId zona = ZoneId.systemDefault();
+        servico.usarRelogio(Clock.fixed(dia.atStartOfDay(zona).toInstant(), zona));
     }
 }
