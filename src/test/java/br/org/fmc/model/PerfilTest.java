@@ -15,6 +15,7 @@ class PerfilTest {
         assertTrue(Perfil.SECRETARIA.permite(Acao.RECEBER_ALUGUEL));
         assertFalse(Perfil.SECRETARIA.permite(Acao.EDITAR_PERMISSOES));
         assertTrue(Perfil.FINANCEIRO.permite(Acao.VER_ALUGUEIS));
+        assertTrue(Perfil.FINANCEIRO.permite(Acao.REGISTRAR_CONTATO_COBRANCA));
         assertFalse(Perfil.FINANCEIRO.permite(Acao.RECEBER_ALUGUEL));
     }
 
@@ -31,6 +32,7 @@ class PerfilTest {
     void formaDePagamentoDefineCaixaOuBanco() {
         assertTrue(FormaPagamento.DINHEIRO.vaiParaCaixa());
         assertTrue(FormaPagamento.CHEQUE.vaiParaCaixa());
+        assertFalse(FormaPagamento.BOLETO_BANCARIO.vaiParaCaixa());
         assertFalse(FormaPagamento.PIX.vaiParaCaixa());
         assertFalse(FormaPagamento.TRANSFERENCIA.vaiParaCaixa());
     }

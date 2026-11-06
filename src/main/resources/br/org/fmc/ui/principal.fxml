@@ -31,7 +31,7 @@
                 <Button text="Painel" userData="painel" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
                     <graphic><FontIcon iconLiteral="fth-grid"/></graphic>
                 </Button>
-                <Button text="Aluguéis" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                <Button text="Aluguéis e cobrança" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
                     <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
                 </Button>
                 <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">

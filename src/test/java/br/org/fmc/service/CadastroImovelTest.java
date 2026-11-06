@@ -94,24 +94,4 @@ class CadastroImovelTest {
                 "", "", "1000", "", "", SituacaoImovel.VAGO);
     }
 
-    @Test void excluiSomenteSelecionadoEPermiteReutilizarUnidade() throws Exception {
-        salvarUnidade(null, "01", "101", "Rua A");
-        salvarUnidade(null, "02", "102", "Rua A");
-        Long id = servico.listar().stream().filter(i -> i.getCodigo().equals("01"))
-                .findFirst().orElseThrow().getId();
-        servico.excluir(id);
-        assertEquals(1, servico.listar().size());
-        assertEquals("02", servico.listar().getFirst().getCodigo());
-        salvarUnidade(null, "03", "101", "Rua A");
-        assertEquals(2, servico.listar().size());
-        assertThrows(RegraNegocioException.class, () -> servico.excluir(id));
-    }
-
-    @Test void naoExcluiSemPermissao() throws Exception {
-        salvarUnidade(null, "01", "101", "Rua A");
-        Long id = servico.listar().getFirst().getId();
-        Sessao.iniciar(new Usuario("Consulta", "consulta@example.org", Perfil.FINANCEIRO));
-        assertThrows(AcessoNegadoException.class, () -> servico.excluir(id));
-        assertEquals(1, servico.listar().size());
-    }
 }

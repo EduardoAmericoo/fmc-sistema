@@ -101,10 +101,14 @@ Acessos depois da carga:
 | `admin@fmc.org` | `Fmc@2026` | Administrador inicial (o mesmo de sempre) |
 | `administrador@exemplo.org` | `teste123` | Administrador |
 | `secretaria@exemplo.org` | `teste123` | Secretaria |
-| `financeiro@exemplo.org` | `teste123` | Financeiro (só consulta) |
+| `financeiro@exemplo.org` | `teste123` | Financeiro (consulta, demonstrativo em PDF e contato de cobrança) |
 | `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
 
-Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC".
+Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os aluguéis de demonstração são os dos 2 meses anteriores e do mês atual. Não há botão de gerar (BOARD-37): ao entrar, o sistema gera sozinho os aluguéis do mês atual e de algum mês que tenha ficado para trás, sem duplicar.
+
+Na tabela de aluguéis, a ação **PDF simulado** salva um demonstrativo fictício para apresentação. O arquivo traz o aviso **SIMULAÇÃO — SEM VALOR PARA PAGAMENTO** e não contém linha digitável, código de barras, PIX ou dados bancários. Não deve ser enviado como boleto para cobrança real.
+
+Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebimentos: a data, a forma e a referência do pagamento ficam no recibo, e multa, juros e correção seguem as regras do contrato. A aba **Para cobrança** agrupa contratos com dois ou mais aluguéis vencidos e mantém o histórico do último contato registrado.
 
 ## Visual das telas (design system)
 

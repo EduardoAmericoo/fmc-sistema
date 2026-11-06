@@ -130,7 +130,8 @@ class ListaAlugueisTest {
         aluguel(maria, OUTUBRO, null);
         hojeE(LocalDate.of(2026, 11, 3)); // novembro ainda sem aluguéis gerados
 
-        assertEquals(List.of(YearMonth.of(2026, 11), OUTUBRO, SETEMBRO), servico.mesesDisponiveis());
+        assertEquals(List.of(YearMonth.of(2026, 11), OUTUBRO, SETEMBRO),
+                servico.mesesDisponiveis());
     }
 
     @Test

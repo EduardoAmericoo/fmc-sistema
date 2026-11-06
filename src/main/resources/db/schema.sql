@@ -206,3 +206,33 @@ CREATE TABLE IF NOT EXISTS contrato_encerramento (
     registrado_em TEXT    NOT NULL,
     feito_por     TEXT    NOT NULL
 );
+
+-- BOARD-39 · Recibos de pagamento: um recibo por aluguel recebido.
+-- O pagamento, forma, referência do documento e encargos ficam preservados para auditoria.
+CREATE TABLE IF NOT EXISTS recibo (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    aluguel_id       INTEGER NOT NULL UNIQUE REFERENCES aluguel(id),
+    ano              INTEGER NOT NULL,
+    sequencial       INTEGER NOT NULL,
+    data_pagamento   TEXT    NOT NULL,
+    forma_pagamento  TEXT    NOT NULL,
+    documento        TEXT,
+    dias_atraso      INTEGER NOT NULL,
+    meses_encargos   INTEGER NOT NULL,
+    multa            TEXT    NOT NULL,
+    juros            TEXT    NOT NULL,
+    correcao         TEXT    NOT NULL,
+    valor_total      TEXT    NOT NULL,
+    emitido_por      INTEGER NOT NULL REFERENCES usuario(id),
+    data_emissao     TEXT    NOT NULL,
+    UNIQUE (ano, sequencial)
+);
+
+-- BOARD-44 · Histórico de tentativas de contato para cobrança por contrato.
+CREATE TABLE IF NOT EXISTS cobranca_contato (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id    INTEGER NOT NULL REFERENCES contrato(id),
+    registrado_em  TEXT    NOT NULL,
+    resultado      TEXT    NOT NULL,
+    feito_por      INTEGER NOT NULL REFERENCES usuario(id)
+);

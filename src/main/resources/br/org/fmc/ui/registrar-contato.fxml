@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.RegistrarContatoController">
+    <VBox styleClass="janela" maxWidth="720" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Registrar contato de cobrança" styleClass="janela-titulo"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+        <VBox styleClass="janela-corpo" spacing="14">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox styleClass="resumo-calculado" spacing="10" alignment="TOP_LEFT">
+                <FontIcon iconLiteral="fth-info"/>
+                <Label fx:id="resumoDivida" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <VBox spacing="5">
+                <Label text="Último contato" styleClass="rotulo"/>
+                <Label fx:id="ultimoContato" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Resultado do contato *" labelFor="$campoResultado" styleClass="rotulo"/>
+                <TextArea fx:id="campoResultado" styleClass="campo" promptText="Ex.: prometeu pagar até dia 30; não atendeu"
+                          wrapText="true" prefRowCount="4"/>
+            </VBox>
+        </VBox>
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Salvar contato" onAction="#salvar" styleClass="botao-primario" defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-phone"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

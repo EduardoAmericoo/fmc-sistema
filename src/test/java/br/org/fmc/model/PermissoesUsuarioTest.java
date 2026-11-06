@@ -65,14 +65,17 @@ class PermissoesUsuarioTest {
     }
 
     @Test
-    void financeiroSoConsulta() {
+    void financeiroConsultaEGeraAlugueisSemReceberPagamento() {
         Usuario financeiro = new Usuario("Contabilidade", "contabilidade@exemplo.org", Perfil.FINANCEIRO);
         for (Tela tela : Tela.values()) {
             assertEquals(tela != Tela.USUARIOS, financeiro.podeAbrir(tela), tela.name());
         }
         for (Acao acao : Acao.values()) {
-            assertEquals(acao.getRequisito() == null && acao != Acao.VER_USUARIOS, financeiro.pode(acao), acao.name());
+            boolean esperada = (acao.getRequisito() == null && acao != Acao.VER_USUARIOS)
+                    || acao == Acao.GERAR_ALUGUEIS || acao == Acao.REGISTRAR_CONTATO_COBRANCA;
+            assertEquals(esperada, financeiro.pode(acao), acao.name());
         }
+        assertFalse(financeiro.pode(Acao.RECEBER_ALUGUEL));
     }
 
     @Test

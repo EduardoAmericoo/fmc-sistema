@@ -16,7 +16,6 @@ public enum Acao {
     CRIAR_IMOVEL("Imóveis", "Cadastrar imóvel novo", VER_IMOVEIS),
     EDITAR_IMOVEL("Imóveis", "Editar dados de imóvel", VER_IMOVEIS),
     ARQUIVAR_IMOVEL("Imóveis", "Arquivar e reativar imóvel (ex.: vendido)", VER_IMOVEIS),
-    EXCLUIR_IMOVEL("Imóveis", "Excluir imóvel cadastrado por engano", VER_IMOVEIS),
 
     VER_INQUILINOS("Inquilinos", "Ver a lista de inquilinos", null),
     CRIAR_INQUILINO("Inquilinos", "Cadastrar inquilino novo", VER_INQUILINOS),
@@ -32,6 +31,7 @@ public enum Acao {
     VER_ALUGUEIS("Aluguéis", "Ver aluguéis e números financeiros", null),
     GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),
     RECEBER_ALUGUEL("Aluguéis", "Receber aluguel e emitir recibo", VER_ALUGUEIS),
+    REGISTRAR_CONTATO_COBRANCA("Aluguéis", "Registrar contato de cobrança", VER_ALUGUEIS),
 
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),
     CRIAR_USUARIO("Usuários", "Criar usuário novo", VER_USUARIOS),

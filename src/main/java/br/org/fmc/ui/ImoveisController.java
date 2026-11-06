@@ -19,8 +19,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -40,7 +38,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * Controla a tela "Imóveis" (ui/imoveis.fxml), no mesmo modelo da tela de Inquilinos.
- * Só cuida da tela: as regras (código repetido, situação pelo contrato, arquivar, excluir)
+ * Só cuida da tela: as regras (código repetido, situação pelo contrato, arquivar)
  * ficam no ServicoImoveis.
  */
 public class ImoveisController {
@@ -153,8 +151,7 @@ public class ImoveisController {
         });
 
         Permissoes.mostrarSe(botaoNovo, Acao.CRIAR_IMOVEL);
-        colunaAcoes.setVisible(Sessao.pode(Acao.EDITAR_IMOVEL) || Sessao.pode(Acao.ARQUIVAR_IMOVEL)
-                || Sessao.pode(Acao.EXCLUIR_IMOVEL));
+        colunaAcoes.setVisible(Sessao.pode(Acao.EDITAR_IMOVEL) || Sessao.pode(Acao.ARQUIVAR_IMOVEL));
 
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
@@ -239,10 +236,6 @@ public class ImoveisController {
             }
         } else if (Sessao.pode(Acao.ARQUIVAR_IMOVEL)) {
             botoes.getChildren().add(botaoIcone("fth-rotate-ccw", "Reativar " + i.getCodigo(), () -> reativar(i)));
-        }
-        if (Sessao.pode(Acao.EXCLUIR_IMOVEL)) {
-            botoes.getChildren().add(botaoIcone("fth-trash-2", "Excluir " + i.getCodigo() + " (cadastro por engano)",
-                    () -> excluir(i)));
         }
         return botoes;
     }
@@ -403,32 +396,6 @@ public class ImoveisController {
             avisarErro(String.join("\n", e.getErros()));
         } catch (SQLException e) {
             avisarErro("Não foi possível reativar no banco de dados. Tente de novo.");
-        }
-    }
-
-    /** Botão da lixeira: exclui de verdade, só cadastro feito por engano (o service confere). */
-    private void excluir(Imovel i) {
-        ButtonType sim = new ButtonType("Excluir", ButtonBar.ButtonData.OK_DONE);
-        ButtonType nao = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION,
-                "Use só para cadastro feito por engano. Imóvel vendido ou fora de uso deve ser arquivado, "
-                        + "para o histórico ficar guardado. A exclusão não pode ser desfeita.", sim, nao);
-        confirmar.initOwner(tabela.getScene().getWindow());
-        confirmar.setTitle("Imóveis");
-        confirmar.setHeaderText("Excluir o imóvel " + i.getCodigo() + "?");
-        ((Button) confirmar.getDialogPane().lookupButton(nao)).setDefaultButton(true);
-        ((Button) confirmar.getDialogPane().lookupButton(sim)).setDefaultButton(false);
-        if (confirmar.showAndWait().orElse(nao) != sim) {
-            return;
-        }
-        try {
-            servico.excluir(i.getId());
-            carregarLista();
-            mostrarToast("Imóvel excluído: " + i.getCodigo());
-        } catch (RegraNegocioException e) {
-            avisarErro(String.join("\n", e.getErros()));
-        } catch (SQLException e) {
-            avisarErro("Não foi possível excluir no banco de dados. Tente de novo.");
         }
     }
 

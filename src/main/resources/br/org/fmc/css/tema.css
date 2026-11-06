@@ -480,6 +480,67 @@
     -fx-icon-size: 16px;
 }
 
+.barra-situacoes {
+    -fx-min-height: 10px;
+    -fx-pref-height: 10px;
+    -fx-max-height: 10px;
+}
+
+.barra-status-pago,
+.barra-status-vencer,
+.barra-status-tolerancia,
+.barra-status-atraso {
+    -fx-min-height: 10px;
+    -fx-max-height: 10px;
+    -fx-background-radius: 6;
+}
+
+.barra-status-pago {
+    -fx-background-color: -fmc-sucesso;
+}
+
+.barra-status-vencer {
+    -fx-background-color: -fmc-azul-medio;
+}
+
+.barra-status-tolerancia {
+    -fx-background-color: -fmc-alerta;
+}
+
+.barra-status-atraso {
+    -fx-background-color: -fmc-erro;
+}
+
+.resumo-status .label {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.numero-resumo {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.linha-detalhe {
+    -fx-padding: 7 0 7 0;
+    -fx-border-color: transparent transparent -fmc-borda transparent;
+}
+
+.linha-detalhe .label {
+    -fx-text-fill: -fmc-texto-corpo;
+}
+
+.rotulo-secao {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.texto-forte {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
 /* ===================== Janela (Dialog) ===================== */
 
 /* Véu escuro por trás da janela */
@@ -1101,4 +1162,75 @@
     -fx-background-color: -fmc-fundo;
     -fx-border-color: -fmc-borda-forte;
     -fx-text-fill: -fmc-texto-suave;
+}
+
+/* ===================== Aluguéis e cobrança ===================== */
+
+/* Cartão de resumo (situação do mês, meses em aberto): com margem interna, o texto não encosta na borda */
+.cartao-resumo {
+    -fx-background-color: -fmc-cartao;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 20 24 20 24;
+}
+
+/* Seletor de mês "‹ Novembro de 2026 ›": parece um campo só, com as setas dentro */
+.seletor-mes {
+    -fx-pref-height: 40;
+    -fx-min-height: 40;
+    -fx-max-height: 40;
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: -fmc-borda-forte;
+    -fx-border-radius: 8;
+    -fx-padding: 0 4 0 4;
+}
+
+.seta-mes {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-pref-width: 32;
+    -fx-pref-height: 32;
+    -fx-min-width: 32;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.seta-mes:hover {
+    -fx-background-color: -fmc-fundo;
+}
+
+.seta-mes .ikonli-font-icon {
+    -fx-icon-size: 18;
+    -fx-icon-color: -fmc-azul;
+}
+
+.seta-mes:disabled .ikonli-font-icon {
+    -fx-icon-color: -fmc-texto-desligado;
+}
+
+.nome-mes,
+.nome-mes:hover,
+.nome-mes:focused,
+.nome-mes:showing {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+}
+
+.nome-mes .list-cell {
+    -fx-alignment: center;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+    -fx-font-size: 14px;
+}
+
+.nome-mes .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 4 0 0;
+}
+
+.nome-mes .arrow {
+    -fx-background-color: -fmc-texto-suave;
 }

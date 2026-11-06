@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-/** Imóvel arquivado (ex.: vendido), excluído só sem histórico, e a situação "Ocupado" vinda do contrato. */
+/** Imóvel arquivado (ex.: vendido) em vez de excluído, e a situação "Ocupado" vinda do contrato. */
 class ArquivarImovelTest {
 
     @TempDir
@@ -94,26 +94,6 @@ class ArquivarImovelTest {
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.arquivar(imovel.getId(), ""));
         assertEquals(List.of("O imóvel IM-200 tem contrato ativo. Encerre o contrato antes de arquivar."), e.getErros());
-    }
-
-    @Test
-    void imovelComHistoricoNaoSeExcluiSoSeArquiva() throws Exception {
-        Imovel imovel = novoImovel("IM-200", SituacaoImovel.VAGO);
-        contratoAtivo(imovel);
-
-        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.excluir(imovel.getId()));
-        assertEquals(List.of("O imóvel IM-200 tem histórico de contrato e não pode ser excluído. "
-                + "Para tirá-lo das listas, use Arquivar."), e.getErros());
-    }
-
-    @Test
-    void cadastroFeitoPorEnganoPodeSerExcluidoMesmoArquivado() throws Exception {
-        Imovel imovel = novoImovel("IM-200", SituacaoImovel.VAGO);
-        servico.arquivar(imovel.getId(), "Cadastrado duas vezes");
-
-        servico.excluir(imovel.getId());
-
-        assertTrue(repo.buscarPorId(imovel.getId()).isEmpty());
     }
 
     @Test

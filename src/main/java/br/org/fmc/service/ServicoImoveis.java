@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Cadastro, edição, busca, arquivamento e exclusão de imóveis (BOARD-34 e BOARD-55).
+ * Cadastro, edição, busca e arquivamento de imóveis (BOARD-34 e BOARD-55).
  *
  * Regras:
  * - código obrigatório e sem repetir; unidade opcional, mas, se informada, sem repetir;
@@ -25,7 +25,8 @@ import java.util.List;
  *   e enquanto o contrato estiver ativo a situação não muda à mão;
  * - imóvel que sai do patrimônio (ex.: vendido) é ARQUIVADO: some das listas e dos formulários,
  *   mas fica guardado com o histórico e pode ser reativado;
- * - EXCLUIR de verdade só serve para cadastro feito por engano, que nunca teve contrato.
+ * - não existe excluir (decisão da equipe com o professor): o histórico de contratos, aluguéis
+ *   e recibos precisa ficar. Para tirar das listas, arquive.
  */
 public class ServicoImoveis {
 
@@ -146,20 +147,6 @@ public class ServicoImoveis {
         imovel.reativar();
         repositorio.salvarArquivamento(imovel);
         return imovel;
-    }
-
-    /**
-     * Apaga o imóvel de verdade. Só para cadastro feito por engano: se o imóvel já teve
-     * contrato, o histórico precisa ficar, e o caminho é arquivar.
-     */
-    public void excluir(long id) throws SQLException {
-        Sessao.exigir(Acao.EXCLUIR_IMOVEL);
-        Imovel imovel = buscar(id);
-        if (contratos.existeNoImovel(id)) {
-            throw new RegraNegocioException("O imóvel " + imovel.getCodigo() + " tem histórico de contrato e não pode "
-                    + "ser excluído. Para tirá-lo das listas, use Arquivar.");
-        }
-        repositorio.excluir(id);
     }
 
     private Imovel buscar(long id) throws SQLException {

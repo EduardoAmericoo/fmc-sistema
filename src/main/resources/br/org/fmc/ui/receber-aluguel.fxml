@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.ReceberAluguelController">
+    <VBox styleClass="janela" maxWidth="820" maxHeight="620">
+        <StackPane.margin><Insets top="28" right="28" bottom="28" left="28"/></StackPane.margin>
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Receber aluguel" styleClass="janela-titulo"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="rolagem" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox styleClass="janela-corpo" spacing="14">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox spacing="20">
+                <VBox spacing="12" HBox.hgrow="ALWAYS">
+                    <HBox styleClass="linha-detalhe"><Label text="Competência"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="competencia"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Vencimento"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="vencimento"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Tolerância sem encargos até"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="tolerancia"/></HBox>
+                    <Label text="COMPOSIÇÃO" styleClass="rotulo-secao"/>
+                    <HBox styleClass="linha-detalhe"><Label text="Aluguel"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="valorAluguel"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Taxa de luz"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="taxaLuz"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="IPTU"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="iptu"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Outros"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="outros"/></HBox>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Data do pagamento *" labelFor="$campoData" styleClass="rotulo"/>
+                    <DatePicker fx:id="campoData" maxWidth="Infinity" styleClass="campo" promptText="dd/mm/aaaa"/>
+                    <Label text="Forma de pagamento *" labelFor="$campoForma" styleClass="rotulo"/>
+                    <ComboBox fx:id="campoForma" maxWidth="Infinity" styleClass="campo"/>
+                    <Label text="Nº do documento / observação" labelFor="$campoDocumento" styleClass="rotulo"/>
+                    <TextField fx:id="campoDocumento" styleClass="campo" promptText="Ex.: ID do PIX, número do cheque"/>
+                    <Label text="PIX e transferência: emita o recibo somente após confirmar o crédito na conta."
+                           styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                </VBox>
+            </HBox>
+            <VBox styleClass="resumo-calculado" spacing="7">
+                <Label text="ENCARGOS PELO CONTRATO" styleClass="rotulo-secao"/>
+                <HBox styleClass="linha-detalhe"><Label text="Valor devido"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="valorDevido"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Atraso"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="atraso"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Multa 10%"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="multa"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Juros 1% ao mês"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="juros"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Correção INPC (índice simulado 0,35% a.m.)"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="correcao"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Total a receber" styleClass="texto-forte"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="total" styleClass="texto-forte"/></HBox>
+            </VBox>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Fechar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Confirmar e emitir recibo" onAction="#confirmar" styleClass="botao-primario" defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-check-circle"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

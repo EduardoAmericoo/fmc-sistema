@@ -27,6 +27,15 @@ public class AluguelRepository {
 
     private final ContratoRepository contratos = new ContratoRepository();
 
+    /**
+     * Início de toda consulta de aluguéis: os dados do aluguel e, se já foi recebido, o número
+     * do recibo (BOARD-60, ex.: 00012/2026). Toda consulta que monta um Aluguel precisa usar isto,
+     * porque o montar() lê a coluna numero_recibo.
+     */
+    private static final String SELECT = "SELECT a.*, CASE WHEN r.id IS NULL THEN NULL ELSE "
+            + "printf('%05d/%d', r.sequencial, r.ano) END AS numero_recibo "
+            + "FROM aluguel a LEFT JOIN recibo r ON r.aluguel_id = a.id ";
+
     /** Aluguel novo: insere. Aluguel já gravado: atualiza outros valores e o pagamento. */
     public void salvar(Aluguel a) throws SQLException {
         if (a.getId() == null) {
@@ -76,7 +85,7 @@ public class AluguelRepository {
         List<Aluguel> lista = new ArrayList<>();
         try (Connection conexao = Database.conectar();
              PreparedStatement st = conexao.prepareStatement(
-                     "SELECT * FROM aluguel WHERE competencia = ? ORDER BY vencimento, id")) {
+                     SELECT + "WHERE a.competencia = ? ORDER BY a.vencimento, a.id")) {
             st.setString(1, mes.toString());
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
@@ -114,7 +123,7 @@ public class AluguelRepository {
         List<Aluguel> lista = new ArrayList<>();
         try (Connection conexao = Database.conectar();
              PreparedStatement st = conexao.prepareStatement(
-                     "SELECT * FROM aluguel WHERE data_pagamento IS NULL ORDER BY vencimento, id");
+                     SELECT + "WHERE a.data_pagamento IS NULL ORDER BY a.vencimento, a.id");
              ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 lista.add(montar(rs, porId.get(rs.getLong("contrato_id"))));
@@ -128,7 +137,7 @@ public class AluguelRepository {
         List<Aluguel> lista = new ArrayList<>();
         try (Connection conexao = Database.conectar();
              PreparedStatement st = conexao.prepareStatement(
-                     "SELECT * FROM aluguel WHERE contrato_id = ? ORDER BY vencimento, id")) {
+                     SELECT + "WHERE a.contrato_id = ? ORDER BY a.vencimento, a.id")) {
             st.setLong(1, contrato.getId());
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
@@ -147,6 +156,7 @@ public class AluguelRepository {
                 new BigDecimal(rs.getString("taxa_luz")), new BigDecimal(rs.getString("valor_iptu")),
                 new BigDecimal(rs.getString("outros")), pago == null ? null : LocalDate.parse(pago));
         a.setId(rs.getLong("id"));
+        a.setNumeroRecibo(rs.getString("numero_recibo"));
         return a;
     }
 }

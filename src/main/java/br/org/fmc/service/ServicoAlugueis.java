@@ -7,9 +7,14 @@ import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Fianca;
 import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.StatusContrato;
 import br.org.fmc.repository.AluguelRepository;
+import br.org.fmc.repository.ContratoRepository;
+import br.org.fmc.util.DocumentoCobrancaPdf;
 import br.org.fmc.util.TextoBusca;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -17,8 +22,10 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +44,7 @@ public class ServicoAlugueis {
     }
 
     private final AluguelRepository alugueis = new AluguelRepository();
+    private final ContratoRepository contratos = new ContratoRepository();
 
     /** Relógio do sistema; os testes trocam por um relógio parado para testar cada situação. */
     private Clock relogio = Clock.systemDefaultZone();
@@ -60,6 +68,65 @@ public class ServicoAlugueis {
         return alugueis.listarDoMes(mes);
     }
 
+    /** Gera os aluguéis ainda inexistentes para os contratos ativos que cobrem a competência. */
+    public List<Aluguel> gerarDoMes(YearMonth mes) throws SQLException {
+        Sessao.exigir(Acao.GERAR_ALUGUEIS);
+        if (mes == null) {
+            throw new RegraNegocioException("Escolha o mês.");
+        }
+        return gerar(mes);
+    }
+
+    /**
+     * Geração automática (BOARD-37): chamada ao entrar no sistema, sem botão. Gera os aluguéis do
+     * mês atual e de algum mês anterior que tenha ficado sem gerar (por exemplo, se ninguém abriu o
+     * sistema no mês passado). Como não duplica, rodar várias vezes não muda nada. É uma tarefa do
+     * próprio sistema, por isso não depende da permissão de quem entrou.
+     */
+    public List<Aluguel> gerarAutomatico() throws SQLException {
+        YearMonth atual = YearMonth.from(hoje());
+        YearMonth mes = alugueis.mesesComAluguel().stream()
+                .filter(m -> m.isBefore(atual)).max(YearMonth::compareTo)
+                .map(m -> m.plusMonths(1)).orElse(atual);
+        List<Aluguel> gerados = new ArrayList<>();
+        for (; !mes.isAfter(atual); mes = mes.plusMonths(1)) {
+            gerados.addAll(gerar(mes));
+        }
+        return List.copyOf(gerados);
+    }
+
+    private List<Aluguel> gerar(YearMonth mes) throws SQLException {
+        Set<Long> contratosComAluguel = new HashSet<>();
+        for (Aluguel aluguel : alugueis.listarDoMes(mes)) {
+            contratosComAluguel.add(aluguel.getContrato().getId());
+        }
+
+        List<Aluguel> gerados = new ArrayList<>();
+        for (Contrato contrato : contratos.listarTodos()) {
+            if (contrato.getStatus() != StatusContrato.ATIVO || !contrato.cobreCompetencia(mes)
+                    || contratosComAluguel.contains(contrato.getId())) {
+                continue;
+            }
+            Aluguel aluguel = new Aluguel(contrato, mes);
+            alugueis.salvar(aluguel);
+            contratosComAluguel.add(contrato.getId());
+            gerados.add(aluguel);
+        }
+        return List.copyOf(gerados);
+    }
+
+    /** Gera um demonstrativo PDF sem valor de pagamento para um aluguel selecionado. */
+    public void gerarDemonstrativo(Aluguel aluguel, LocalDate emitidoEm, Path destino) throws IOException {
+        Sessao.exigir(Acao.GERAR_ALUGUEIS);
+        if (aluguel == null) {
+            throw new RegraNegocioException("Escolha um aluguel.");
+        }
+        if (aluguel.estaPago()) {
+            throw new RegraNegocioException("Não é possível gerar demonstrativo para um aluguel já pago.");
+        }
+        DocumentoCobrancaPdf.gerar(aluguel, emitidoEm, destino);
+    }
+
     /**
      * Todos os aluguéis ainda não pagos, de qualquer mês, do vencimento mais antigo para o mais recente.
      * É o que a tela mostra quando vem do Painel (ex.: "28 aluguéis em atraso" somam vários meses).
@@ -70,15 +137,15 @@ public class ServicoAlugueis {
     }
 
     /**
-     * Os meses para o filtro:os que já têm aluguéis, do mais recente para o mais antigo,
-     * e sempre o mês atual (mesmo antes de os aluguéis dele serem gerados).
+     * Os meses para o filtro: os que já têm aluguéis, do mais recente para o mais antigo,
+     * e sempre o mês atual e o seguinte (mesmo antes de os aluguéis deles serem gerados).
      */
     public List<YearMonth> mesesDisponiveis() throws SQLException {
         Sessao.exigir(Acao.VER_ALUGUEIS);
         List<YearMonth> meses = new ArrayList<>(alugueis.mesesComAluguel());
         YearMonth atual = YearMonth.from(hoje());
         if (!meses.contains(atual)) {
-            meses.add(atual);
+            meses.add(atual); // o mês atual sempre aparece
         }
         meses.sort((a, b) -> b.compareTo(a));
         return meses;

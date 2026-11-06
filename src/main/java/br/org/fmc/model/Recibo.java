@@ -19,11 +19,17 @@ public class Recibo {
     private final FormaPagamento formaPagamento;
     private final Encargos encargos;
     private final BigDecimal valorTotal;
+    private final String documento;
     private final Usuario emitidoPor;
     private LocalDateTime dataEmissao = LocalDateTime.now();
 
     public Recibo(int ano, int sequencial, Aluguel aluguel, LocalDate dataPagamento,
                   FormaPagamento formaPagamento, Encargos encargos, Usuario emitidoPor) {
+        this(ano, sequencial, aluguel, dataPagamento, formaPagamento, encargos, null, emitidoPor);
+    }
+
+    public Recibo(int ano, int sequencial, Aluguel aluguel, LocalDate dataPagamento,
+                  FormaPagamento formaPagamento, Encargos encargos, String documento, Usuario emitidoPor) {
         if (sequencial <= 0) {
             throw new IllegalArgumentException("O número do recibo precisa ser maior que zero.");
         }
@@ -33,6 +39,7 @@ public class Recibo {
         this.dataPagamento = Valida.obrigatorio(dataPagamento, "a data do pagamento");
         this.formaPagamento = Valida.obrigatorio(formaPagamento, "a forma de pagamento");
         this.encargos = Valida.obrigatorio(encargos, "os encargos");
+        this.documento = Valida.textoOpcional(documento);
         this.emitidoPor = Valida.obrigatorio(emitidoPor, "quem emitiu o recibo");
         this.valorTotal = aluguel.base().add(encargos.total());
     }
@@ -81,6 +88,10 @@ public class Recibo {
 
     public BigDecimal getValorTotal() {
         return valorTotal;
+    }
+
+    public String getDocumento() {
+        return documento;
     }
 
     public Usuario getEmitidoPor() {
