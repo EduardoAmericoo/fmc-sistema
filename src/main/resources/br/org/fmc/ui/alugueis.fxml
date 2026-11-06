@@ -6,8 +6,8 @@
   1. cabeçalho com o título e o resumo do mês;
   2. filtros: mês e busca (imóvel, inquilino ou contrato);
   3. cartão com abas por situação (com a contagem de cada uma) e a tabela.
-  O botão "Gerar aluguéis do mês" é da BOARD-37 e o "Receber" é da BOARD-39:
-  os lugares deles estão marcados abaixo.
+  Os aluguéis do mês são gerados sozinhos ao entrar no sistema (BOARD-37, sem botão);
+  o "Receber" da linha é da BOARD-39.
 -->
 
 <?import javafx.geometry.Insets?>
@@ -34,10 +34,6 @@
                 <Label text="Aluguéis e cobrança" styleClass="titulo"/>
                 <Label fx:id="contagem" styleClass="texto"/>
             </VBox>
-            <Button fx:id="botaoGerar" text="Gerar cobranças do mês" onAction="#gerarMes"
-                    styleClass="botao-primario">
-                <graphic><FontIcon iconLiteral="fth-calendar"/></graphic>
-            </Button>
         </HBox>
 
         <HBox fx:id="abasVisualizacao" styleClass="abas" spacing="4">
@@ -47,13 +43,25 @@
         </HBox>
 
         <HBox fx:id="barraFiltrosMes" spacing="12" alignment="CENTER_LEFT">
-            <ComboBox fx:id="campoMes" prefWidth="235" accessibleText="Mês dos aluguéis"/>
+            <!-- Seletor de mês: ‹ Novembro de 2026 › (o nome abre a lista de meses) -->
+            <HBox styleClass="seletor-mes" alignment="CENTER">
+                <Button fx:id="mesAnterior" onAction="#irMesAnterior" styleClass="seta-mes"
+                        accessibleText="Mês anterior">
+                    <graphic><FontIcon iconLiteral="fth-chevron-left"/></graphic>
+                </Button>
+                <ComboBox fx:id="campoMes" prefWidth="215" styleClass="nome-mes" accessibleText="Mês dos aluguéis"/>
+                <Button fx:id="mesSeguinte" onAction="#irMesSeguinte" styleClass="seta-mes"
+                        accessibleText="Mês seguinte">
+                    <graphic><FontIcon iconLiteral="fth-chevron-right"/></graphic>
+                </Button>
+            </HBox>
+            <Button text="Mês atual" onAction="#irMesAtual" styleClass="botao-secundario"/>
             <TextField fx:id="campoBusca" promptText="Buscar por imóvel, inquilino ou contrato" HBox.hgrow="ALWAYS"
                        accessibleText="Buscar aluguel"/>
             <Button text="Limpar filtros" onAction="#limparFiltros"/>
         </HBox>
 
-        <VBox fx:id="resumoMes" styleClass="cartao-tabela" spacing="10">
+        <VBox fx:id="resumoMes" styleClass="cartao-resumo" spacing="14">
             <VBox spacing="4" styleClass="bloco-resumo-mes">
                 <Label fx:id="tituloResumoMes" styleClass="subtitulo"/>
                 <Label fx:id="textoResumoMes" styleClass="texto" wrapText="true"/>
@@ -72,8 +80,8 @@
             </HBox>
         </VBox>
 
-        <VBox fx:id="resumoCobranca" styleClass="cartao-tabela" spacing="10" managed="false" visible="false">
-            <VBox styleClass="janela-corpo" spacing="4">
+        <VBox fx:id="resumoCobranca" styleClass="cartao-resumo" spacing="10" managed="false" visible="false">
+            <VBox spacing="4">
                 <Label text="Meses em aberto" styleClass="subtitulo"/>
                 <Label text="Cobrança a partir de mais de 1 mês em aberto · valores atualizados com multa, juros e INPC"
                        styleClass="texto" wrapText="true"/>
@@ -102,7 +110,7 @@
                     <TableColumn fx:id="colunaValor" text="Valor do mês" prefWidth="140" minWidth="130"
                                  styleClass="coluna-numero"/>
                     <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="150" minWidth="140"/>
-                    <TableColumn fx:id="colunaDemonstrativo" text="Recibo / ações" prefWidth="190" minWidth="170"
+                    <TableColumn fx:id="colunaDemonstrativo" text="Recibo / ações" prefWidth="210" minWidth="190"
                                  sortable="false"/>
                 </columns>
                 <columnResizePolicy>
@@ -113,14 +121,15 @@
             <TableView fx:id="tabelaCobranca" styleClass="tabela-fmc" VBox.vgrow="ALWAYS"
                        managed="false" visible="false">
                 <columns>
-                    <TableColumn fx:id="cobrancaInquilino" text="Inquilino e imóvel" prefWidth="225" minWidth="200"/>
-                    <TableColumn fx:id="cobrancaMeses" text="Meses em aberto" prefWidth="165" minWidth="140"/>
-                    <TableColumn fx:id="cobrancaOriginal" text="Valor original" prefWidth="130" minWidth="120"/>
-                    <TableColumn fx:id="cobrancaAtualizado" text="Valor atualizado" prefWidth="145" minWidth="130"
+                    <TableColumn fx:id="cobrancaInquilino" text="Inquilino e imóvel" prefWidth="190" minWidth="170"/>
+                    <TableColumn fx:id="cobrancaMeses" text="Em aberto" prefWidth="105" minWidth="95"/>
+                    <TableColumn fx:id="cobrancaOriginal" text="Valor original" prefWidth="125" minWidth="120"
                                  styleClass="coluna-numero"/>
-                    <TableColumn fx:id="cobrancaFiador" text="Fiador" prefWidth="170" minWidth="150"/>
-                    <TableColumn fx:id="cobrancaUltimoContato" text="Último contato" prefWidth="175" minWidth="150"/>
-                    <TableColumn fx:id="cobrancaAcao" prefWidth="150" minWidth="140" sortable="false"/>
+                    <TableColumn fx:id="cobrancaAtualizado" text="Valor atualizado" prefWidth="135" minWidth="130"
+                                 styleClass="coluna-numero"/>
+                    <TableColumn fx:id="cobrancaFiador" text="Fiador" prefWidth="150" minWidth="125"/>
+                    <TableColumn fx:id="cobrancaUltimoContato" text="Último contato" prefWidth="130" minWidth="115"/>
+                    <TableColumn fx:id="cobrancaAcao" prefWidth="125" minWidth="120" sortable="false"/>
                 </columns>
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>

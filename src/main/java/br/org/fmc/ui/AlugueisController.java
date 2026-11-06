@@ -143,7 +143,9 @@ public class AlugueisController {
     @FXML
     private ComboBox<YearMonth> campoMes;
     @FXML
-    private Button botaoGerar;
+    private Button mesAnterior;
+    @FXML
+    private Button mesSeguinte;
     @FXML
     private TextField campoBusca;
     @FXML
@@ -194,7 +196,6 @@ public class AlugueisController {
     @FXML
     private void initialize() {
         hoje = servico.hoje();
-        Permissoes.mostrarSe(botaoGerar, Acao.GERAR_ALUGUEIS);
         montarTabela();
         montarTabelaCobranca();
         barraSituacoes.widthProperty().addListener((obs, antes, agora) -> ajustarBarraSituacoes());
@@ -245,7 +246,7 @@ public class AlugueisController {
             }
         });
         campoMes.valueProperty().addListener((obs, antes, agora) -> {
-            botaoGerar.setDisable(agora == null || agora.equals(TODOS_EM_ABERTO));
+            atualizarSetasDoMes();
             carregarMes();
         });
         campoBusca.textProperty().addListener((obs, antes, agora) -> aplicarFiltros());
@@ -315,7 +316,8 @@ public class AlugueisController {
                 recibo.getStyleClass().add("selo");
                 return recibo;
             }
-            HBox acoes = new HBox(6);
+            HBox acoes = new HBox(8);
+            acoes.setAlignment(Pos.CENTER_LEFT);
             if (Sessao.pode(Acao.RECEBER_ALUGUEL)) {
                 Button receber = new Button("Receber");
                 receber.getStyleClass().addAll("botao-primario", "botao-pequeno");
@@ -323,9 +325,10 @@ public class AlugueisController {
                 acoes.getChildren().add(receber);
             }
             if (Sessao.pode(Acao.GERAR_ALUGUEIS)) {
-                Button salvar = new Button(null, new FontIcon("fth-file-text"));
-                salvar.getStyleClass().add("botao-icone");
-                salvar.setTooltip(new Tooltip("Salvar demonstrativo simulado, sem valor para pagamento"));
+                // Demonstrativo em PDF para mandar ao inquilino (simulação, sem valor de boleto).
+                Button salvar = new Button("PDF", new FontIcon("fth-download"));
+                salvar.getStyleClass().addAll("botao-secundario", "botao-pequeno");
+                salvar.setTooltip(new Tooltip("Baixar o demonstrativo da cobrança em PDF (simulação, sem valor para pagamento)"));
                 salvar.setOnAction(e -> salvarDemonstrativo(a));
                 acoes.getChildren().add(salvar);
             }
@@ -383,7 +386,11 @@ public class AlugueisController {
         cobrancaMeses.setCellFactory(c -> celula(linha -> duasLinhas(meses(linha.alugueis()),
                 linha.mesesEmAberto() + (linha.mesesEmAberto() == 1 ? " mês" : " meses"), null)));
         cobrancaOriginal.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        cobrancaOriginal.setCellFactory(c -> celula(linha -> new Label(Formatos.moeda(linha.valorOriginal()))));
+        cobrancaOriginal.setCellFactory(c -> {
+            TableCell<Linha, Linha> celula = celula(linha -> new Label(Formatos.moeda(linha.valorOriginal())));
+            celula.getStyleClass().add("celula-numero");
+            return celula;
+        });
         cobrancaAtualizado.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         cobrancaAtualizado.setCellFactory(c -> {
             TableCell<Linha, Linha> celula = celula(linha -> new Label(Formatos.moeda(linha.valorAtualizado())));
@@ -411,7 +418,8 @@ public class AlugueisController {
         }));
         cobrancaAcao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         cobrancaAcao.setCellFactory(c -> celula(linha -> {
-            Button contato = new Button("Registrar contato");
+            Button contato = new Button("Contato", new FontIcon("fth-phone"));
+            contato.setTooltip(new Tooltip("Registrar contato de cobrança"));
             contato.getStyleClass().addAll("botao-secundario", "botao-pequeno");
             contato.setVisible(Sessao.pode(Acao.REGISTRAR_CONTATO_COBRANCA));
             contato.setManaged(Sessao.pode(Acao.REGISTRAR_CONTATO_COBRANCA));
@@ -475,8 +483,6 @@ public class AlugueisController {
         }
         barraFiltrosMes.setVisible(!modoCobranca);
         barraFiltrosMes.setManaged(!modoCobranca);
-        botaoGerar.setVisible(!modoCobranca && Sessao.pode(Acao.GERAR_ALUGUEIS));
-        botaoGerar.setManaged(!modoCobranca && Sessao.pode(Acao.GERAR_ALUGUEIS));
         mostrar(resumoCobranca, modoCobranca);
         mostrar(resumoMes, !modoCobranca);
         mostrar(abas, !modoCobranca);
@@ -582,16 +588,27 @@ public class AlugueisController {
     }
 
     private void ajustarBarraSituacoes() {
-        int total = resumoAtual.values().stream().mapToInt(ServicoAlugueis.Total::quantidade).sum();
-        double largura = Math.max(0, barraSituacoes.getWidth() - barraSituacoes.getSpacing() * 3);
         Region[] segmentos = {barraPagos, barraAVencer, barraTolerancia, barraAtraso};
         SituacaoAluguel[] situacoes = {SituacaoAluguel.PAGO, SituacaoAluguel.A_VENCER,
             SituacaoAluguel.EM_TOLERANCIA, SituacaoAluguel.EM_ATRASO};
+        int[] quantidades = new int[segmentos.length];
+        int total = 0;
+        int comAlgum = 0;
         for (int i = 0; i < segmentos.length; i++) {
-            int quantidade = resumoAtual.getOrDefault(situacoes[i],
+            quantidades[i] = resumoAtual.getOrDefault(situacoes[i],
                     new ServicoAlugueis.Total(0, BigDecimal.ZERO)).quantidade();
-            double parte = total == 0 ? 0 : largura * quantidade / total;
-            segmentos[i].setMinWidth(quantidade == 0 ? 0 : Math.min(4, parte));
+            total += quantidades[i];
+            comAlgum += quantidades[i] > 0 ? 1 : 0;
+        }
+        // A barra nunca pede mais espaço que o cartão: as partes vazias saem (sem deixar o espaço
+        // entre elas) e as outras dividem a largura que sobra, na proporção de cada situação.
+        barraSituacoes.setMinWidth(0);
+        barraSituacoes.setPrefWidth(0);
+        double largura = Math.max(0, barraSituacoes.getWidth() - barraSituacoes.getSpacing() * Math.max(0, comAlgum - 1) - 1);
+        for (int i = 0; i < segmentos.length; i++) {
+            double parte = total == 0 ? 0 : Math.floor(largura * quantidades[i] / total);
+            mostrar(segmentos[i], quantidades[i] > 0);
+            segmentos[i].setMinWidth(0);
             segmentos[i].setPrefWidth(parte);
             segmentos[i].setMaxWidth(parte);
         }
@@ -611,29 +628,37 @@ public class AlugueisController {
         grupoVisualizacao.selectToggle(abaCobranca);
     }
 
+    /*
+     * Seletor de mês "‹ Novembro de 2026 ›": as setas andam um mês, o nome abre a lista de meses
+     * e "Mês atual" volta para hoje. A lista vem do mais novo para o mais antigo, com
+     * "Em aberto, todos os meses" na posição 0.
+     */
     @FXML
-    private void gerarMes() {
-        YearMonth mes = campoMes.getValue();
-        if (mes == null || mes.equals(TODOS_EM_ABERTO)) {
-            return;
+    private void irMesAnterior() {
+        andarMes(+1);
+    }
+
+    @FXML
+    private void irMesSeguinte() {
+        andarMes(-1);
+    }
+
+    @FXML
+    private void irMesAtual() {
+        campoMes.setValue(YearMonth.from(hoje));
+    }
+
+    private void andarMes(int passo) {
+        int i = campoMes.getItems().indexOf(campoMes.getValue()) + passo;
+        if (i >= 1 && i < campoMes.getItems().size()) {
+            campoMes.setValue(campoMes.getItems().get(i));
         }
-        try {
-            List<Aluguel> gerados = servico.gerarDoMes(mes);
-            carregarMes();
-            Alert aviso = new Alert(Alert.AlertType.INFORMATION);
-            aviso.setTitle("Geração de cobranças");
-            aviso.setHeaderText(gerados.isEmpty() ? "Nenhuma cobrança nova"
-                    : gerados.size() + (gerados.size() == 1 ? " cobrança gerada" : " cobranças geradas"));
-            aviso.setContentText(gerados.isEmpty()
-                    ? "As cobranças elegíveis de " + nomeDoMes(mes)
-                        + " já foram geradas. Os aluguéis em atraso continuam na lista; nenhuma duplicata foi criada."
-                    : "As cobranças de " + nomeDoMes(mes) + " foram incluídas na lista.");
-            aviso.showAndWait();
-        } catch (RegraNegocioException e) {
-            new Alert(Alert.AlertType.WARNING, String.join(" ", e.getErros())).showAndWait();
-        } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "Não foi possível gerar as cobranças do mês.").showAndWait();
-        }
+    }
+
+    private void atualizarSetasDoMes() {
+        int i = campoMes.getItems().indexOf(campoMes.getValue());
+        mesAnterior.setDisable(i < 1 || i >= campoMes.getItems().size() - 1);
+        mesSeguinte.setDisable(i <= 1);
     }
 
     @FXML
