@@ -125,6 +125,9 @@ public class FichaInquilinoController {
         if (Sessao.pode(Acao.VER_ALUGUEIS)) {
             corpo.getChildren().add(financeiro(f));
         }
+        if (!f.contatos().isEmpty()) {
+            corpo.getChildren().add(contatosDeCobranca(f));
+        }
         if (f.contratos().size() > 1) {
             corpo.getChildren().add(contratosAnteriores(f, atual));
         }
@@ -291,6 +294,17 @@ public class FichaInquilinoController {
 
     private static String estilo(Pagamento p) {
         return "mes-" + p.name().toLowerCase().replace('_', '-');
+    }
+
+    // ---------- contatos de cobrança, [D7] BOARD-64 ----------
+
+    /** Todas as ligações de cobrança: quando, quem fez e o que deu (ex.: prometeu pagar até 15/11). */
+    private static VBox contatosDeCobranca(Ficha f) {
+        VBox bloco = new VBox(8, titulo("Contatos de cobrança · " + f.contatos().size()));
+        for (var contato : f.contatos()) {
+            bloco.getChildren().add(RegistrarContatoController.linhaDoHistorico(contato));
+        }
+        return bloco;
     }
 
     // ---------- contratos anteriores ----------

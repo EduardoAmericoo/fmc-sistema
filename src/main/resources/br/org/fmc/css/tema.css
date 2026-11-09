@@ -1234,3 +1234,61 @@
 .nome-mes .arrow {
     -fx-background-color: -fmc-texto-suave;
 }
+
+/* ===================== Contatos de cobrança, [D7] BOARD-64 ===================== */
+
+.celula-detalhe-alerta {
+    -fx-text-fill: -fmc-alerta;
+    -fx-font-size: 13px;
+}
+
+.celula-detalhe-ok {
+    -fx-text-fill: -fmc-sucesso;
+    -fx-font-size: 13px;
+}
+
+/* Opções "Não atendeu", "Prometeu pagar"... como botões que ficam marcados */
+.opcao-contato {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: -fmc-borda-forte;
+    -fx-border-radius: 8;
+    -fx-text-fill: -fmc-texto;
+    -fx-pref-height: 36;
+    -fx-padding: 0 14 0 14;
+    -fx-cursor: hand;
+}
+
+.opcao-contato:hover {
+    -fx-background-color: -fmc-fundo;
+}
+
+.opcao-contato:selected {
+    -fx-background-color: -fmc-azul-claro;
+    -fx-border-color: -fmc-azul;
+    -fx-text-fill: -fmc-azul;
+    -fx-font-weight: bold;
+}
+
+/* Quadro da data prometida, que aparece só em "Prometeu pagar" */
+.bloco-promessa {
+    -fx-background-color: -fmc-fundo;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14 12 14;
+}
+
+/* Histórico de contatos (janela de contato e ficha do inquilino) */
+.historico-item {
+    -fx-padding: 8 0 8 12;
+    -fx-border-color: transparent transparent transparent -fmc-borda-forte;
+    -fx-border-width: 0 0 0 3;
+}
+
+.historico-quando {
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-size: 12px;
+}
+
+.historico-texto {
+    -fx-text-fill: -fmc-texto;
+}

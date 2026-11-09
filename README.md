@@ -108,7 +108,7 @@ Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha
 
 Na tabela de aluguéis, a ação **PDF simulado** salva um demonstrativo fictício para apresentação. O arquivo traz o aviso **SIMULAÇÃO — SEM VALOR PARA PAGAMENTO** e não contém linha digitável, código de barras, PIX ou dados bancários. Não deve ser enviado como boleto para cobrança real.
 
-Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebimentos: a data, a forma e a referência do pagamento ficam no recibo, e multa, juros e correção seguem as regras do contrato. A aba **Para cobrança** agrupa contratos com dois ou mais aluguéis vencidos e mantém o histórico do último contato registrado.
+Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebimentos: a data, a forma e a referência do pagamento ficam no recibo, e multa, juros e correção seguem as regras do contrato. A aba **Para cobrança** agrupa contratos com dois ou mais aluguéis em atraso. Em cada ligação, o botão **Contato** registra o que deu (não atendeu, prometeu pagar com a data, sem acordo ou telefone errado). A coluna **Contato** mostra em que pé está cada inquilino e a lista vem em ordem de urgência: promessa vencida, nunca contatado, sem retorno e, por último, promessas no prazo. O Painel avisa das promessas a partir de 5 dias antes da data e das que passaram sem pagamento. O histórico completo aparece na janela de contato e na ficha do inquilino.
 
 ## Visual das telas (design system)
 
