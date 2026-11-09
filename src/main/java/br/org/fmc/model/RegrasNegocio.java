@@ -38,6 +38,12 @@ public final class RegrasNegocio {
      */
     public static final BigDecimal REAJUSTE_MAXIMO_PERCENTUAL = new BigDecimal("30");
 
+    /** [D7] BOARD-64: o Painel avisa da promessa de pagamento a partir de 5 dias antes da data. */
+    public static final int DIAS_AVISO_PROMESSA = 5;
+
+    /** [D7] BOARD-64: a data prometida pode ser de no máximo 90 dias depois do contato. */
+    public static final int DIAS_MAXIMO_PROMESSA = 90;
+
     private RegrasNegocio() {
     }
 }

@@ -236,3 +236,12 @@ CREATE TABLE IF NOT EXISTS cobranca_contato (
     resultado      TEXT    NOT NULL,
     feito_por      INTEGER NOT NULL REFERENCES usuario(id)
 );
+
+-- [D7] BOARD-64 · O que deu cada contato (escolhido numa lista) e, se o inquilino prometeu pagar,
+-- a data prometida. Fica numa tabela ao lado para os bancos que já existem continuarem valendo:
+-- contato antigo, sem linha aqui, mostra só o texto que foi digitado.
+CREATE TABLE IF NOT EXISTS cobranca_contato_resultado (
+    contato_id      INTEGER PRIMARY KEY REFERENCES cobranca_contato(id),
+    tipo            TEXT    NOT NULL,
+    data_prometida  TEXT
+);
