@@ -3,12 +3,14 @@ package br.org.fmc.service;
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Conjuge;
+import br.org.fmc.model.ContatoCobranca;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
 import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.StatusContrato;
 import br.org.fmc.repository.AluguelRepository;
+import br.org.fmc.repository.ContatoCobrancaRepository;
 import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.InquilinoRepository;
 import br.org.fmc.util.Formatos;
@@ -35,6 +37,7 @@ public class ServicoInquilinos {
     private final InquilinoRepository inquilinos;
     private final ContratoRepository contratos = new ContratoRepository();
     private final AluguelRepository alugueis = new AluguelRepository();
+    private final ContatoCobrancaRepository contatos = new ContatoCobrancaRepository();
 
     /** Relógio do sistema; os testes trocam por um relógio parado (a ficha depende de "hoje"). */
     private Clock relogio = Clock.systemDefaultZone();
@@ -91,7 +94,8 @@ public class ServicoInquilinos {
      * e os aluguéis desses contratos (o mais recente primeiro). Contratos e aluguéis só vêm
      * para quem pode ver essas telas; para os outros, as listas vêm vazias.
      */
-    public record Ficha(Inquilino inquilino, List<Contrato> contratos, List<Aluguel> alugueis, LocalDate hoje) {
+    public record Ficha(Inquilino inquilino, List<Contrato> contratos, List<Aluguel> alugueis,
+            List<ContatoCobranca> contatos, LocalDate hoje) {
 
         /** O contrato que aparece em destaque: o ativo, ou o mais recente se não houver ativo. */
         public Contrato contratoAtual() {
@@ -137,7 +141,15 @@ public class ServicoInquilinos {
             }
             lista.sort(Comparator.comparing(Aluguel::getVencimento).reversed());
         }
-        return new Ficha(inquilino, doInquilino, lista, LocalDate.now(relogio));
+        // [D7] BOARD-64: os contatos de cobrança de todos os contratos, do mais recente para o mais antigo.
+        List<ContatoCobranca> contatosDoInquilino = new ArrayList<>();
+        if (Sessao.pode(Acao.VER_ALUGUEIS)) {
+            for (Contrato c : doInquilino) {
+                contatosDoInquilino.addAll(contatos.listarDoContrato(c.getId()));
+            }
+            contatosDoInquilino.sort(Comparator.comparing(ContatoCobranca::registradoEm).reversed());
+        }
+        return new Ficha(inquilino, doInquilino, lista, contatosDoInquilino, LocalDate.now(relogio));
     }
 
     /**

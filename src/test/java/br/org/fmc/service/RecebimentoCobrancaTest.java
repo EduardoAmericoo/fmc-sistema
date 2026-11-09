@@ -14,6 +14,7 @@ import br.org.fmc.model.EstadoCivil;
 import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Perfil;
 import br.org.fmc.model.PrazoContrato;
+import br.org.fmc.model.ResultadoContato;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.TipoImovel;
 import br.org.fmc.model.Usuario;
@@ -91,10 +92,11 @@ class RecebimentoCobrancaTest {
         assertEquals(1, cobranca.listarParaCobranca().size());
         assertEquals(2, cobranca.listarParaCobranca().get(0).mesesEmAberto());
 
-        ContatoCobranca salvo = cobranca.registrarContato(contrato.getId(), "Prometeu pagar ate dia 10");
+        ContatoCobranca salvo = cobranca.registrarContato(contrato.getId(), ResultadoContato.NAO_ATENDEU, null,
+                "Caixa postal");
         assertNotNull(salvo.id());
         ContatoCobranca carregado = cobranca.listarParaCobranca().get(0).ultimoContato();
-        assertEquals("Prometeu pagar ate dia 10", carregado.resultado());
+        assertEquals("Não atendeu · Caixa postal", carregado.descricao());
         assertEquals(Sessao.usuario().getNome(), carregado.feitoPor().getNome());
         assertFalse(cobranca.listarParaCobranca().isEmpty());
     }

@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  [D7] BOARD-64 · Registrar contato de cobrança.
+  A pessoa escolhe o que deu a ligação; se o inquilino prometeu pagar, informa a data
+  (o Painel avisa a partir de 5 dias antes). Embaixo, o histórico de todos os contatos.
+-->
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -23,25 +34,47 @@
                 <graphic><FontIcon iconLiteral="fth-x"/></graphic>
             </Button>
         </HBox>
-        <VBox styleClass="janela-corpo" spacing="14">
-            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
-                <FontIcon iconLiteral="fth-alert-circle"/>
-                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
-            </HBox>
-            <HBox styleClass="resumo-calculado" spacing="10" alignment="TOP_LEFT">
-                <FontIcon iconLiteral="fth-info"/>
-                <Label fx:id="resumoDivida" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
-            </HBox>
-            <VBox spacing="5">
-                <Label text="Último contato" styleClass="rotulo"/>
-                <Label fx:id="ultimoContato" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
+        <ScrollPane fitToWidth="true" styleClass="rolagem" VBox.vgrow="ALWAYS">
+            <VBox styleClass="janela-corpo" spacing="16">
+                <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                    <FontIcon iconLiteral="fth-alert-circle"/>
+                    <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox styleClass="resumo-calculado" spacing="10" alignment="TOP_LEFT">
+                    <FontIcon iconLiteral="fth-info"/>
+                    <Label fx:id="resumoDivida" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <VBox spacing="8">
+                    <Label text="O que deu o contato? *" styleClass="rotulo"/>
+                    <FlowPane fx:id="opcoes" hgap="8" vgap="8">
+                        <fx:define><ToggleGroup fx:id="grupoResultado"/></fx:define>
+                    </FlowPane>
+                </VBox>
+
+                <VBox fx:id="blocoPromessa" spacing="8" styleClass="bloco-promessa">
+                    <Label text="Data que prometeu pagar *" labelFor="$campoData" styleClass="rotulo"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <DatePicker fx:id="campoData" prefWidth="170" styleClass="campo" promptText="dd/mm/aaaa"/>
+                        <Button text="Em 7 dias" onAction="#em7Dias" styleClass="botao-secundario,botao-pequeno"/>
+                        <Button text="Em 15 dias" onAction="#em15Dias" styleClass="botao-secundario,botao-pequeno"/>
+                        <Button text="Em 30 dias" onAction="#em30Dias" styleClass="botao-secundario,botao-pequeno"/>
+                    </HBox>
+                    <Label fx:id="dicaPromessa" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="Observação" labelFor="$campoObservacao" styleClass="rotulo"/>
+                    <TextArea fx:id="campoObservacao" styleClass="campo" wrapText="true" prefRowCount="2"
+                              promptText="Opcional. Ex.: vai pagar quando receber o 13º; pediu para ligar à tarde"/>
+                </VBox>
+
+                <VBox spacing="8">
+                    <Label fx:id="tituloHistorico" text="Contatos anteriores" styleClass="rotulo"/>
+                    <VBox fx:id="historico" styleClass="historico-contatos"/>
+                </VBox>
             </VBox>
-            <VBox spacing="6">
-                <Label text="Resultado do contato *" labelFor="$campoResultado" styleClass="rotulo"/>
-                <TextArea fx:id="campoResultado" styleClass="campo" promptText="Ex.: prometeu pagar até dia 30; não atendeu"
-                          wrapText="true" prefRowCount="4"/>
-            </VBox>
-        </VBox>
+        </ScrollPane>
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>

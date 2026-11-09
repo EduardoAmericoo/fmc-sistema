@@ -6,10 +6,12 @@ import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoAluguel;
+import br.org.fmc.model.SituacaoContato;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
 import br.org.fmc.model.Tela;
 import br.org.fmc.repository.AluguelRepository;
+import br.org.fmc.repository.ContatoCobrancaRepository;
 import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.ImovelRepository;
 import br.org.fmc.util.Formatos;
@@ -88,6 +90,8 @@ public class ServicoPainel {
     public enum Tipo {
         ALUGUEIS_EM_ATRASO(Tela.ALUGUEIS),
         INQUILINOS_PARA_COBRANCA(Tela.ALUGUEIS),
+        PROMESSAS_NAO_CUMPRIDAS(Tela.ALUGUEIS),
+        PROMESSAS_VENCENDO(Tela.ALUGUEIS),
         ALUGUEIS_EM_TOLERANCIA(Tela.ALUGUEIS),
         CONTRATOS_VENCIDOS(Tela.CONTRATOS),
         CONTRATOS_VENCENDO(Tela.CONTRATOS),
@@ -116,6 +120,7 @@ public class ServicoPainel {
     private final AluguelRepository alugueis = new AluguelRepository();
     private final ContratoRepository contratos = new ContratoRepository();
     private final ImovelRepository imoveis = new ImovelRepository();
+    private final ContatoCobrancaRepository contatos = new ContatoCobrancaRepository();
     private Clock relogio = Clock.systemDefaultZone();
 
     /** Para os testes: fixa o "hoje" num dia conhecido. */
@@ -139,6 +144,8 @@ public class ServicoPainel {
             emAtraso = emAtraso(emAberto, hoje);
             numeros = numerosDoMes(hoje, emAtraso);
             pendenciasDeAlugueis(emAberto, emAtraso, hoje, pendencias);
+            pendenciasDePromessas(ServicoCobranca.montarLista(ServicoAlugueis.listaDeCobranca(emAberto, hoje),
+                    contatos.ultimosPorContrato(), hoje), pendencias);
         }
         if (Sessao.pode(Acao.VER_CONTRATOS)) {
             pendenciasDeContratos(contratos.listarTodos(), hoje, pendencias);
@@ -205,6 +212,41 @@ public class ServicoPainel {
                     "Venceram há até " + RegrasNegocio.TOLERANCIA_DIAS + " dias. Ainda dá para pagar sem multa.",
                     Tipo.ALUGUEIS_EM_TOLERANCIA));
         }
+    }
+
+    /**
+     * [D7] BOARD-64: promessas de pagamento registradas na lista de cobrança. A partir de 5 dias
+     * antes da data, o Painel avisa todo dia com a contagem ("faltam 3 dias"); passada a data com
+     * a dívida ainda em aberto, vira "não cumprida". Quem paga sai da lista de cobrança e, com
+     * isso, daqui também.
+     */
+    static void pendenciasDePromessas(List<ServicoCobranca.Linha> lista, List<Pendencia> pendencias) {
+        List<ServicoCobranca.Linha> quebradas = lista.stream()
+                .filter(l -> l.situacao() == SituacaoContato.PROMESSA_NAO_CUMPRIDA).toList();
+        List<ServicoCobranca.Linha> vencendo = lista.stream()
+                .filter(l -> l.situacao() == SituacaoContato.PROMESSA_VENCENDO)
+                .sorted(Comparator.comparing(l -> l.ultimoContato().dataPrometida())).toList();
+        if (!quebradas.isEmpty()) {
+            pendencias.add(new Pendencia(Gravidade.ALTA, quebradas.size(),
+                    plural(quebradas.size(), "Promessa de pagamento não cumprida",
+                            "Promessas de pagamento não cumpridas"),
+                    nomes(quebradas, l -> "") + ". Ligar de novo ou avisar o fiador.",
+                    Tipo.PROMESSAS_NAO_CUMPRIDAS));
+        }
+        if (!vencendo.isEmpty()) {
+            pendencias.add(new Pendencia(Gravidade.MEDIA, vencendo.size(),
+                    plural(vencendo.size(), "Promessa de pagamento vencendo", "Promessas de pagamento vencendo"),
+                    nomes(vencendo, l -> ": " + l.acompanhamento().detalhe().toLowerCase()) + ".",
+                    Tipo.PROMESSAS_VENCENDO));
+        }
+    }
+
+    /** "Ana Lima: faltam 3 dias · Rui Melo: vence hoje e mais 2" (no máximo 2 nomes). */
+    private static String nomes(List<ServicoCobranca.Linha> linhas,
+            java.util.function.Function<ServicoCobranca.Linha, String> complemento) {
+        String texto = String.join(" · ", linhas.stream().limit(2)
+                .map(l -> l.contrato().getInquilino().getNome() + complemento.apply(l)).toList());
+        return linhas.size() > 2 ? texto + " e mais " + (linhas.size() - 2) : texto;
     }
 
     /** Decisão do PO (27/10): contrato vencido não gera aluguel, então o Painel avisa para prorrogar ou encerrar. */

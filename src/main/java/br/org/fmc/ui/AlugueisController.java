@@ -2,7 +2,6 @@ package br.org.fmc.ui;
 
 import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Acao;
-import br.org.fmc.model.ContatoCobranca;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.SituacaoAluguel;
 import br.org.fmc.service.RegraNegocioException;
@@ -407,14 +406,20 @@ public class AlugueisController {
             return duasLinhas(fiador.getNome(), fiador.getTelefone() == null ? "sem telefone" : fiador.getTelefone(), null);
         }));
         cobrancaUltimoContato.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
+        // [D7] BOARD-64: em que pé está a cobrança (nunca contatado, prometeu para..., promessa não cumprida).
         cobrancaUltimoContato.setCellFactory(c -> celula(linha -> {
-            ContatoCobranca contato = linha.ultimoContato();
-            if (contato == null) {
-                return duasLinhas("Nenhum registro", "", null);
+            ServicoCobranca.Acompanhamento a = linha.acompanhamento();
+            String estilo = switch (a.situacao()) {
+                case PROMESSA_NAO_CUMPRIDA -> "celula-detalhe-erro";
+                case PROMESSA_VENCENDO -> "celula-detalhe-alerta";
+                case PROMESSA_NO_PRAZO -> "celula-detalhe-ok";
+                case SEM_RETORNO, NUNCA_CONTATADO -> null;
+            };
+            VBox celula = duasLinhas(a.texto(), a.detalhe(), estilo);
+            if (linha.ultimoContato() != null) {
+                Tooltip.install(celula, new Tooltip(linha.ultimoContato().descricao()));
             }
-            String resumo = contato.resultado().length() > 38
-                    ? contato.resultado().substring(0, 35) + "..." : contato.resultado();
-            return duasLinhas(Formatos.data(contato.registradoEm().toLocalDate()), resumo, null);
+            return celula;
         }));
         cobrancaAcao.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         cobrancaAcao.setCellFactory(c -> celula(linha -> {
