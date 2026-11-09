@@ -35,6 +35,15 @@ public class ServicoRecebimento {
         return aluguel.encargosEm(dataPagamento);
     }
 
+    /** O recibo de um aluguel já recebido, para ver de novo, imprimir ou salvar em PDF (BOARD-60). */
+    public java.util.Optional<Recibo> reciboDoAluguel(Aluguel aluguel) throws SQLException {
+        Sessao.exigir(Acao.VER_ALUGUEIS);
+        if (aluguel == null || aluguel.getId() == null) {
+            return java.util.Optional.empty();
+        }
+        return recibos.buscarDoAluguel(aluguel);
+    }
+
     public Recibo receber(Aluguel aluguel, LocalDate dataPagamento, FormaPagamento formaPagamento,
             String documento) throws SQLException {
         Sessao.exigir(Acao.RECEBER_ALUGUEL);

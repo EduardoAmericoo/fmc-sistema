@@ -311,8 +311,17 @@ public class AlugueisController {
         colunaDemonstrativo.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaDemonstrativo.setCellFactory(c -> celula(a -> {
             if (a.estaPago()) {
-                Label recibo = new Label(a.getNumeroRecibo() == null ? "Pago" : a.getNumeroRecibo());
-                recibo.getStyleClass().add("selo");
+                if (a.getNumeroRecibo() == null) {
+                    // pago sem recibo no sistema (ex.: dados de teste lançados como já pagos)
+                    Label pago = new Label("Pago");
+                    pago.getStyleClass().add("selo");
+                    return pago;
+                }
+                // BOARD-60: o número abre o recibo, para ver de novo, imprimir ou salvar em PDF
+                Button recibo = new Button(a.getNumeroRecibo(), new FontIcon("fth-file-text"));
+                recibo.getStyleClass().addAll("botao-secundario", "botao-pequeno");
+                recibo.setTooltip(new Tooltip("Ver o recibo " + a.getNumeroRecibo() + " (imprimir ou salvar em PDF)"));
+                recibo.setOnAction(e -> verRecibo(a));
                 return recibo;
             }
             HBox acoes = new HBox(8);
@@ -336,7 +345,24 @@ public class AlugueisController {
     }
 
     private void abrirRecebimento(Aluguel aluguel) {
-        ReceberAluguelController.abrir(aluguel, new ServicoRecebimento(), recibo -> carregarMes());
+        // BOARD-60: depois de receber, a lista atualiza e o recibo abre na hora
+        ReceberAluguelController.abrir(aluguel, new ServicoRecebimento(), recibo -> {
+            carregarMes();
+            ReciboController.abrir(recibo, true);
+        });
+    }
+
+    /** Abre de novo o recibo de um aluguel já recebido. */
+    private void verRecibo(Aluguel aluguel) {
+        try {
+            new ServicoRecebimento().reciboDoAluguel(aluguel).ifPresentOrElse(
+                    recibo -> ReciboController.abrir(recibo, false),
+                    () -> new Alert(Alert.AlertType.INFORMATION, "Este aluguel não tem recibo no sistema.").showAndWait());
+        } catch (RegraNegocioException e) {
+            new Alert(Alert.AlertType.WARNING, String.join(" ", e.getErros())).showAndWait();
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Não foi possível abrir o recibo.").showAndWait();
+        }
     }
 
     private void salvarDemonstrativo(Aluguel aluguel) {

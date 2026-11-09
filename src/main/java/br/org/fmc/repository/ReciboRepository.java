@@ -4,13 +4,17 @@ import br.org.fmc.db.Database;
 import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.Perfil;
 import br.org.fmc.model.Recibo;
 import br.org.fmc.model.Usuario;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 /** Grava o recibo e marca o aluguel como pago na mesma transação. */
 public class ReciboRepository {
@@ -78,6 +82,36 @@ public class ReciboRepository {
             st.setLong(13, recibo.getEmitidoPor().getId());
             st.setString(14, recibo.getDataEmissao().toString());
             st.executeUpdate();
+        }
+    }
+
+    /**
+     * O recibo de um aluguel já recebido, para mostrar, imprimir ou salvar em PDF (BOARD-60).
+     * Vazio quando o aluguel não tem recibo (ex.: os pagos dos dados de teste).
+     */
+    public Optional<Recibo> buscarDoAluguel(Aluguel aluguel) throws SQLException {
+        String sql = "SELECT r.*, u.nome AS usuario_nome, u.email AS usuario_email, u.perfil AS usuario_perfil "
+                + "FROM recibo r JOIN usuario u ON u.id = r.emitido_por WHERE r.aluguel_id = ?";
+        try (Connection conexao = Database.conectar(); PreparedStatement st = conexao.prepareStatement(sql)) {
+            st.setLong(1, aluguel.getId());
+            try (ResultSet rs = st.executeQuery()) {
+                if (!rs.next()) {
+                    return Optional.empty();
+                }
+                Usuario emitidoPor = new Usuario(rs.getString("usuario_nome"), rs.getString("usuario_email"),
+                        Perfil.valueOf(rs.getString("usuario_perfil")));
+                emitidoPor.setId(rs.getLong("emitido_por"));
+                Encargos encargos = Encargos.doBanco(rs.getLong("dias_atraso"), rs.getInt("meses_encargos"),
+                        new BigDecimal(rs.getString("multa")), new BigDecimal(rs.getString("juros")),
+                        new BigDecimal(rs.getString("correcao")));
+                Recibo recibo = new Recibo(rs.getInt("ano"), rs.getInt("sequencial"), aluguel,
+                        LocalDate.parse(rs.getString("data_pagamento")),
+                        FormaPagamento.valueOf(rs.getString("forma_pagamento")), encargos,
+                        rs.getString("documento"), emitidoPor);
+                recibo.setId(rs.getLong("id"));
+                recibo.setDataEmissao(LocalDateTime.parse(rs.getString("data_emissao")));
+                return Optional.of(recibo);
+            }
         }
     }
 

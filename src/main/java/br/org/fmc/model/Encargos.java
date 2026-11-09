@@ -48,6 +48,12 @@ public final class Encargos {
                 arredondar(base.multiply(RegrasNegocio.CORRECAO_MES).multiply(m)));
     }
 
+    /** Os encargos como foram gravados no recibo (BOARD-60), para mostrar o recibo de novo. */
+    public static Encargos doBanco(long diasAtraso, int meses, BigDecimal multa, BigDecimal juros,
+            BigDecimal correcao) {
+        return new Encargos(diasAtraso, meses, multa, juros, correcao);
+    }
+
     /** Encargos zerados (pagamento em dia). */
     public static Encargos nenhum() {
         return new Encargos(0, 0, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
