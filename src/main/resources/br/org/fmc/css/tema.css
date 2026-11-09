@@ -1292,3 +1292,100 @@
 .historico-texto {
     -fx-text-fill: -fmc-texto;
 }
+
+/* ===================== Recibo, BOARD-60 ===================== */
+
+/* A folha com as duas vias, como no papel (fundo branco, borda fina, letra escura) */
+.recibo-via {
+    -fx-background-color: white;
+    -fx-border-color: #A0A8B2;
+    -fx-border-width: 1;
+    -fx-padding: 18 20 14 20;
+}
+
+.recibo-fundacao {
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-text-fill: -fmc-texto;
+}
+
+.recibo-pequeno {
+    -fx-font-size: 11px;
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.recibo-mes {
+    -fx-border-color: -fmc-texto;
+    -fx-border-width: 1;
+    -fx-padding: 6 18 6 18;
+    -fx-min-width: 170;
+    -fx-max-height: 52;
+}
+
+.recibo-mes-nome {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fmc-texto;
+}
+
+.recibo-composicao {
+    -fx-hgap: 12;
+    -fx-vgap: 1;
+}
+
+.recibo-item,
+.recibo-texto {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fmc-texto;
+    -fx-fill: -fmc-texto;
+}
+
+.recibo-negrito {
+    -fx-font-weight: bold;
+}
+
+.recibo-total {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.recibo-traco {
+    -fx-min-height: 1;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+    -fx-background-color: -fmc-texto;
+}
+
+.recibo-titulo {
+    -fx-font-family: "Urbanist", "Segoe UI", sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-text-fill: -fmc-texto;
+}
+
+.recibo-numero {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fmc-texto;
+}
+
+.recibo-local {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+/* Quadradinho da forma de pagamento; a usada leva um X */
+.recibo-caixa {
+    -fx-border-color: -fmc-texto;
+    -fx-border-width: 1;
+    -fx-min-width: 14;
+    -fx-min-height: 14;
+    -fx-max-width: 14;
+    -fx-max-height: 14;
+    -fx-alignment: center;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-text-fill: -fmc-texto;
+}
