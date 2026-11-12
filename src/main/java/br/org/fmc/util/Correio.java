@@ -35,13 +35,46 @@ public interface Correio {
      * senão, nenhum (null): a recuperação por e-mail fica desligada.
      */
     static Correio doSistema() {
-        String host = System.getenv("FMC_SMTP_HOST");
+        String host = configuracao("FMC_SMTP_HOST");
         if (host != null && !host.isBlank()) {
-            return new Smtp(host, System.getenv("FMC_SMTP_PORTA"), System.getenv("FMC_SMTP_USUARIO"),
-                    System.getenv("FMC_SMTP_SENHA"), System.getenv("FMC_SMTP_REMETENTE"));
+            return new Smtp(host, configuracao("FMC_SMTP_PORTA"), configuracao("FMC_SMTP_USUARIO"),
+                    configuracao("FMC_SMTP_SENHA"), configuracao("FMC_SMTP_REMETENTE"));
         }
         if (!"nao".equalsIgnoreCase(System.getenv("FMC_DADOS_TESTE"))) {
             return new Simulado(Database.pasta().resolve("caixa-de-saida"));
+        }
+        return null;
+    }
+
+    /**
+     * Lê uma configuração do ambiente. No Windows, se o programa foi aberto por outro que já estava
+     * aberto antes da configuração ser gravada (ex.: VS Code aberto pelo GitHub Desktop), ela não
+     * chega pelo ambiente; então lê direto das variáveis do usuário no Windows (HKCU\Environment).
+     */
+    static String configuracao(String nome) {
+        String valor = System.getenv(nome);
+        if ((valor == null || valor.isBlank()) && System.getProperty("os.name", "").startsWith("Windows")) {
+            valor = variavelDoUsuarioNoWindows(nome);
+        }
+        return valor;
+    }
+
+    private static String variavelDoUsuarioNoWindows(String nome) {
+        try {
+            Process reg = new ProcessBuilder("reg", "query", "HKCU\\Environment", "/v", nome)
+                    .redirectErrorStream(true).start();
+            String saida = new String(reg.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            reg.waitFor();
+            for (String linha : saida.split("\\R")) {
+                String[] partes = linha.trim().split("\\s{2,}|\\t", 3);
+                if (partes.length == 3 && partes[0].equalsIgnoreCase(nome)) {
+                    return partes[2].trim();
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
         return null;
     }
