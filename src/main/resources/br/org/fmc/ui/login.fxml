@@ -99,10 +99,17 @@
                 <Label fx:id="textoAvisoGeral" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
             </HBox>
 
-            <Label text="Esqueceu a senha? Peça uma senha provisória ao Administrador." styleClass="dica"
-                   wrapText="true" minHeight="-Infinity">
-                <VBox.margin><Insets top="14"/></VBox.margin>
-            </Label>
+            <HBox fx:id="avisoSenhaTrocada" styleClass="resumo-calculado" spacing="10" alignment="CENTER_LEFT"
+                  visible="false" managed="false">
+                <VBox.margin><Insets top="8"/></VBox.margin>
+                <FontIcon iconLiteral="fth-check-circle"/>
+                <Label text="Senha trocada. Entre com a senha nova." wrapText="true" minHeight="-Infinity"/>
+            </HBox>
+
+            <!-- Esqueci a senha: código por e-mail (sem depender do Administrador) -->
+            <Button text="Esqueci minha senha" onAction="#esqueciSenha" styleClass="botao-link">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
         </VBox>
     </StackPane>
 </GridPane>

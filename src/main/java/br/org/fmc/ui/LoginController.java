@@ -62,6 +62,8 @@ public class LoginController {
     private HBox avisoGeral;
     @FXML
     private Label textoAvisoGeral;
+    @FXML
+    private HBox avisoSenhaTrocada;
 
     @FXML
     private void initialize() {
@@ -179,6 +181,19 @@ public class LoginController {
     }
 
     /** Botão do olho: mostra ou esconde a senha. */
+    /** Abre a janela "Esqueci a senha", já com o e-mail digitado (se houver). */
+    @FXML
+    private void esqueciSenha() {
+        RecuperarSenhaController.abrir(campoEmail.getText(), emailDaSenhaNova -> {
+            campoEmail.setText(emailDaSenhaNova);
+            campoSenha.clear();
+            campoSenhaVisivel.clear();
+            limparTudo();
+            mostrar(avisoSenhaTrocada, true);
+            campoSenha.requestFocus();
+        });
+    }
+
     @FXML
     private void alternarSenha() {
         boolean mostrarTexto = campoSenha.isVisible();

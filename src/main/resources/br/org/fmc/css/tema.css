@@ -1389,3 +1389,25 @@
     -fx-padding: 0;
     -fx-text-fill: -fmc-texto;
 }
+
+/* ===================== Esqueci a senha ===================== */
+
+/* Botão com cara de link (ex.: "Esqueci minha senha") */
+.botao-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fmc-azul;
+    -fx-font-weight: bold;
+    -fx-padding: 4 0 4 0;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+.botao-link:hover {
+    -fx-underline: true;
+}
+
+.campo-codigo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-max-width: 180;
+}

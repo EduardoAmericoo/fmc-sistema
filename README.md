@@ -39,6 +39,31 @@ O sistema nasce com um único usuário, o **Administrador**:
 
 É ele quem cadastra os outros usuários. Esta senha é só para desenvolvimento e testes; a troca de senha pelo próprio usuário é a história desejável D2.
 
+### Esqueci a senha (código por e-mail)
+
+Na tela de login, **"Esqueci minha senha"** manda um código de 6 números para o e-mail cadastrado. Com ele, a pessoa cria uma senha nova sozinha, sem depender do Administrador. Travas de segurança:
+
+- o código vale 15 minutos e só uma vez;
+- 5 códigos errados cancelam o pedido;
+- a tela responde igual exista o e-mail ou não;
+- usuário bloqueado não recupera a senha;
+- chega um e-mail avisando que a senha foi trocada.
+
+**Como o e-mail sai:**
+
+- **Com os dados de teste ligados** (o normal no desenvolvimento), nada é enviado de verdade. Cada e-mail vira um arquivo `.txt` em `data/caixa-de-saida/`, e a janela tem o botão "Abrir caixa de saída" para ver o código.
+- **Para enviar de verdade** (versão da Fundação), defina estas variáveis de ambiente no Windows. A senha nunca vai para o código nem para o GitHub.
+
+| Variável | Exemplo |
+|---|---|
+| `FMC_SMTP_HOST` | `smtp.gmail.com` |
+| `FMC_SMTP_PORTA` | `587` |
+| `FMC_SMTP_USUARIO` | `sistema@fundacao.org` |
+| `FMC_SMTP_SENHA` | senha de app da conta (no Gmail: Conta Google → Segurança → Senhas de app) |
+| `FMC_SMTP_REMETENTE` | opcional; por padrão, o próprio usuário |
+
+Com `FMC_DADOS_TESTE=nao` e sem `FMC_SMTP_HOST`, a recuperação por e-mail fica desligada, e só o Administrador gera senha provisória.
+
 ## Como rodar os testes
 
 ```
