@@ -71,6 +71,13 @@
             <version>${pdfbox.version}</version>
         </dependency>
 
+        <!-- Envio de e-mail: código de "Esqueci a senha" (Jakarta Mail, implementação Angus) -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
         <!-- Testes automatizados -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Esqueci a senha, em dois passos na mesma janela:
+  1. a pessoa digita o e-mail e recebe um código de 6 números;
+  2. digita o código e cria a senha nova (regra de senha forte).
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.RecuperarSenhaController">
+    <VBox styleClass="janela" maxWidth="520" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Esqueci a senha" styleClass="janela-titulo"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+        <VBox styleClass="janela-corpo" spacing="8">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- passo 1: e-mail -->
+            <VBox fx:id="passoEmail" spacing="6">
+                <Label text="E-mail cadastrado" labelFor="$campoEmail" styleClass="rotulo"/>
+                <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
+                <Label text="Vamos enviar um código de 6 números para este e-mail." styleClass="dica"
+                       wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+
+            <!-- passo 2: código e senha nova -->
+            <VBox fx:id="passoCodigo" spacing="6">
+                <HBox styleClass="resumo-calculado" spacing="10" alignment="TOP_LEFT">
+                    <FontIcon iconLiteral="fth-mail"/>
+                    <Label fx:id="textoEnviado" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox fx:id="avisoSimulado" styleClass="bloco-promessa" spacing="10" alignment="CENTER_LEFT">
+                    <Label fx:id="textoSimulado" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"
+                           styleClass="texto"/>
+                    <Button text="Abrir caixa de saída" onAction="#abrirCaixaDeSaida" minWidth="-Infinity"
+                            styleClass="botao-secundario, botao-pequeno"/>
+                </HBox>
+                <Label text="Código de 6 números *" labelFor="$campoCodigo" styleClass="rotulo">
+                    <VBox.margin><Insets top="8"/></VBox.margin>
+                </Label>
+                <TextField fx:id="campoCodigo" promptText="000000" styleClass="campo, campo-codigo"/>
+                <Label text="Senha nova *" labelFor="$campoSenha" styleClass="rotulo">
+                    <VBox.margin><Insets top="8"/></VBox.margin>
+                </Label>
+                <PasswordField fx:id="campoSenha" styleClass="campo"/>
+                <Label text="Pelo menos 8 caracteres, com letra maiúscula, letra minúscula e número." styleClass="dica"
+                       wrapText="true" minHeight="-Infinity"/>
+                <Label text="Repita a senha nova *" labelFor="$campoConfirmacao" styleClass="rotulo">
+                    <VBox.margin><Insets top="8"/></VBox.margin>
+                </Label>
+                <PasswordField fx:id="campoConfirmacao" styleClass="campo"/>
+                <Button fx:id="botaoReenviar" text="Não chegou? Enviar outro código" onAction="#reenviar"
+                        styleClass="botao-link">
+                    <VBox.margin><Insets top="6"/></VBox.margin>
+                </Button>
+            </VBox>
+        </VBox>
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button fx:id="botaoPrincipal" onAction="#continuar" styleClass="botao-primario" defaultButton="true"/>
+        </HBox>
+    </VBox>
+</StackPane>
