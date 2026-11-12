@@ -245,3 +245,14 @@ CREATE TABLE IF NOT EXISTS cobranca_contato_resultado (
     tipo            TEXT    NOT NULL,
     data_prometida  TEXT
 );
+
+-- Esqueci a senha · Código de recuperação enviado por e-mail. Um pedido por usuário (o novo
+-- substitui o anterior). O código fica guardado só como hash, vale 15 minutos e aceita
+-- até 5 tentativas.
+CREATE TABLE IF NOT EXISTS senha_recuperacao (
+    usuario_id   INTEGER PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
+    codigo_hash  TEXT    NOT NULL,
+    criado_em    TEXT    NOT NULL,
+    expira_em    TEXT    NOT NULL,
+    tentativas   INTEGER NOT NULL DEFAULT 0
+);

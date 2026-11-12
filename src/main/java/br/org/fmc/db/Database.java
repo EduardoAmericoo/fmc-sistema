@@ -28,6 +28,12 @@ public final class Database {
         arquivo = novoArquivo;
     }
 
+    /** A pasta onde fica o arquivo do banco (ex.: data/). Também guarda a caixa de saída simulada. */
+    public static Path pasta() {
+        Path pasta = arquivo.toAbsolutePath().getParent();
+        return pasta == null ? Path.of(".").toAbsolutePath() : pasta;
+    }
+
     /** Abre uma conexão. Use sempre com try-with-resources para fechar no fim. */
     public static Connection conectar() throws SQLException {
         try {
