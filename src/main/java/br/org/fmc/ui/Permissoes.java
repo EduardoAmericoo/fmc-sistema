@@ -22,6 +22,11 @@ public final class Permissoes {
     private Permissoes() {
     }
 
+    /** O usuário logado pode fazer a ação? (para montar botões criados no código) */
+    public static boolean pode(Acao acao) {
+        return Sessao.pode(acao);
+    }
+
     /** O componente aparece só se o usuário logado puder fazer a ação; senão some sem deixar espaço vazio. */
     public static void mostrarSe(Node componente, Acao acao) {
         boolean pode = Sessao.pode(acao);

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Janela "Enviar documento digitalizado", aberta pelo botão "Enviar documento" dos detalhes do contrato.
+  Segue o protótipo: Contrato (só leitura), Tipo de documento *, Data do documento *,
+  Arquivo * (PDF ou foto) e Observação. O arquivo pode ser escolhido no botão ou arrastado para a caixa.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.EnviarDocumentoController">
+    <VBox styleClass="janela" maxWidth="620" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Enviar documento digitalizado" styleClass="janela-titulo" wrapText="true"/>
+                <Label text="O arquivo é copiado para dentro do sistema: continua abrindo mesmo se o original for apagado."
+                       styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="janela-corpo" spacing="16">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <VBox spacing="6">
+                <Label text="Contrato" labelFor="$campoContrato" styleClass="rotulo"/>
+                <TextField fx:id="campoContrato" styleClass="campo" editable="false" focusTraversable="false"/>
+            </VBox>
+
+            <HBox spacing="16">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Tipo de documento *" labelFor="$campoTipo" styleClass="rotulo"/>
+                    <ComboBox fx:id="campoTipo" maxWidth="Infinity" styleClass="campo" promptText="Escolha"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Data do documento *" labelFor="$campoData" styleClass="rotulo"/>
+                    <DatePicker fx:id="campoData" maxWidth="Infinity" styleClass="campo" promptText="dd/mm/aaaa"/>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="6">
+                <Label text="Arquivo * (PDF ou foto)" labelFor="$campoArquivo" styleClass="rotulo"/>
+                <HBox fx:id="caixaArquivo" spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="campoArquivo" styleClass="campo" editable="false" HBox.hgrow="ALWAYS"
+                               promptText="Nenhum arquivo escolhido (ou arraste o arquivo para cá)"/>
+                    <Button text="Escolher arquivo…" onAction="#escolherArquivo" styleClass="botao-secundario">
+                        <graphic><FontIcon iconLiteral="fth-paperclip"/></graphic>
+                    </Button>
+                </HBox>
+                <Label fx:id="dicaArquivo" text="PDF, JPG, JPEG ou PNG, até 10 MB." styleClass="dica"
+                       wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Observação" labelFor="$campoObservacao" styleClass="rotulo"/>
+                <TextField fx:id="campoObservacao" styleClass="campo"
+                           promptText="Ex.: frente e verso; via assinada pelas duas partes"/>
+            </VBox>
+        </VBox>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Enviar documento" onAction="#enviar" styleClass="botao-primario" defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

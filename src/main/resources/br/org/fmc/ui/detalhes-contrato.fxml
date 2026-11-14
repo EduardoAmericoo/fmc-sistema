@@ -8,6 +8,8 @@
   e a situação do contrato em caixas coloridas. O corpo é montado pelo DetalhesContratoController.
   Fica num arquivo próprio, como as janelas de prorrogar e encerrar, para a tela de Contratos
   continuar pequena. Os botões de ação (ex.: Prorrogar, BOARD-169) podem entrar no rodapé depois.
+  Documentos digitalizados: seção "Documentos · N" no fim do corpo e botão "Enviar documento" no rodapé
+  (só para quem tem a permissão "Anexar documentos").
 -->
 
 <?import javafx.geometry.Insets?>
@@ -40,6 +42,10 @@
         </ScrollPane>
 
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Button fx:id="botaoEnviarDocumento" text="Enviar documento" onAction="#enviarDocumento"
+                    styleClass="botao-secundario">
+                <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
+            </Button>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="botaoReajustar" text="Aplicar reajuste" onAction="#reajustar" styleClass="botao-primario"
                     managed="false" visible="false">

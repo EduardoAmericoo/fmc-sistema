@@ -256,3 +256,23 @@ CREATE TABLE IF NOT EXISTS senha_recuperacao (
     expira_em    TEXT    NOT NULL,
     tentativas   INTEGER NOT NULL DEFAULT 0
 );
+
+-- Documentos digitalizados do contrato (contrato assinado, RG/CPF, comprovante de renda...).
+-- O arquivo é COPIADO para a pasta data/documentos: se o original for apagado ou estiver
+-- num pendrive, o documento continua abrindo. "arquivo" é o caminho dentro dessa pasta
+-- (ex.: "CT-1001/contrato-assinado.pdf") e "nome_original" é o nome que o arquivo tinha.
+-- Não há exclusão (decisão da equipe): o documento enviado errado é arquivado
+-- (arquivado_em preenchido) e some da lista, mas continua guardado e pode ser reativado.
+CREATE TABLE IF NOT EXISTS contrato_documento (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id   INTEGER NOT NULL REFERENCES contrato(id) ON DELETE CASCADE,
+    tipo          TEXT    NOT NULL,
+    data          TEXT    NOT NULL,
+    arquivo       TEXT    NOT NULL UNIQUE,
+    nome_original TEXT    NOT NULL,
+    tamanho       INTEGER NOT NULL,
+    observacao    TEXT,
+    enviado_em    TEXT    NOT NULL,
+    enviado_por   TEXT    NOT NULL,
+    arquivado_em  TEXT
+);
