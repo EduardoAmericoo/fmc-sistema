@@ -28,6 +28,15 @@ public final class Database {
         arquivo = novoArquivo;
     }
 
+    /**
+     * Pasta onde fica o banco (por padrão, data/). Os documentos digitalizados ficam em
+     * data/documentos, junto do banco: quem copia a pasta data leva tudo junto.
+     */
+    public static Path pastaDados() {
+        Path pasta = arquivo.toAbsolutePath().getParent();
+        return pasta == null ? Path.of("").toAbsolutePath() : pasta;
+    }
+
     /** Abre uma conexão. Use sempre com try-with-resources para fechar no fim. */
     public static Connection conectar() throws SQLException {
         try {
