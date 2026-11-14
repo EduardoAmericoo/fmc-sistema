@@ -11,6 +11,7 @@ import br.org.fmc.model.Acao;
 import br.org.fmc.model.Caucao;
 import br.org.fmc.model.Conjuge;
 import br.org.fmc.model.Contrato;
+import br.org.fmc.model.DocumentoContrato;
 import br.org.fmc.model.Encerramento;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Fianca;
@@ -21,30 +22,48 @@ import br.org.fmc.model.Reajuste;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.model.StatusContrato;
+import br.org.fmc.service.RegraNegocioException;
+import br.org.fmc.service.ServicoDocumentos;
 import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
+import java.awt.Desktop;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.sql.SQLException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * Controla a janela "Detalhes do contrato" (ui/detalhes-contrato.fxml), BOARD-59.
- * Só mostra o que já está no contrato carregado: não grava nada nem chama o banco.
+ * Mostra o que já está no contrato carregado; o banco só é usado para os documentos digitalizados.
  *
  * O desenho segue a janela "Contrato" do protótipo: três colunas (Imóvel, Locatário e
  * Garantia), com o rótulo à esquerda e o valor à direita; embaixo, prazo, vigência e
  * vencimento; e a situação do contrato em caixas coloridas (verde, amarela, vermelha, cinza).
+ *
+ * No fim, os documentos digitalizados do contrato ("Documentos · N"), com o botão "Abrir"
+ * (abre no programa padrão do computador) e "Arquivar" (não existe excluir). Os documentos
+ * arquivados ficam escondidos atrás de "Mostrar arquivados", com o botão "Reativar".
  */
 public class DetalhesContratoController {
 
@@ -58,6 +77,13 @@ public class DetalhesContratoController {
     private VBox corpo;
     @FXML
     private Button botaoReajustar;
+    @FXML
+    private Button botaoEnviarDocumento;
+
+    private final ServicoDocumentos servicoDocumentos = new ServicoDocumentos();
+    /** A seção de documentos é refeita depois de enviar, arquivar ou reativar. */
+    private final VBox secaoDocumentos = new VBox(8);
+    private boolean mostrarArquivados;
 
     /** O contrato aberto e o que fazer quando ele muda por esta janela. */
     private Contrato contrato;
@@ -90,6 +116,7 @@ public class DetalhesContratoController {
 
     @FXML
     private void initialize() {
+        Permissoes.mostrarSe(botaoEnviarDocumento, Acao.ANEXAR_DOCUMENTOS);
         // Esc fecha a janela.
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
@@ -99,6 +126,7 @@ public class DetalhesContratoController {
     }
 
     private void preencher(Contrato c) {
+        this.contrato = c;
         LocalDate hoje = LocalDate.now();
         SituacaoContrato situacao = SituacaoContrato.de(c, hoje);
         titulo.setText("Contrato " + c.getNumero());
@@ -125,7 +153,8 @@ public class DetalhesContratoController {
         if (c.getStatus() == StatusContrato.ATIVO || !c.getReajustes().isEmpty()) {
             corpo.getChildren().add(secaoReajuste(c, hoje));
         }
-        this.contrato = c;
+        corpo.getChildren().add(secaoDocumentos);
+        carregarDocumentos();
         boolean podeReajustar = c.reajustePendente(hoje) && Sessao.pode(Acao.REAJUSTAR_CONTRATO);
         botaoReajustar.setVisible(podeReajustar);
         botaoReajustar.setManaged(podeReajustar);
@@ -262,6 +291,185 @@ public class DetalhesContratoController {
         }
         return "Encerrado: chaves devolvidas em " + Formatos.data(e.getDataSaida()) + " · " + e.getMotivo()
                 + ". Não gera mais aluguel; os aluguéis em aberto continuam sendo cobrados.";
+    }
+
+    // ---------- documentos digitalizados ----------
+
+    private void carregarDocumentos() {
+        secaoDocumentos.getChildren().clear();
+        List<DocumentoContrato> todos;
+        try {
+            todos = servicoDocumentos.listar(contrato.getId());
+        } catch (SQLException | RuntimeException e) {
+            secaoDocumentos.getChildren().addAll(titulo("Documentos"),
+                    veredito("veredito-erro", "Não foi possível carregar os documentos: " + e.getMessage()));
+            return;
+        }
+        List<DocumentoContrato> ativos = todos.stream().filter(d -> !d.arquivado()).toList();
+        List<DocumentoContrato> arquivados = todos.stream().filter(DocumentoContrato::arquivado).toList();
+
+        secaoDocumentos.getChildren().add(titulo("Documentos · " + ativos.size()));
+        if (ativos.isEmpty()) {
+            secaoDocumentos.getChildren().add(veredito("veredito-neutro", "Nenhum documento anexado ainda."
+                    + (botaoEnviarDocumento.isVisible() ? " Use \"Enviar documento\" para anexar o contrato "
+                            + "assinado, RG/CPF, comprovantes..." : "")));
+        }
+        for (DocumentoContrato d : ativos) {
+            secaoDocumentos.getChildren().add(linhaDocumento(d));
+        }
+        if (!arquivados.isEmpty()) {
+            Button alternar = new Button((mostrarArquivados ? "Esconder arquivados" : "Mostrar arquivados")
+                    + " (" + arquivados.size() + ")");
+            alternar.getStyleClass().addAll("botao-secundario", "botao-pequeno");
+            alternar.setOnAction(e -> {
+                mostrarArquivados = !mostrarArquivados;
+                carregarDocumentos();
+            });
+            secaoDocumentos.getChildren().add(new HBox(alternar));
+            if (mostrarArquivados) {
+                for (DocumentoContrato d : arquivados) {
+                    secaoDocumentos.getChildren().add(linhaDocumento(d));
+                }
+            }
+        }
+    }
+
+    /** Uma linha: ícone, tipo e data, nome do arquivo e quem enviou, e os botões. */
+    private HBox linhaDocumento(DocumentoContrato d) {
+        boolean pdf = d.nomeOriginal().toLowerCase().endsWith(".pdf");
+        FontIcon icone = new FontIcon(pdf ? "fth-file-text" : "fth-image");
+
+        Label tipo = new Label(d.tipo() + " · " + Formatos.data(d.data())
+                + (d.arquivado() ? " · arquivado em " + Formatos.data(d.arquivadoEm().toLocalDate()) : ""));
+        tipo.getStyleClass().add("detalhe-valor");
+        tipo.setWrapText(true);
+        tipo.setMinHeight(Region.USE_PREF_SIZE);
+        Label arquivo = new Label(d.nomeOriginal() + " · " + ServicoDocumentos.megas(d.tamanho())
+                + " · enviado por " + d.enviadoPor() + " em " + Formatos.data(d.enviadoEm().toLocalDate()));
+        arquivo.getStyleClass().add("detalhe-rotulo");
+        arquivo.setWrapText(true);
+        arquivo.setMinHeight(Region.USE_PREF_SIZE);
+        VBox textos = new VBox(2, tipo, arquivo);
+        if (d.observacao() != null) {
+            Label obs = new Label(d.observacao());
+            obs.getStyleClass().add("detalhe-rotulo");
+            obs.setWrapText(true);
+            obs.setMinHeight(Region.USE_PREF_SIZE);
+            textos.getChildren().add(obs);
+        }
+        textos.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textos, Priority.ALWAYS);
+
+        Button abrir = botaoPequeno("Abrir", "fth-external-link");
+        abrir.setOnAction(e -> abrirDocumento(d));
+        HBox linha = new HBox(12, icone, textos, abrir);
+        if (Permissoes.pode(Acao.ANEXAR_DOCUMENTOS)) {
+            Button outro = d.arquivado() ? botaoPequeno("Reativar", "fth-rotate-ccw")
+                    : botaoPequeno("Arquivar", "fth-archive");
+            outro.setOnAction(e -> {
+                if (d.arquivado()) {
+                    reativarDocumento(d);
+                } else {
+                    arquivarDocumento(d);
+                }
+            });
+            linha.getChildren().add(outro);
+        }
+        linha.setAlignment(Pos.CENTER_LEFT);
+        linha.getStyleClass().add("detalhe-linha");
+        if (d.arquivado()) {
+            linha.setOpacity(0.6);
+        }
+        return linha;
+    }
+
+    private static Button botaoPequeno(String texto, String icone) {
+        Button botao = new Button(texto, new FontIcon(icone));
+        botao.getStyleClass().addAll("botao-secundario", "botao-pequeno");
+        botao.setMinWidth(Region.USE_PREF_SIZE);
+        return botao;
+    }
+
+    /** Botão "Enviar documento" do rodapé. */
+    @FXML
+    private void enviarDocumento() {
+        EnviarDocumentoController.abrir(contrato, servicoDocumentos, doc -> carregarDocumentos());
+    }
+
+    /**
+     * Abre a cópia guardada no sistema no programa padrão (leitor de PDF, visualizador de fotos).
+     * Roda fora da tela para ela não travar enquanto o programa abre.
+     */
+    private void abrirDocumento(DocumentoContrato d) {
+        Path caminho;
+        try {
+            caminho = servicoDocumentos.arquivoParaAbrir(d.id());
+        } catch (RegraNegocioException e) {
+            avisar(String.join(" ", e.getErros()));
+            return;
+        } catch (SQLException e) {
+            avisar("Erro no banco de dados: " + e.getMessage());
+            return;
+        }
+        if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+            avisar("Este computador não permite abrir arquivos pelo sistema. O arquivo está em: " + caminho);
+            return;
+        }
+        Thread abrir = new Thread(() -> {
+            try {
+                Desktop.getDesktop().open(caminho.toFile());
+            } catch (IOException | RuntimeException e) {
+                Platform.runLater(() -> avisar("Não foi possível abrir o arquivo (" + e.getMessage()
+                        + "). Confira se há um programa para abrir PDF ou fotos. O arquivo está em: " + caminho));
+            }
+        }, "abrir-documento");
+        abrir.setDaemon(true);
+        abrir.start();
+    }
+
+    private void arquivarDocumento(DocumentoContrato d) {
+        if (!confirmar("Arquivar documento?", "\"" + d.tipo() + "\" (" + d.nomeOriginal() + ") sai da lista de "
+                + "documentos do contrato. O arquivo continua guardado e pode ser reativado depois "
+                + "em \"Mostrar arquivados\".", "Arquivar")) {
+            return;
+        }
+        try {
+            servicoDocumentos.arquivar(d.id());
+            carregarDocumentos();
+        } catch (RegraNegocioException e) {
+            avisar(String.join(" ", e.getErros()));
+        } catch (SQLException e) {
+            avisar("Erro no banco de dados: " + e.getMessage());
+        }
+    }
+
+    private void reativarDocumento(DocumentoContrato d) {
+        try {
+            servicoDocumentos.reativar(d.id());
+            carregarDocumentos();
+        } catch (RegraNegocioException e) {
+            avisar(String.join(" ", e.getErros()));
+        } catch (SQLException e) {
+            avisar("Erro no banco de dados: " + e.getMessage());
+        }
+    }
+
+    private boolean confirmar(String titulo, String texto, String botao) {
+        ButtonType sim = new ButtonType(botao, ButtonBar.ButtonData.OK_DONE);
+        ButtonType nao = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION, texto, sim, nao);
+        alerta.initOwner(veu.getScene().getWindow());
+        alerta.setTitle("Documentos do contrato");
+        alerta.setHeaderText(titulo);
+        return alerta.showAndWait().orElse(nao) == sim;
+    }
+
+    private void avisar(String texto) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING, texto);
+        alerta.initOwner(veu.getScene().getWindow());
+        alerta.setTitle("Documentos do contrato");
+        alerta.setHeaderText("Não foi possível concluir");
+        alerta.show();
     }
 
     /** Botões "Fechar" e X (e a tecla Esc). */
