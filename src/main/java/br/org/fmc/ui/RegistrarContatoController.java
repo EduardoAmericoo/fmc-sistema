@@ -6,6 +6,7 @@ import br.org.fmc.model.ResultadoContato;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoCobranca;
 import br.org.fmc.service.ServicoCobranca.Linha;
+import br.org.fmc.service.ServicoMensagemCobranca;
 import br.org.fmc.util.Formatos;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -56,6 +58,15 @@ public class RegistrarContatoController {
     @FXML private VBox historico;
     @FXML private HBox avisoErros;
     @FXML private Label textoErros;
+    // BOARD-189 · mensagem pronta por e-mail ou WhatsApp
+    @FXML private VBox blocoMensagem;
+    @FXML private TextArea campoMensagem;
+    @FXML private Button botaoEmail;
+    @FXML private Button botaoWhatsApp;
+    @FXML private Label dicaMensagem;
+    @FXML private HBox avisoMensagem;
+    @FXML private Label textoAvisoMensagem;
+    private final ServicoMensagemCobranca mensagens = new ServicoMensagemCobranca();
 
     public static void abrir(Linha linha, ServicoCobranca servico,
             Consumer<ContatoCobranca> depoisDeRegistrar) {
@@ -81,6 +92,9 @@ public class RegistrarContatoController {
         });
         // Uma opção por resultado; "Prometeu pagar" abre o campo da data.
         for (ResultadoContato resultado : ResultadoContato.values()) {
+            if (!resultado.isDaLigacao()) {
+                continue; // e-mail e WhatsApp entram sozinhos no histórico, pelos botões da mensagem
+            }
             ToggleButton opcao = new ToggleButton(resultado.getRotulo());
             opcao.setUserData(resultado);
             opcao.setToggleGroup(grupoResultado);
@@ -109,8 +123,72 @@ public class RegistrarContatoController {
         subtitulo.setText(linha.contrato().getInquilino().getNome()
                 + (telefone == null || telefone.isBlank() ? "" : " · " + telefone));
         resumoDivida.setText("Valor atualizado para informar ao inquilino: " + Formatos.moeda(linha.valorAtualizado())
-                + " (" + linha.mesesEmAberto() + " meses em aberto: " + competencias() + ").");
+                + " (" + linha.mesesEmAberto() + (linha.mesesEmAberto() == 1 ? " mês" : " meses")
+                + " em aberto: " + competencias() + ").");
+        prepararMensagem();
         mostrarHistorico();
+    }
+
+    /** BOARD-189 · Texto pronto e os botões; um botão fica desligado quando falta e-mail ou celular. */
+    private void prepararMensagem() {
+        mostrar(avisoMensagem, false);
+        campoMensagem.setText(mensagens.mensagem(linha).texto());
+        String semEmail = mensagens.problemaEmail(linha);
+        String semWhatsApp = mensagens.problemaWhatsApp(linha);
+        botaoEmail.setDisable(semEmail != null);
+        botaoWhatsApp.setDisable(semWhatsApp != null);
+        String email = linha.contrato().getInquilino().getEmail();
+        List<String> dicas = new java.util.ArrayList<>();
+        dicas.add(semEmail != null ? semEmail : "E-mail para " + email + ".");
+        if (semWhatsApp != null) {
+            dicas.add(semWhatsApp);
+        }
+        dicaMensagem.setText(String.join(" ", dicas));
+    }
+
+    @FXML
+    private void enviarEmail() {
+        try {
+            ContatoCobranca contato = mensagens.enviarEmail(linha, campoMensagem.getText());
+            avisarEnvio("E-mail enviado e registrado no histórico (" + contato.observacao() + ").", contato);
+        } catch (RegraNegocioException e) {
+            mostrarErros(String.join("\n", e.getErros()));
+        } catch (IOException e) {
+            mostrarErros("Não foi possível enviar o e-mail. Confira a internet e tente de novo. (" + e.getMessage() + ")");
+        } catch (SQLException e) {
+            mostrarErros("O e-mail saiu, mas não foi possível registrar no histórico: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void abrirWhatsApp() {
+        try {
+            String link = mensagens.abrirWhatsApp(linha, campoMensagem.getText());
+            // abre o navegador fora da tela do sistema, para a janela não travar enquanto ele carrega
+            new Thread(() -> {
+                try {
+                    java.awt.Desktop.getDesktop().browse(java.net.URI.create(link));
+                } catch (Exception e) {
+                    javafx.application.Platform.runLater(() -> mostrarErros(
+                            "Não foi possível abrir o WhatsApp neste computador: " + e.getMessage()));
+                }
+            }, "abrir-whatsapp").start();
+            avisarEnvio("WhatsApp aberto com a mensagem pronta: confira e aperte enviar. Registrado no histórico.",
+                    null);
+        } catch (RegraNegocioException e) {
+            mostrarErros(String.join("\n", e.getErros()));
+        } catch (SQLException e) {
+            mostrarErros("Não foi possível registrar no histórico: " + e.getMessage());
+        }
+    }
+
+    /** Mostra o aviso verde, atualiza o histórico desta janela e a lista de cobrança de trás. */
+    private void avisarEnvio(String texto, ContatoCobranca contato) {
+        mostrar(avisoErros, false);
+        textoAvisoMensagem.setText(texto);
+        mostrar(avisoMensagem, true);
+        mostrarHistorico();
+        depoisDeRegistrar.accept(contato);
     }
 
     /** Todos os contatos do contrato, do mais recente para o mais antigo: data, quem e o que deu. */

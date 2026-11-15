@@ -45,6 +45,28 @@
                     <Label fx:id="resumoDivida" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
 
+                <!-- BOARD-189: mensagem pronta por e-mail ou WhatsApp; a pessoa confere (e pode ajustar) antes -->
+                <VBox fx:id="blocoMensagem" spacing="8" styleClass="bloco-mensagem">
+                    <Label text="Mandar mensagem de cobrança" styleClass="rotulo"/>
+                    <TextArea fx:id="campoMensagem" styleClass="campo" wrapText="true" prefRowCount="7" minHeight="170" prefHeight="190"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Button fx:id="botaoEmail" text="Enviar por e-mail" onAction="#enviarEmail"
+                                styleClass="botao-secundario, botao-pequeno" minWidth="-Infinity">
+                            <graphic><FontIcon iconLiteral="fth-mail"/></graphic>
+                        </Button>
+                        <Button fx:id="botaoWhatsApp" text="Abrir no WhatsApp" onAction="#abrirWhatsApp"
+                                styleClass="botao-secundario, botao-pequeno, botao-whatsapp" minWidth="-Infinity">
+                            <graphic><FontIcon iconLiteral="fth-message-circle"/></graphic>
+                        </Button>
+                        <Label fx:id="dicaMensagem" styleClass="dica" wrapText="true" minHeight="-Infinity"
+                               HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <HBox fx:id="avisoMensagem" styleClass="veredito, veredito-ok" spacing="10" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fth-check-circle"/>
+                        <Label fx:id="textoAvisoMensagem" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </VBox>
+
                 <VBox spacing="8">
                     <Label text="O que deu o contato? *" styleClass="rotulo"/>
                     <FlowPane fx:id="opcoes" hgap="8" vgap="8">
