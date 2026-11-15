@@ -405,6 +405,15 @@ public class AlugueisController {
             Tooltip.install(caixa, new Tooltip(linha.contrato().getNumero() + " · "
                     + linha.contrato().getImovel().getEndereco()
                     + (unidade == null ? "" : " · " + unidade)));
+            // Melhoria da SR2: o nome abre a ficha (como costuma pagar e os contatos já feitos)
+            if (Sessao.pode(Acao.VER_INQUILINOS) && caixa.getChildren().get(0) instanceof Label nome) {
+                nome.getStyleClass().add("link-ficha");
+                nome.setTooltip(new Tooltip("Abrir a ficha: como costuma pagar e os contatos já feitos"));
+                nome.setOnMouseClicked(e -> {
+                    e.consume();
+                    abrirFicha(linha);
+                });
+            }
             return caixa;
         }));
         cobrancaMeses.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
@@ -470,6 +479,14 @@ public class AlugueisController {
 
     private void abrirContato(Linha linha) {
         RegistrarContatoController.abrir(linha, servicoCobranca, contato -> carregarMes());
+    }
+
+    /** A ficha do inquilino; o "Editar cadastro" de dentro dela não aparece aqui (é da tela de Inquilinos). */
+    private void abrirFicha(Linha linha) {
+        String erro = FichaInquilinoController.abrir(linha.contrato().getInquilino(), null);
+        if (erro != null) {
+            new Alert(Alert.AlertType.WARNING, erro).showAndWait();
+        }
     }
 
     /** "ago, set e out" (com o ano quando não é o ano de hoje: "dez/25, jan e fev"). */

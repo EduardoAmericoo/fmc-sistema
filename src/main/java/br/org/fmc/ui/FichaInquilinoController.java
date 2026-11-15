@@ -110,7 +110,7 @@ public class FichaInquilinoController {
         Inquilino i = f.inquilino();
         Contrato atual = f.contratoAtual();
         subtitulo.setText(i.getNome() + (atual == null ? "" : " · " + imovel(atual)));
-        boolean podeEditar = Sessao.pode(Acao.EDITAR_INQUILINO) && !i.estaArquivado();
+        boolean podeEditar = aoEditar != null && Sessao.pode(Acao.EDITAR_INQUILINO) && !i.estaArquivado();
         botaoEditar.setVisible(podeEditar);
         botaoEditar.setManaged(podeEditar);
 
@@ -118,6 +118,15 @@ public class FichaInquilinoController {
             corpo.getChildren().add(veredito("veredito-neutro", "Arquivado em " + Formatos.data(i.getArquivadoEm())
                     + (i.getMotivoArquivamento() == null ? "" : " · " + i.getMotivoArquivamento())
                     + ". Para voltar a alugar, reative o cadastro em \"Ver arquivados\"."));
+        }
+        // Melhoria da SR2: em uma frase, como esta pessoa costuma pagar (ajuda a escolher o tom da cobrança)
+        if (Sessao.pode(Acao.VER_ALUGUEIS) && !i.estaArquivado()) {
+            ServicoInquilinos.Resumo resumo = f.resumo();
+            corpo.getChildren().add(veredito(switch (resumo.nivel()) {
+                case BOM -> "veredito-ok";
+                case REGULAR, SEM_HISTORICO -> "veredito-neutro";
+                case ATENCAO -> "veredito-alerta";
+            }, resumo.texto()));
         }
         corpo.getChildren().add(tresColunas(colunaLocatario(i), colunaContrato(f, atual),
                 atual == null ? coluna("Garantia", linha("Garantia", Detalhe.SEM_DADO))
