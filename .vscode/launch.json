@@ -6,7 +6,8 @@
       "name": "Rodar o sistema",
       "request": "launch",
       "mainClass": "br.org.fmc.Launcher",
-      "vmArgs": "--enable-native-access=ALL-UNNAMED"
+      "vmArgs": "--enable-native-access=ALL-UNNAMED",
+      "noDebug": true
     },
     {
       "type": "java",
@@ -14,9 +15,17 @@
       "request": "launch",
       "mainClass": "br.org.fmc.Launcher",
       "vmArgs": "--enable-native-access=ALL-UNNAMED",
+      "noDebug": true,
       "env": {
         "FMC_DADOS_TESTE": "recarregar"
       }
+    },
+    {
+      "type": "java",
+      "name": "Depurar (para quem programa: para nos breakpoints)",
+      "request": "launch",
+      "mainClass": "br.org.fmc.Launcher",
+      "vmArgs": "--enable-native-access=ALL-UNNAMED"
     }
   ]
 }

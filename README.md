@@ -19,7 +19,7 @@ Não é preciso instalar o Maven. O projeto traz o `mvnw`, que baixa tudo sozinh
 
 ## Como rodar
 
-**Pelo VS Code:** abra a aba *Run and Debug* (Ctrl+Shift+D) e clique em **▶ Rodar o sistema**.
+**Pelo VS Code:** abra a aba *Run and Debug* (Ctrl+Shift+D) e clique em **▶ Rodar o sistema** (ou aperte F5). Ela roda sem depuração: as bolinhas vermelhas (breakpoints) não pausam o sistema. Para investigar um erro passo a passo, escolha **"Depurar (para quem programa)"**; aí o sistema para em cada breakpoint e só continua com F5 (parece travado, mas está esperando). Para apagar todos os breakpoints: aba Run and Debug, seção *Breakpoints*, botão "Remove All Breakpoints".
 
 **Pelo terminal** (dentro da pasta do projeto):
 
