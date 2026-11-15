@@ -143,6 +143,11 @@
                         <FontIcon iconLiteral="fth-calendar"/>
                         <Label fx:id="textoResumoPrazo" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
                     </HBox>
+                    <!-- Contrato com início no passado: gerar os aluguéis que já venceram? -->
+                    <VBox fx:id="blocoGerarVencidos" spacing="6" styleClass="veredito, veredito-alerta">
+                        <CheckBox fx:id="campoGerarVencidos" selected="true" wrapText="true"/>
+                        <Label fx:id="dicaGerarVencidos" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+                    </VBox>
 
                     <!-- Garantia -->
                     <VBox spacing="4">

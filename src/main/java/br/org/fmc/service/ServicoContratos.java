@@ -64,6 +64,61 @@ public class ServicoContratos {
         return LocalDate.now(relogio);
     }
 
+    /** O contrato e os aluguéis gerados na hora (para a tela dizer quantos meses entraram e quanto deve). */
+    public record ComAlugueis(Contrato contrato, List<br.org.fmc.model.Aluguel> gerados) {
+    }
+
+    /**
+     * Cadastra e já gera os aluguéis. Contrato com início no passado: com
+     * gerarMesesQueJaVenceram, os meses vencidos entram como em aberto (ex.: o contrato foi
+     * cadastrado com atraso); sem, entram só os que ainda vão vencer (contrato antigo trazido do
+     * papel, com esses aluguéis já pagos).
+     */
+    public ComAlugueis cadastrarEGerar(DadosContrato d, boolean gerarMesesQueJaVenceram) throws SQLException {
+        Contrato contrato = cadastrar(d);
+        java.time.YearMonth desde = null;
+        if (!gerarMesesQueJaVenceram) {
+            List<java.time.YearMonth> vencidos = mesesQueJaVenceram(contrato.getDataEntregaChaves(),
+                    contrato.getPrazo(), hoje());
+            desde = vencidos.isEmpty() ? null : vencidos.get(vencidos.size() - 1).plusMonths(1);
+        }
+        return new ComAlugueis(contrato, geracao().gerarDoContrato(contrato.getId(), desde));
+    }
+
+    /** Prorroga e já gera os meses que ficaram sem aluguel enquanto o contrato estava vencido. */
+    public ComAlugueis prorrogarEGerar(long contratoId, PrazoContrato prazo) throws SQLException {
+        Contrato contrato = prorrogar(contratoId, prazo);
+        return new ComAlugueis(contrato, geracao().gerarDoContrato(contrato.getId(), null));
+    }
+
+    private ServicoAlugueis geracao() {
+        ServicoAlugueis s = new ServicoAlugueis();
+        s.usarRelogio(relogio);
+        return s;
+    }
+
+    /**
+     * Os meses cujo aluguel já venceu, para um contrato com estas chaves e este prazo (para a
+     * pergunta do cadastro: "os aluguéis de setembro e outubro já venceram. Gerar como em aberto?").
+     * Mesma regra do Contrato: 1º vencimento 30 dias depois das chaves e o mesmo dia todo mês.
+     */
+    public static List<java.time.YearMonth> mesesQueJaVenceram(LocalDate chaves, PrazoContrato prazo,
+            LocalDate hoje) {
+        List<java.time.YearMonth> meses = new ArrayList<>();
+        if (chaves == null || prazo == null || hoje == null) {
+            return meses;
+        }
+        LocalDate primeiro = chaves.plusDays(br.org.fmc.model.RegrasNegocio.DIAS_1O_VENCIMENTO);
+        LocalDate termino = chaves.plusMonths(prazo.getMeses());
+        for (java.time.YearMonth mes = java.time.YearMonth.from(primeiro); ; mes = mes.plusMonths(1)) {
+            LocalDate vencimento = mes.atDay(Math.min(primeiro.getDayOfMonth(), mes.lengthOfMonth()));
+            if (!vencimento.isBefore(hoje) || vencimento.isAfter(termino)) {
+                return meses;
+            }
+            meses.add(mes);
+        }
+    }
+
     /**
      * Cadastra um contrato novo, já ativo.
      * Junta todos os problemas numa única RegraNegocioException, para a tela mostrar tudo de uma vez.

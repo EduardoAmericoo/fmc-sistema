@@ -220,6 +220,9 @@ public class ServicoDadosTeste {
                 alugueis.salvar(a);
                 total++;
             }
+            // Os dados de teste só têm os últimos 3 meses: o que vem antes conta como "pago no papel",
+            // para um contrato vencido prorrogado não ganhar anos de aluguel em aberto.
+            alugueis.salvarGerarDesde(contrato.getId(), atual.minusMonths(2));
         }
         return total;
     }
