@@ -82,13 +82,13 @@
 
         <VBox fx:id="resumoCobranca" styleClass="cartao-resumo" spacing="10" managed="false" visible="false">
             <VBox spacing="4">
-                <Label text="Meses em aberto" styleClass="subtitulo"/>
-                <Label text="Cobrança a partir de mais de 1 mês em aberto · valores atualizados com multa, juros e INPC"
-                       styleClass="texto" wrapText="true"/>
+                <Label text="Em atraso" styleClass="subtitulo"/>
+                <Label text="Todos os inquilinos com aluguel em atraso (passados os 5 dias de tolerância), de quem deve há mais tempo para o mais recente. Valores atualizados com multa, juros e INPC."
+                       styleClass="texto" wrapText="true" minHeight="-Infinity"/>
                 <HBox spacing="28" styleClass="resumo-calculado">
+                    <VBox spacing="3"><Label fx:id="contagemUmMes" text="1 mês"/><Label fx:id="valorUmMes"/></VBox>
                     <VBox spacing="3"><Label fx:id="contagemDoisMeses" text="2 meses"/><Label fx:id="valorDoisMeses"/></VBox>
-                    <VBox spacing="3"><Label fx:id="contagemTresMeses" text="3 meses"/><Label fx:id="valorTresMeses"/></VBox>
-                    <VBox spacing="3"><Label fx:id="contagemQuatroMeses" text="4 ou mais"/><Label fx:id="valorQuatroMeses"/></VBox>
+                    <VBox spacing="3"><Label fx:id="contagemTresOuMais" text="3 ou mais"/><Label fx:id="valorTresOuMais"/></VBox>
                 </HBox>
             </VBox>
         </VBox>
@@ -117,7 +117,7 @@
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
                 </columnResizePolicy>
             </TableView>
-                <!-- Inquilinos com dois ou mais aluguéis vencidos, agrupados por contrato. -->
+                <!-- BOARD-188: todos os inquilinos com aluguel em atraso, agrupados por contrato. -->
             <TableView fx:id="tabelaCobranca" styleClass="tabela-fmc" VBox.vgrow="ALWAYS"
                        managed="false" visible="false">
                 <columns>

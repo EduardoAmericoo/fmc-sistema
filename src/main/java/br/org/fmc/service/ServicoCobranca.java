@@ -72,11 +72,11 @@ public class ServicoCobranca {
     }
 
     /**
-     * Mais de um mês em aberto: dois ou mais aluguéis EM ATRASO (passada a tolerância) no mesmo
-     * contrato. Quem entra vem do ServicoAlugueis.listaDeCobranca, a mesma regra do Painel
-     * (BOARD-61), para os números da aba e do Painel sempre baterem. A lista sai em ordem de
-     * urgência: promessas não cumpridas, nunca contatados, sem retorno (o contato mais antigo
-     * primeiro) e, por último, as promessas ainda no prazo.
+     * BOARD-188: todo inquilino com aluguel EM ATRASO (passada a tolerância), não só quem deve 2
+     * ou mais. Quem entra vem do ServicoAlugueis.listaDeCobranca, a mesma regra do Painel, para os
+     * números da aba e do Painel sempre baterem. Ordem (decisão do PO): quem está há mais tempo
+     * sem pagar primeiro; no empate, a urgência do contato: promessas não cumpridas, nunca
+     * contatados, sem retorno (o contato mais antigo primeiro) e, por último, promessas no prazo.
      */
     public List<Linha> listarParaCobranca() throws SQLException {
         Sessao.exigir(Acao.VER_ALUGUEIS);
@@ -93,8 +93,9 @@ public class ServicoCobranca {
             linhas.add(new Linha(c.contrato(), c.alugueis(), c.base(), c.devidoHoje(hoje), ultimo,
                     acompanhamento(ultimo, hoje)));
         }
-        // sort é estável: dentro da mesma situação, fica a ordem da lista de cobrança (mais meses primeiro).
-        linhas.sort(Comparator.comparing(Linha::situacao)
+        // sort é estável: no empate completo, fica a ordem da lista de cobrança (mais aluguéis primeiro).
+        linhas.sort(Comparator.comparing((Linha l) -> l.alugueis().get(0).getVencimento())
+                .thenComparing(Linha::situacao)
                 .thenComparing(l -> l.situacao() == SituacaoContato.SEM_RETORNO
                         ? l.ultimoContato().registradoEm() : LocalDateTime.MIN));
         return List.copyOf(linhas);

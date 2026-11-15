@@ -195,15 +195,18 @@ public class ServicoPainel {
                             + Formatos.moeda(Valor.de(emAtraso).total()) + " sem encargos.",
                     Tipo.ALUGUEIS_EM_ATRASO));
         }
-        // 2 ou mais aluguéis em atraso no mesmo contrato: hora de cobrar (e avisar o fiador).
-        // A mesma regra filtra a tela de Aluguéis quando a pessoa clica em "Abrir".
-        int paraCobranca = (int) ServicoAlugueis.deInquilinosComDoisOuMaisAtrasados(emAtraso, hoje).stream()
+        // BOARD-188: todo inquilino com aluguel em atraso vai para a lista de cobrança (o "Abrir"
+        // leva a ela). Quem deve 2 ou mais aparece contado à parte: aí também se avisa o fiador.
+        int paraCobranca = (int) emAtraso.stream().map(a -> a.getContrato().getId()).distinct().count();
+        int comDoisOuMais = (int) ServicoAlugueis.deInquilinosComDoisOuMaisAtrasados(emAtraso, hoje).stream()
                 .map(a -> a.getContrato().getId()).distinct().count();
         if (paraCobranca > 0) {
             pendencias.add(new Pendencia(Gravidade.ALTA, paraCobranca,
-                    plural(paraCobranca, "Inquilino com 2 ou mais aluguéis atrasados",
-                            "Inquilinos com 2 ou mais aluguéis atrasados"),
-                    "Encaminhar para cobrança e avisar o fiador.", Tipo.INQUILINOS_PARA_COBRANCA));
+                    plural(paraCobranca, "Inquilino para cobrança", "Inquilinos para cobrança"),
+                    comDoisOuMais == 0 ? "Todos com 1 aluguel em atraso. Ligar ou mandar mensagem."
+                            : plural(comDoisOuMais, "1 deles deve 2 ou mais aluguéis: avisar também o fiador.",
+                                    comDoisOuMais + " deles devem 2 ou mais aluguéis: avisar também o fiador."),
+                    Tipo.INQUILINOS_PARA_COBRANCA));
         }
         List<Aluguel> tolerancia = filtrar(emAberto, a -> a.getSituacao(hoje) == SituacaoAluguel.EM_TOLERANCIA);
         if (!tolerancia.isEmpty()) {
