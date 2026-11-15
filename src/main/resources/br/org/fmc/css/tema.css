@@ -1526,3 +1526,13 @@
 .botao-primario.botao-perigo-forte:pressed {
     -fx-background-color: -fmc-erro-escuro;
 }
+
+/* Melhoria da SR2 · Nome do inquilino na lista de cobrança: clicar abre a ficha */
+.link-ficha {
+    -fx-text-fill: -fmc-azul;
+    -fx-cursor: hand;
+}
+
+.link-ficha:hover {
+    -fx-underline: true;
+}

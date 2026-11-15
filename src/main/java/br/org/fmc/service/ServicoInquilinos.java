@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -123,6 +125,95 @@ public class ServicoInquilinos {
         public long pagosComAtraso() {
             return alugueis.stream().filter(a -> Pagamento.de(a, hoje) == Pagamento.PAGO_COM_ATRASO).count();
         }
+
+        public long emAtraso() {
+            return alugueis.stream().filter(a -> Pagamento.de(a, hoje) == Pagamento.EM_ATRASO).count();
+        }
+
+        /** Desde quando aluga com a Fundação: a entrega das chaves do primeiro contrato. */
+        public LocalDate inquilinoDesde() {
+            return contratos.stream().map(Contrato::getDataEntregaChaves).min(Comparator.naturalOrder()).orElse(null);
+        }
+
+        /**
+         * Melhoria da SR2 · Como o inquilino costuma pagar, numa frase, para o topo da ficha.
+         * Ajuda a decidir o tom da cobrança: bom pagador num mês ruim ou atraso de sempre.
+         * O nível olha o HISTÓRICO, para não confundir um bom pagador num mês ruim com um mau pagador:
+         * Bom: 90% ou mais pagos em dia. Alguns atrasos: de 70% a 89%.
+         * Atenção: menos de 70% em dia, ou 3 ou mais aluguéis em atraso hoje, ou nenhum pago e 2 ou mais em atraso.
+         */
+        public Resumo resumo() {
+            long pagos = pagos();
+            long emDia = pagos - pagosComAtraso();
+            long devendo = emAtraso();
+            List<String> partes = new ArrayList<>();
+            LocalDate desde = inquilinoDesde();
+            if (desde != null) {
+                partes.add("inquilino desde " + desde.format(MES_ANO) + tempo(desde));
+            }
+            if (pagos > 0) {
+                partes.add(emDia + " de " + pagos + (pagos == 1 ? " aluguel pago" : " aluguéis pagos")
+                        + " em dia (" + (emDia * 100 / pagos) + "%)");
+            }
+            if (devendo > 0) {
+                partes.add("hoje deve " + devendo + (devendo == 1 ? " aluguel" : " aluguéis"));
+            }
+            Nivel nivel;
+            if (devendo >= ATRASADOS_ATENCAO || (pagos == 0 && devendo >= 2)
+                    || (pagos > 0 && emDia * 100 < pagos * PERCENTUAL_ATENCAO)) {
+                nivel = Nivel.ATENCAO;
+            } else if (pagos == 0) {
+                nivel = Nivel.SEM_HISTORICO;
+            } else if (emDia * 100 >= pagos * PERCENTUAL_BOM) {
+                nivel = Nivel.BOM;
+            } else {
+                nivel = Nivel.REGULAR;
+            }
+            String texto = String.join(" · ", partes);
+            return new Resumo(nivel, nivel.getDescricao() + (texto.isEmpty() ? "" : ": " + texto) + ".");
+        }
+
+        /** " (2 anos e 3 meses)", " (5 meses)" ou "" se começou neste mês. */
+        private String tempo(LocalDate desde) {
+            Period p = Period.between(desde, hoje);
+            List<String> partes = new ArrayList<>();
+            if (p.getYears() > 0) {
+                partes.add(p.getYears() + (p.getYears() == 1 ? " ano" : " anos"));
+            }
+            if (p.getMonths() > 0) {
+                partes.add(p.getMonths() + (p.getMonths() == 1 ? " mês" : " meses"));
+            }
+            return partes.isEmpty() ? "" : " (" + String.join(" e ", partes) + ")";
+        }
+    }
+
+    private static final DateTimeFormatter MES_ANO = DateTimeFormatter.ofPattern("MM/yyyy");
+    /** Abaixo disto (em % dos aluguéis pagos em dia), a ficha pede atenção. */
+    static final int PERCENTUAL_ATENCAO = 70;
+    /** A partir disto (em % pagos em dia), é bom pagador. */
+    static final int PERCENTUAL_BOM = 90;
+    /** Com tantos aluguéis em atraso hoje, a ficha pede atenção, mesmo com bom histórico. */
+    static final int ATRASADOS_ATENCAO = 3;
+
+    /** Como o inquilino costuma pagar (ver Ficha.resumo). */
+    public enum Nivel {
+        BOM("Bom pagador"),
+        REGULAR("Paga, mas com alguns atrasos"),
+        ATENCAO("Atenção, atrasa com frequência"),
+        SEM_HISTORICO("Ainda sem pagamentos");
+
+        private final String descricao;
+
+        Nivel(String descricao) {
+            this.descricao = descricao;
+        }
+
+        public String getDescricao() {
+            return descricao;
+        }
+    }
+
+    public record Resumo(Nivel nivel, String texto) {
     }
 
     /** Monta a ficha do inquilino ([D8] BOARD-45). Só leitura: não grava nada. */
