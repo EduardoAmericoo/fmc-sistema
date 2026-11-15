@@ -1,8 +1,11 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.Acao;
 import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.Lancamento;
 import br.org.fmc.model.Recibo;
+import br.org.fmc.service.ServicoRecebimento;
 import br.org.fmc.util.Formatos;
 import br.org.fmc.util.ReciboImpresso;
 import br.org.fmc.util.ReciboPdf;
@@ -15,6 +18,7 @@ import javafx.geometry.Pos;
 import javafx.print.PageLayout;
 import javafx.print.PrinterJob;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.ColumnConstraints;
@@ -38,8 +42,12 @@ public class ReciboController {
     private static final Locale BRASIL = Locale.forLanguageTag("pt-BR");
 
     private Recibo recibo;
+    private Runnable depoisDeCancelar = () -> { };
 
     @FXML private StackPane veu;
+    @FXML private Button botaoCancelarRecibo;
+    @FXML private Button botaoSalvarPdf;
+    @FXML private Button botaoImprimir;
     @FXML private Label titulo;
     @FXML private Label subtitulo;
     @FXML private VBox vias;
@@ -53,10 +61,16 @@ public class ReciboController {
      * Abre o recibo. Com acabouDeReceber, mostra em cima o aviso de que o recebimento foi registrado.
      */
     public static void abrir(Recibo recibo, boolean acabouDeReceber) {
+        abrir(recibo, acabouDeReceber, () -> { });
+    }
+
+    /** @param depoisDeCancelar roda se o recibo for cancelado (D10), para a tela de trás atualizar */
+    public static void abrir(Recibo recibo, boolean acabouDeReceber, Runnable depoisDeCancelar) {
         FXMLLoader carregador = new FXMLLoader(ReciboController.class.getResource("/br/org/fmc/ui/recibo.fxml"));
         try {
             Node janela = carregador.load();
             ReciboController controle = carregador.getController();
+            controle.depoisDeCancelar = depoisDeCancelar;
             controle.preencher(recibo, acabouDeReceber);
             Navegador.mostrarJanela(janela);
         } catch (IOException e) {
@@ -88,6 +102,27 @@ public class ReciboController {
             vias.getChildren().add(via(r, nomeVia));
         }
         preencherDispensa(recibo.getDispensa());
+        Permissoes.mostrarSe(botaoCancelarRecibo, Acao.CANCELAR_RECIBO);
+    }
+
+    /** [D10] BOARD-65 · Abre a confirmação; depois de cancelar, o recibo fica marcado nesta janela. */
+    @FXML
+    private void cancelarRecibo() {
+        CancelarReciboController.abrir(recibo, new ServicoRecebimento(), this::mostrarCancelado);
+    }
+
+    private void mostrarCancelado(Lancamento estorno) {
+        titulo.setText("Recibo " + recibo.getNumero() + " · cancelado");
+        mostrar(avisoErros, false);
+        textoSucesso.setText("Recibo cancelado. O aluguel de " + new ReciboImpresso(recibo).mes()
+                + " voltou a ficar em aberto e " + Formatos.moeda(estorno.valor().negate()) + " saíram do "
+                + estorno.conta() + " em " + Formatos.data(estorno.data()) + " (estorno).");
+        mostrar(avisoSucesso, true);
+        vias.setOpacity(0.4);
+        for (Node botao : new Node[] {botaoCancelarRecibo, botaoSalvarPdf, botaoImprimir}) {
+            mostrar(botao, false);
+        }
+        depoisDeCancelar.run();
     }
 
     /** BOARD-66 · Para auditoria: o que foi dispensado, o motivo, quem autorizou e quando. */

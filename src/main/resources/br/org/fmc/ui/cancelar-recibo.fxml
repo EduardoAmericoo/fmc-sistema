@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  [D10] BOARD-65 · Janela "Cancelar recibo", aberta pelo botão Cancelar recibo da janela do recibo.
+  Mostra o que acontece ao cancelar (aluguel volta em aberto, valor sai do Caixa ou do Banco)
+  e pede o motivo, que fica guardado junto com quem cancelou e quando.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.CancelarReciboController">
+    <VBox styleClass="janela" maxWidth="580" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label fx:id="titulo" styleClass="janela-titulo" wrapText="true"/>
+                <Label fx:id="subtitulo" styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+
+        <VBox styleClass="janela-corpo" spacing="14">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <VBox styleClass="cartao-resumo" spacing="2">
+                <HBox styleClass="linha-detalhe"><Label text="Valor do recibo"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="valor" styleClass="valor-forte"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Pago em"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="pagoEm" styleClass="valor-forte"/></HBox>
+                <HBox styleClass="linha-detalhe"><Label text="Sai de"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="conta" styleClass="valor-forte"/></HBox>
+            </VBox>
+
+            <HBox styleClass="veredito, veredito-alerta" spacing="10" alignment="TOP_LEFT">
+                <FontIcon iconLiteral="fth-alert-triangle"/>
+                <Label fx:id="consequencias" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <VBox spacing="6">
+                <Label text="Motivo do cancelamento *" labelFor="$campoMotivo" styleClass="rotulo"/>
+                <TextArea fx:id="campoMotivo" prefRowCount="3" wrapText="true" styleClass="campo"
+                          promptText="Ex.: PIX lançado no aluguel de outro inquilino"/>
+                <Label text="O motivo, quem cancelou e quando ficam registrados." styleClass="dica"/>
+            </VBox>
+        </VBox>
+
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Voltar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Cancelar recibo" onAction="#confirmar" styleClass="botao-primario, botao-perigo-forte"
+                    minWidth="-Infinity">
+                <graphic><FontIcon iconLiteral="fth-x-circle"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>

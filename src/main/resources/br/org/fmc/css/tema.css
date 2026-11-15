@@ -1502,3 +1502,27 @@
 .kpi-valor-saida {
     -fx-text-fill: -fmc-erro;
 }
+
+/* [D10] BOARD-65 · Cancelar recibo: ação que não dá para desfazer, em vermelho */
+.botao-secundario.botao-perigo {
+    -fx-text-fill: -fmc-erro;
+    -fx-border-color: -fmc-erro;
+}
+
+.botao-secundario.botao-perigo .ikonli-font-icon {
+    -fx-icon-color: -fmc-erro;
+    -fx-icon-size: 16;
+}
+
+.botao-secundario.botao-perigo:hover {
+    -fx-background-color: -fmc-erro-fundo;
+}
+
+.botao-primario.botao-perigo-forte {
+    -fx-background-color: -fmc-erro;
+}
+
+.botao-primario.botao-perigo-forte:hover,
+.botao-primario.botao-perigo-forte:pressed {
+    -fx-background-color: -fmc-erro-escuro;
+}

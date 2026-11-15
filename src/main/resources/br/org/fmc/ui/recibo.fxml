@@ -47,12 +47,17 @@
             </content>
         </ScrollPane>
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <!-- [D10] BOARD-65: só aparece para quem tem a permissão "Cancelar recibo" -->
+            <Button fx:id="botaoCancelarRecibo" text="Cancelar recibo" onAction="#cancelarRecibo"
+                    styleClass="botao-secundario, botao-perigo" minWidth="-Infinity">
+                <graphic><FontIcon iconLiteral="fth-x-circle"/></graphic>
+            </Button>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Fechar" onAction="#fechar" styleClass="botao-secundario"/>
-            <Button text="Salvar PDF" onAction="#salvarPdf" styleClass="botao-secundario">
+            <Button fx:id="botaoSalvarPdf" text="Salvar PDF" onAction="#salvarPdf" styleClass="botao-secundario">
                 <graphic><FontIcon iconLiteral="fth-download"/></graphic>
             </Button>
-            <Button text="Imprimir" onAction="#imprimir" styleClass="botao-primario" defaultButton="true">
+            <Button fx:id="botaoImprimir" text="Imprimir" onAction="#imprimir" styleClass="botao-primario" defaultButton="true">
                 <graphic><FontIcon iconLiteral="fth-printer"/></graphic>
             </Button>
         </HBox>
