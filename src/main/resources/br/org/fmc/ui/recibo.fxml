@@ -40,6 +40,8 @@
                         <FontIcon iconLiteral="fth-alert-circle"/>
                         <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
                     </HBox>
+                    <!-- BOARD-66 · Auditoria da dispensa de encargos: só na tela, não vai para a impressão -->
+                    <VBox fx:id="quadroDispensa" styleClass="aviso-dispensa" spacing="4"/>
                     <VBox fx:id="vias" styleClass="recibo-folha" spacing="18"/>
                 </VBox>
             </content>

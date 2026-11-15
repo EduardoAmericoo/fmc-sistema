@@ -2,6 +2,7 @@ package br.org.fmc.util;
 
 import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.Contrato;
+import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Imovel;
@@ -28,6 +29,19 @@ public final class ReciboImpresso {
     public static final String ADMINISTRACAO = "Administrada pela Arquidiocese de Aracaju";
     public static final String CIDADE = "Aracaju — Sergipe";
     public static final String[] VIAS = {"1ª via: Locatário", "2ª via: Fundação"};
+
+    /**
+     * [D11] BOARD-66 · Como a dispensa de encargos aparece no recibo impresso (tela e PDF).
+     *
+     * true: multa, juros e correção com os valores do contrato e mais a linha
+     * "Encargos dispensados" com o total dispensado (negativo), e o TOTAL fica igual ao valor devido.
+     * false: multa, juros e correção aparecem zerados, sem a linha da dispensa.
+     *
+     * TODO BOARD-66: formato ainda a confirmar com o cliente. Para mudar, basta trocar aqui.
+     */
+    public static final boolean MOSTRAR_ENCARGOS_DISPENSADOS = true;
+
+    public static final String ROTULO_DISPENSA = "Encargos dispensados";
 
     /** Uma linha da composição do valor, ex.: "Aluguel" / R$ 1.530,00. */
     public record Item(String rotulo, BigDecimal valor) {
@@ -116,18 +130,29 @@ public final class ReciboImpresso {
         return "Emitido por " + recibo.getEmitidoPor().getNome();
     }
 
-    /** Aluguel, taxa de luz, IPTU, outros e, se houver atraso, correção, juros e multa. */
+    /**
+     * Aluguel, taxa de luz, IPTU, outros, correção, juros e multa. Se houve dispensa (BOARD-66),
+     * ver MOSTRAR_ENCARGOS_DISPENSADOS. A soma das linhas é sempre igual ao total().
+     */
     public List<Item> composicao() {
         Aluguel a = recibo.getAluguel();
         Encargos e = recibo.getEncargos();
+        DispensaEncargos d = recibo.getDispensa();
         List<Item> itens = new ArrayList<>(List.of(
                 new Item("Aluguel", a.getValorAluguel()),
                 new Item("Taxa de luz", a.getTaxaLuz()),
                 new Item("IPTU", a.getValorIptu()),
                 new Item("Outros", a.getOutros())));
-        itens.add(new Item("Correção", e.getCorrecao()));
-        itens.add(new Item("Juros", e.getJuros()));
-        itens.add(new Item("Multa", e.getMulta()));
+        if (d != null && MOSTRAR_ENCARGOS_DISPENSADOS) {
+            itens.add(new Item("Correção", d.getCorrecao()));
+            itens.add(new Item("Juros", d.getJuros()));
+            itens.add(new Item("Multa", d.getMulta()));
+            itens.add(new Item(ROTULO_DISPENSA, d.total().negate()));
+        } else {
+            itens.add(new Item("Correção", e.getCorrecao()));
+            itens.add(new Item("Juros", e.getJuros()));
+            itens.add(new Item("Multa", e.getMulta()));
+        }
         return itens;
     }
 

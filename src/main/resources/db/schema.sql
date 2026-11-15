@@ -276,3 +276,18 @@ CREATE TABLE IF NOT EXISTS contrato_documento (
     enviado_por   TEXT    NOT NULL,
     arquivado_em  TEXT
 );
+
+-- [D11] BOARD-66 · Dispensa de multa, juros e correção num recebimento, para auditoria.
+-- Fica numa tabela ao lado para os bancos que já existem continuarem valendo: recibo sem
+-- linha aqui não teve dispensa. Quando há dispensa, o recibo guarda multa, juros e correção
+-- COBRADOS (zero) e o valor_total igual ao valor devido. Aqui ficam os valores DISPENSADOS
+-- (calculados pelo contrato), o motivo, quem autorizou e quando.
+CREATE TABLE IF NOT EXISTS recibo_dispensa (
+    recibo_id      INTEGER PRIMARY KEY REFERENCES recibo(id),
+    multa          TEXT    NOT NULL,
+    juros          TEXT    NOT NULL,
+    correcao       TEXT    NOT NULL,
+    motivo         TEXT    NOT NULL,
+    autorizado_por INTEGER NOT NULL REFERENCES usuario(id),
+    autorizado_em  TEXT    NOT NULL
+);

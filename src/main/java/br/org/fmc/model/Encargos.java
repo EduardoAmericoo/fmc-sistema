@@ -59,6 +59,14 @@ public final class Encargos {
         return new Encargos(0, 0, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
+    /**
+     * Os encargos cobrados quando tudo foi dispensado (BOARD-66): multa, juros e correção zerados,
+     * mas com os dias e meses de atraso, que continuam valendo para o histórico.
+     */
+    public Encargos dispensados() {
+        return new Encargos(diasAtraso, meses, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+    }
+
     private static BigDecimal arredondar(BigDecimal v) {
         return v.setScale(2, RoundingMode.HALF_UP);
     }
