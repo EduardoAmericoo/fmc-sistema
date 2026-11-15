@@ -137,6 +137,8 @@ Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebim
 
 **Dispensa de encargos (BOARD-66).** Ao receber um aluguel em atraso, a opção **"Dispensar multa, juros e correção"** faz o total a receber cair para o valor devido. O **motivo** é obrigatório, e o sistema grava os valores dispensados (multa, juros e correção, separados), quem autorizou e a data e hora. Esses dados aparecem no quadro "Encargos dispensados" da janela do recibo, para auditoria. O recibo impresso mostra a multa, os juros e a correção do contrato e mais a linha "Encargos dispensados" (ajustável em `ReciboImpresso.MOSTRAR_ENCARGOS_DISPENSADOS`). Quem pode dispensar é a permissão **"Dispensar multa, juros e correção"**: o Administrador já vem com ela e escolhe, na tela de **Usuários**, quem mais pode dispensar. Para quem não tem a permissão, e quando não há encargos, a opção aparece desabilitada com a explicação.
 
+**Caixa e Banco (BOARD-43, D4).** Cada recibo gera sozinho um lançamento, na mesma transação: dinheiro e cheque entram no **Caixa**; PIX, transferência e boleto, no **Banco**. O valor é o total pago (aluguel, taxas e os encargos cobrados) e a data é a do pagamento. O Banco é o total das contas bancárias, sem separar conta por conta. Os lançamentos ficam na tabela `lancamento` (valor positivo é entrada; negativo, saída) e alimentam a tela de movimento (D5).
+
 ## Visual das telas (design system)
 
 O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):

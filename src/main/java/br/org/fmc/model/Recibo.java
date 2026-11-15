@@ -117,6 +117,11 @@ public class Recibo {
         return dispensa;
     }
 
+    /** [D4] BOARD-43 · Para onde o dinheiro deste recibo foi: Caixa (dinheiro e cheque) ou Banco. */
+    public Conta getConta() {
+        return Conta.de(formaPagamento);
+    }
+
     public boolean teveDispensa() {
         return dispensa != null;
     }

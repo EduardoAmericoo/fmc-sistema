@@ -80,7 +80,10 @@ public class ReciboController {
         titulo.setText("Recibo " + recibo.getNumero()); // a fonte do título (Urbanist) não tem o "º"
         subtitulo.setText(recibo.getAluguel().getContrato().getInquilino().getNome() + " · " + r.mes());
         mostrar(avisoSucesso, acabouDeReceber);
-        textoSucesso.setText("Recebimento registrado. Imprima ou salve o recibo para entregar ao inquilino.");
+        // [D4] BOARD-43: diz onde o dinheiro entrou (o lançamento é gravado junto com o recibo)
+        textoSucesso.setText("Recebimento registrado e " + Formatos.moeda(recibo.getValorTotal()) + " lançados no "
+                + recibo.getConta() + " (" + recibo.getFormaPagamento().getDescricao()
+                + "). Imprima ou salve o recibo para entregar ao inquilino.");
         for (String nomeVia : ReciboImpresso.VIAS) {
             vias.getChildren().add(via(r, nomeVia));
         }

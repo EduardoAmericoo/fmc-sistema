@@ -291,3 +291,19 @@ CREATE TABLE IF NOT EXISTS recibo_dispensa (
     autorizado_por INTEGER NOT NULL REFERENCES usuario(id),
     autorizado_em  TEXT    NOT NULL
 );
+
+-- [D4] BOARD-43 · Lançamentos do Caixa (dinheiro e cheque) e do Banco (PIX, transferência e
+-- boleto). Cada recibo gera o seu lançamento sozinho, na mesma transação do recibo.
+-- valor positivo é entrada e negativo é saída (o estorno da D10 será uma saída). O saldo
+-- inicial que o Administrador informa uma vez também é um lançamento (tipo SALDO_INICIAL).
+CREATE TABLE IF NOT EXISTS lancamento (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    conta          TEXT    NOT NULL,
+    tipo           TEXT    NOT NULL,
+    data           TEXT    NOT NULL,
+    valor          TEXT    NOT NULL,
+    descricao      TEXT    NOT NULL,
+    recibo_id      INTEGER REFERENCES recibo(id),
+    registrado_por INTEGER NOT NULL REFERENCES usuario(id),
+    registrado_em  TEXT    NOT NULL
+);
