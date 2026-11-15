@@ -5,8 +5,10 @@ import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.Lancamento;
 import br.org.fmc.model.Perfil;
 import br.org.fmc.model.Recibo;
+import br.org.fmc.model.TipoLancamento;
 import br.org.fmc.model.Usuario;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -47,6 +49,8 @@ public class ReciboRepository {
                 if (dispensa != null) {
                     inserirDispensa(conexao, recibo.getId(), dispensa);
                 }
+                // [D4] BOARD-43: o dinheiro entra sozinho no Caixa ou no Banco, na mesma transação
+                LancamentoRepository.inserir(conexao, lancamentoDoRecibo(recibo));
                 conexao.commit();
                 aluguel.registrarPagamento(dataPagamento);
                 return recibo;
@@ -55,6 +59,20 @@ public class ReciboRepository {
                 throw e;
             }
         }
+    }
+
+    /**
+     * [D4] BOARD-43 · O lançamento que o recibo gera: o valor total pago (aluguel, taxas e
+     * encargos cobrados), na data do pagamento, no Caixa (dinheiro e cheque) ou no Banco.
+     */
+    static Lancamento lancamentoDoRecibo(Recibo r) {
+        Aluguel a = r.getAluguel();
+        String descricao = "Aluguel " + String.format("%02d/%d", a.getCompetencia().getMonthValue(),
+                a.getCompetencia().getYear()) + " · " + a.getContrato().getNumero() + " · "
+                + a.getContrato().getInquilino().getNome() + " · recibo " + r.getNumero() + " · "
+                + r.getFormaPagamento().getDescricao();
+        return new Lancamento(null, r.getConta(), TipoLancamento.RECEBIMENTO_ALUGUEL, r.getDataPagamento(),
+                r.getValorTotal(), descricao, r.getId(), r.getEmitidoPor(), r.getDataEmissao());
     }
 
     private int proximoSequencial(Connection conexao, int ano) throws SQLException {
