@@ -48,7 +48,7 @@
             <HBox spacing="16">
                 <VBox spacing="6" HBox.hgrow="ALWAYS">
                     <Label text="Tipo de documento *" labelFor="$campoTipo" styleClass="rotulo"/>
-                    <ComboBox fx:id="campoTipo" maxWidth="Infinity" styleClass="campo" promptText="Escolha"/>
+                    <ComboBox fx:id="campoTipo" maxWidth="Infinity" styleClass="campo" promptText="Selecione…"/>
                 </VBox>
                 <VBox spacing="6" HBox.hgrow="ALWAYS">
                     <Label text="Data do documento *" labelFor="$campoData" styleClass="rotulo"/>

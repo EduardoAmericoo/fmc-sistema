@@ -19,6 +19,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
@@ -52,7 +53,7 @@ public class EnviarDocumentoController {
     @FXML
     private TextField campoContrato;
     @FXML
-    private ComboBox<TipoDocumento> campoTipo;
+    private ComboBox<Object> campoTipo;
     @FXML
     private DatePicker campoData;
     @FXML
@@ -80,7 +81,7 @@ public class EnviarDocumentoController {
 
     @FXML
     private void initialize() {
-        campoTipo.getItems().setAll(TipoDocumento.values());
+        montarTipos();
         campoData.setConverter(new StringConverter<>() {
             @Override
             public String toString(LocalDate data) {
@@ -121,6 +122,48 @@ public class EnviarDocumentoController {
         mostrar(avisoErros, false);
     }
 
+    /**
+     * Tipo de documento agrupado pela etapa da locação, como no protótipo: o nome da etapa
+     * (Locação, Entrada, Durante a locação, Saída, Outros) aparece como título e não pode
+     * ser escolhido; os tipos ficam embaixo, recuados.
+     */
+    private void montarTipos() {
+        for (TipoDocumento.Etapa etapa : TipoDocumento.Etapa.values()) {
+            campoTipo.getItems().add(etapa);
+            for (TipoDocumento tipo : TipoDocumento.values()) {
+                if (tipo.getEtapa() == etapa) {
+                    campoTipo.getItems().add(tipo);
+                }
+            }
+        }
+        campoTipo.setVisibleRowCount(campoTipo.getItems().size()); // a lista inteira, sem rolar
+        campoTipo.setCellFactory(lista -> new ListCell<>() {
+            @Override
+            protected void updateItem(Object item, boolean vazio) {
+                super.updateItem(item, vazio);
+                getStyleClass().removeAll("tipo-etapa", "tipo-item");
+                setDisable(false);
+                if (vazio || item == null) {
+                    setText(null);
+                } else if (item instanceof TipoDocumento.Etapa etapa) {
+                    setText(etapa.getDescricao());
+                    setDisable(true); // título do grupo: não dá para escolher
+                    getStyleClass().add("tipo-etapa");
+                } else {
+                    setText(item.toString());
+                    getStyleClass().add("tipo-item");
+                }
+            }
+        });
+        // Se a etapa for escolhida pelo teclado, volta para o que estava.
+        campoTipo.valueProperty().addListener((obs, antes, agora) -> {
+            if (agora instanceof TipoDocumento.Etapa) {
+                javafx.application.Platform.runLater(() -> campoTipo.setValue(
+                        antes instanceof TipoDocumento ? antes : null));
+            }
+        });
+    }
+
     private void preencher(Contrato c, ServicoDocumentos servico, Consumer<DocumentoContrato> depois) {
         this.contrato = c;
         this.servico = servico;
@@ -158,7 +201,8 @@ public class EnviarDocumentoController {
     private void enviar() {
         LocalDate data = campoData.getConverter().fromString(campoData.getEditor().getText());
         try {
-            DocumentoContrato doc = servico.enviar(contrato.getId(), campoTipo.getValue(), data, arquivo,
+            TipoDocumento tipo = campoTipo.getValue() instanceof TipoDocumento t ? t : null;
+            DocumentoContrato doc = servico.enviar(contrato.getId(), tipo, data, arquivo,
                     campoObservacao.getText());
             fechar();
             depoisDeEnviar.accept(doc);

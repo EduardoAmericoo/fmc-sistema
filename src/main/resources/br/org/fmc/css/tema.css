@@ -1432,3 +1432,26 @@
 .resumo-calculado .label.selo-alerta {
     -fx-text-fill: -fmc-alerta;
 }
+
+/* ===================== Documentos do contrato por etapa, BOARD-42 ===================== */
+
+/* Título de cada etapa na lista de documentos (LOCAÇÃO, ENTRADA...) */
+.documentos-etapa {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-padding: 10 0 2 0;
+}
+
+/* Na escolha do tipo: a etapa é um título que não se escolhe; os tipos ficam recuados */
+.list-cell.tipo-etapa,
+.list-cell.tipo-etapa:disabled {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+    -fx-opacity: 1;
+    -fx-background-color: -fmc-fundo;
+}
+
+.list-cell.tipo-item {
+    -fx-padding: 4 8 4 24;
+}
