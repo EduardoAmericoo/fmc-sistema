@@ -5,6 +5,7 @@ import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
+import br.org.fmc.model.Lancamento;
 import br.org.fmc.model.Recibo;
 import br.org.fmc.model.Usuario;
 import br.org.fmc.repository.ReciboRepository;
@@ -72,6 +73,31 @@ public class ServicoRecebimento {
             return java.util.Optional.empty();
         }
         return recibos.buscarDoAluguel(aluguel);
+    }
+
+    /**
+     * [D10] BOARD-65 · Cancela um recibo emitido por engano. Precisa da permissão "Cancelar recibo"
+     * (o Administrador já vem com ela) e de um motivo. O aluguel volta a ficar em aberto e o valor
+     * sai do Caixa ou do Banco no dia de hoje.
+     *
+     * @return o lançamento de estorno, para a tela dizer de onde o valor saiu
+     */
+    public Lancamento cancelarRecibo(Recibo recibo, String motivo) throws SQLException {
+        Sessao.exigir(Acao.CANCELAR_RECIBO);
+        if (recibo == null || recibo.getId() == null) {
+            throw new RegraNegocioException("Escolha o recibo a cancelar.");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new RegraNegocioException("Informe o motivo do cancelamento.");
+        }
+        if (motivo.strip().length() < 5) {
+            throw new RegraNegocioException("Explique um pouco melhor o motivo do cancelamento.");
+        }
+        if (recibos.estaCancelado(recibo.getId())) {
+            throw new RegraNegocioException("Este recibo já foi cancelado.");
+        }
+        return recibos.cancelar(recibo, motivo.strip(), Sessao.usuario(),
+                LocalDateTime.now(relogio).truncatedTo(ChronoUnit.SECONDS));
     }
 
     /** Recebe o aluguel cobrando todos os encargos do contrato. */

@@ -96,6 +96,11 @@ public class Aluguel {
         this.dataPagamento = Valida.obrigatorio(data, "a data do pagamento");
     }
 
+    /** [D10] BOARD-65 · O recibo foi cancelado: o aluguel volta a ficar em aberto. */
+    public void cancelarPagamento() {
+        this.dataPagamento = null;
+    }
+
     public Long getId() {
         return id;
     }

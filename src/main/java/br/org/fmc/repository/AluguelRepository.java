@@ -34,7 +34,9 @@ public class AluguelRepository {
      */
     private static final String SELECT = "SELECT a.*, CASE WHEN r.id IS NULL THEN NULL ELSE "
             + "printf('%05d/%d', r.sequencial, r.ano) END AS numero_recibo "
-            + "FROM aluguel a LEFT JOIN recibo r ON r.aluguel_id = a.id ";
+            + "FROM aluguel a LEFT JOIN recibo r ON r.aluguel_id = a.id "
+            // [D10] BOARD-65: o recibo cancelado não conta; o aluguel mostra só o recibo válido
+            + "AND NOT EXISTS (SELECT 1 FROM recibo_cancelamento c WHERE c.recibo_id = r.id) ";
 
     /** Aluguel novo: insere. Aluguel já gravado: atualiza outros valores e o pagamento. */
     public void salvar(Aluguel a) throws SQLException {
