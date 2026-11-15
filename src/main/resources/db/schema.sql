@@ -323,3 +323,11 @@ CREATE TABLE IF NOT EXISTS recibo_cancelamento (
 );
 
 CREATE INDEX IF NOT EXISTS recibo_por_aluguel ON recibo(aluguel_id);
+
+-- Aluguéis dos meses que faltam: contrato cadastrado com início no passado cujos aluguéis já
+-- vencidos foram pagos fora do sistema (ex.: contrato antigo trazido do papel). A geração
+-- automática não gera nada antes de gerar_desde (AAAA-MM) para este contrato.
+CREATE TABLE IF NOT EXISTS contrato_gerar_desde (
+    contrato_id INTEGER PRIMARY KEY REFERENCES contrato(id),
+    gerar_desde TEXT    NOT NULL
+);
