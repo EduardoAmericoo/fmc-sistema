@@ -15,6 +15,7 @@ public enum Tela {
     IMOVEIS("imoveis", "Imóveis", Acao.VER_IMOVEIS),
     INQUILINOS("inquilinos", "Inquilinos", Acao.VER_INQUILINOS),
     CONTRATOS("contratos", "Contratos", Acao.VER_CONTRATOS),
+    CAIXA_BANCO("caixa-banco", "Caixa e banco", Acao.VER_CAIXA_BANCO),
     USUARIOS("usuarios", "Usuários", Acao.VER_USUARIOS);
 
     private final String arquivo;

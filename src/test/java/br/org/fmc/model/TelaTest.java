@@ -27,7 +27,8 @@ class TelaTest {
 
     @Test
     void secretariaEFinanceiroNaoVeemUsuarios() {
-        List<Tela> esperadas = List.of(Tela.PAINEL, Tela.ALUGUEIS, Tela.IMOVEIS, Tela.INQUILINOS, Tela.CONTRATOS);
+        List<Tela> esperadas = List.of(Tela.PAINEL, Tela.ALUGUEIS, Tela.IMOVEIS, Tela.INQUILINOS, Tela.CONTRATOS,
+                Tela.CAIXA_BANCO); // [D5] BOARD-63: as duas veem o Caixa e banco
         assertEquals(esperadas, telasDo(Perfil.SECRETARIA));
         assertEquals(esperadas, telasDo(Perfil.FINANCEIRO));
     }

@@ -139,6 +139,8 @@ Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebim
 
 **Caixa e Banco (BOARD-43, D4).** Cada recibo gera sozinho um lançamento, na mesma transação: dinheiro e cheque entram no **Caixa**; PIX, transferência e boleto, no **Banco**. O valor é o total pago (aluguel, taxas e os encargos cobrados) e a data é a do pagamento. O Banco é o total das contas bancárias, sem separar conta por conta. Os lançamentos ficam na tabela `lancamento` (valor positivo é entrada; negativo, saída) e alimentam a tela de movimento (D5).
 
+**Tela Caixa e banco (BOARD-63, D5).** No menu **Caixa e banco**: as disponibilidades de hoje (Caixa, Banco e total), e o movimento do mês de cada um (saldo anterior, entradas, saídas, saldo final e a lista de lançamentos com o saldo depois de cada um). O **saldo inicial** é informado uma vez pelo Administrador (permissão "Informar o saldo inicial"), com a data: quanto havia no Caixa e no Banco naquele dia. Recebimentos de antes dessa data não contam, porque já estão dentro do saldo informado. Secretaria e Financeiro veem a tela.
+
 ## Visual das telas (design system)
 
 O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):

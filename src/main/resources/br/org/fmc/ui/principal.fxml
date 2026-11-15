@@ -34,6 +34,9 @@
                 <Button text="Aluguéis e cobrança" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
                     <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
                 </Button>
+                <Button text="Caixa e banco" userData="caixa-banco" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-credit-card"/></graphic>
+                </Button>
                 <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
                     <graphic><FontIcon iconLiteral="fth-home"/></graphic>
                 </Button>
