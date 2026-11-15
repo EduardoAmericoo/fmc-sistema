@@ -162,7 +162,8 @@ class GerarAlugueisTest {
         hojeE(LocalDate.of(2026, 10, 3));
         Sessao.encerrar();
 
-        assertEquals(2, servico.gerarAutomatico().size());
+        // sem nenhum aluguel ainda: cada contrato recebe do 1º vencimento (agosto) até outubro
+        assertEquals(6, servico.gerarAutomatico().size());
     }
 
     private void hojeE(LocalDate dia) {

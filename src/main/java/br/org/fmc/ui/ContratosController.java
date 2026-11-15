@@ -131,6 +131,12 @@ public class ContratosController {
     @FXML
     private ComboBox<PrazoContrato> campoPrazo;
     @FXML
+    private javafx.scene.layout.VBox blocoGerarVencidos;
+    @FXML
+    private javafx.scene.control.CheckBox campoGerarVencidos;
+    @FXML
+    private Label dicaGerarVencidos;
+    @FXML
     private HBox resumoPrazo;
     @FXML
     private Label textoResumoPrazo;
@@ -394,10 +400,11 @@ public class ContratosController {
         botao.getStyleClass().addAll("botao-icone", "botao-tabela", "botao-prorrogar");
         botao.setAccessibleText("Prorrogar");
         botao.setTooltip(new Tooltip("Prorrogar o contrato " + c.getNumero() + " por 12, 24 ou 36 meses"));
-        botao.setOnAction(e -> ProrrogarContratoController.abrir(c, servico, prorrogado -> {
+        botao.setOnAction(e -> ProrrogarContratoController.abrir(c, servico, resultado -> {
             carregarLista();
+            Contrato prorrogado = resultado.contrato();
             mostrarToast("Contrato " + prorrogado.getNumero() + " prorrogado até "
-                    + Formatos.data(prorrogado.getDataTermino()) + ".");
+                    + Formatos.data(prorrogado.getDataTermino()) + "." + resumoGerados(resultado.gerados()));
         }));
         return botao;
     }
@@ -459,11 +466,14 @@ public class ContratosController {
     @FXML
     private void salvar() {
         try {
-            Contrato salvo = servico.cadastrar(lerFormulario());
+            // já gera os aluguéis; os meses que já venceram só entram se a pergunta ficou marcada
+            ServicoContratos.ComAlugueis resultado = servico.cadastrarEGerar(lerFormulario(),
+                    !campoGerarVencidos.isManaged() || campoGerarVencidos.isSelected());
+            Contrato salvo = resultado.contrato();
             fechar();
             carregarLista();
             mostrarToast("Contrato " + salvo.getNumero() + " cadastrado. O imóvel "
-                    + salvo.getImovel().getCodigo() + " agora está ocupado.");
+                    + salvo.getImovel().getCodigo() + " agora está ocupado." + resumoGerados(resultado.gerados()));
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
@@ -541,12 +551,52 @@ public class ContratosController {
         PrazoContrato prazo = campoPrazo.getValue();
         if (entrega == null || prazo == null) {
             textoResumoPrazo.setText("Escolha a data e o prazo para ver o fim do contrato e o vencimento dos aluguéis.");
+            atualizarPerguntaVencidos(null, null);
             return;
         }
         LocalDate primeiro = entrega.plusDays(RegrasNegocio.DIAS_1O_VENCIMENTO);
         textoResumoPrazo.setText("Termina em " + Formatos.data(entrega.plusMonths(prazo.getMeses()))
                 + ". O 1º aluguel vence em " + Formatos.data(primeiro)
                 + " e os próximos, todo dia " + primeiro.getDayOfMonth() + ".");
+        atualizarPerguntaVencidos(entrega, prazo);
+    }
+
+    /**
+     * Contrato com início no passado: pergunta se os aluguéis que já venceram entram como em aberto.
+     * Marcado (padrão): cadastrou com atraso e a pessoa deve esses meses. Desmarcado: contrato antigo
+     * trazido do papel, com esses aluguéis já pagos (ex.: quando a Fundação começar a usar o sistema).
+     */
+    private void atualizarPerguntaVencidos(LocalDate entrega, PrazoContrato prazo) {
+        List<java.time.YearMonth> vencidos = entrega == null || prazo == null ? List.of()
+                : ServicoContratos.mesesQueJaVenceram(entrega, prazo, LocalDate.now());
+        mostrar(blocoGerarVencidos, !vencidos.isEmpty());
+        if (vencidos.isEmpty()) {
+            return;
+        }
+        String meses = vencidos.size() == 1 ? "O aluguel de " + mesAno(vencidos.get(0)) + " já venceu"
+                : "Os " + vencidos.size() + " aluguéis de " + mesAno(vencidos.get(0)) + " a "
+                        + mesAno(vencidos.get(vencidos.size() - 1)) + " já venceram";
+        campoGerarVencidos.setText(meses + ". Gerar como em aberto (o inquilino deve)");
+        dicaGerarVencidos.setText("Desmarque se esses aluguéis já foram pagos fora do sistema (por exemplo, "
+                + "um contrato antigo trazido do papel). Marcado, eles entram em atraso, com multa e juros.");
+    }
+
+    private static String mesAno(java.time.YearMonth mes) {
+        return String.format("%02d/%d", mes.getMonthValue(), mes.getYear());
+    }
+
+    /** O que entrou de aluguel na hora, para o aviso de cadastro e de prorrogação. */
+    private static String resumoGerados(List<br.org.fmc.model.Aluguel> gerados) {
+        if (gerados.isEmpty()) {
+            return "";
+        }
+        java.math.BigDecimal total = gerados.stream().map(br.org.fmc.model.Aluguel::base)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        String periodo = gerados.size() == 1 ? mesAno(gerados.get(0).getCompetencia())
+                : mesAno(gerados.get(0).getCompetencia()) + " a "
+                        + mesAno(gerados.get(gerados.size() - 1).getCompetencia());
+        return " " + (gerados.size() == 1 ? "Foi gerado 1 aluguel (" : "Foram gerados " + gerados.size()
+                + " aluguéis (") + periodo + "), somando " + Formatos.moeda(total) + " sem encargos.";
     }
 
     /** Mostra só os campos da garantia escolhida, e os do cônjuge só para fiador casado. */

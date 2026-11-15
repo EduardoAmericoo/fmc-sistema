@@ -34,7 +34,7 @@ public class ProrrogarContratoController {
 
     private ServicoContratos servico;
     private Contrato contrato;
-    private Consumer<Contrato> depoisDeProrrogar;
+    private Consumer<ServicoContratos.ComAlugueis> depoisDeProrrogar;
 
     @FXML
     private StackPane veu;
@@ -70,7 +70,8 @@ public class ProrrogarContratoController {
      *
      * @param depoisDeProrrogar o que a tela de Contratos faz depois (recarregar a lista e mostrar o aviso)
      */
-    public static void abrir(Contrato contrato, ServicoContratos servico, Consumer<Contrato> depoisDeProrrogar) {
+    public static void abrir(Contrato contrato, ServicoContratos servico,
+            Consumer<ServicoContratos.ComAlugueis> depoisDeProrrogar) {
         FXMLLoader carregador = new FXMLLoader(
                 ProrrogarContratoController.class.getResource("/br/org/fmc/ui/prorrogar-contrato.fxml"));
         try {
@@ -105,7 +106,7 @@ public class ProrrogarContratoController {
         mostrar(avisoErros, false);
     }
 
-    private void preencher(Contrato c, ServicoContratos servico, Consumer<Contrato> depois) {
+    private void preencher(Contrato c, ServicoContratos servico, Consumer<ServicoContratos.ComAlugueis> depois) {
         this.contrato = c;
         this.servico = servico;
         this.depoisDeProrrogar = depois;
@@ -168,7 +169,8 @@ public class ProrrogarContratoController {
     @FXML
     private void confirmar() {
         try {
-            Contrato prorrogado = servico.prorrogar(contrato.getId(), prazoEscolhido());
+            // já gera os meses que ficaram sem aluguel enquanto o contrato estava vencido
+            ServicoContratos.ComAlugueis prorrogado = servico.prorrogarEGerar(contrato.getId(), prazoEscolhido());
             fechar();
             depoisDeProrrogar.accept(prorrogado);
         } catch (RegraNegocioException e) {

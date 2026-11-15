@@ -102,6 +102,44 @@ public class AluguelRepository {
     }
 
     /** Os meses que já têm aluguéis gerados, do mais recente para o mais antigo (para o filtro de mês). */
+    /** O mês do último aluguel gerado de cada contrato (contrato sem aluguel não aparece). */
+    public java.util.Map<Long, YearMonth> ultimoMesPorContrato() throws SQLException {
+        java.util.Map<Long, YearMonth> ultimos = new java.util.HashMap<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement(
+                     "SELECT contrato_id, MAX(competencia) FROM aluguel GROUP BY contrato_id");
+             ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                ultimos.put(rs.getLong(1), YearMonth.parse(rs.getString(2)));
+            }
+        }
+        return ultimos;
+    }
+
+    /** Guarda que este contrato só gera aluguel a partir do mês informado (os anteriores foram pagos no papel). */
+    public void salvarGerarDesde(long contratoId, YearMonth desde) throws SQLException {
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement(
+                     "INSERT OR REPLACE INTO contrato_gerar_desde (contrato_id, gerar_desde) VALUES (?, ?)")) {
+            st.setLong(1, contratoId);
+            st.setString(2, desde.toString());
+            st.executeUpdate();
+        }
+    }
+
+    /** O "gerar a partir de" de cada contrato que tem um. */
+    public java.util.Map<Long, YearMonth> gerarDesdePorContrato() throws SQLException {
+        java.util.Map<Long, YearMonth> desde = new java.util.HashMap<>();
+        try (Connection conexao = Database.conectar();
+             PreparedStatement st = conexao.prepareStatement("SELECT contrato_id, gerar_desde FROM contrato_gerar_desde");
+             ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                desde.put(rs.getLong(1), YearMonth.parse(rs.getString(2)));
+            }
+        }
+        return desde;
+    }
+
     public List<YearMonth> mesesComAluguel() throws SQLException {
         List<YearMonth> meses = new ArrayList<>();
         try (Connection conexao = Database.conectar();

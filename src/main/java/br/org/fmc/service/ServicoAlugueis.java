@@ -78,21 +78,76 @@ public class ServicoAlugueis {
     }
 
     /**
-     * Geração automática (BOARD-37): chamada ao entrar no sistema, sem botão. Gera os aluguéis do
-     * mês atual e de algum mês anterior que tenha ficado sem gerar (por exemplo, se ninguém abriu o
-     * sistema no mês passado). Como não duplica, rodar várias vezes não muda nada. É uma tarefa do
+     * Geração automática (BOARD-37): chamada ao entrar no sistema, sem botão. É uma tarefa do
      * próprio sistema, por isso não depende da permissão de quem entrou.
+     *
+     * Vai contrato por contrato: cada contrato ativo recebe todos os meses que faltam, do mês
+     * seguinte ao último aluguel dele até o mês atual (ou desde o 1º vencimento, se ainda não tem
+     * nenhum). Assim nada fica para trás: nem o mês em que ninguém abriu o sistema, nem os meses de
+     * um contrato vencido que foi prorrogado depois (eles voltam a ser cobertos pelo contrato).
+     * Como não duplica, rodar várias vezes não muda nada.
      */
     public List<Aluguel> gerarAutomatico() throws SQLException {
-        YearMonth atual = YearMonth.from(hoje());
-        YearMonth mes = alugueis.mesesComAluguel().stream()
-                .filter(m -> m.isBefore(atual)).max(YearMonth::compareTo)
-                .map(m -> m.plusMonths(1)).orElse(atual);
+        java.util.Map<Long, YearMonth> ultimos = alugueis.ultimoMesPorContrato();
+        java.util.Map<Long, YearMonth> desde = alugueis.gerarDesdePorContrato();
         List<Aluguel> gerados = new ArrayList<>();
-        for (; !mes.isAfter(atual); mes = mes.plusMonths(1)) {
-            gerados.addAll(gerar(mes));
+        for (Contrato contrato : contratos.listarTodos()) {
+            if (contrato.getStatus() == StatusContrato.ATIVO) {
+                gerados.addAll(gerarMesesQueFaltam(contrato, ultimos.get(contrato.getId()),
+                        desde.get(contrato.getId())));
+            }
         }
         return List.copyOf(gerados);
+    }
+
+    /**
+     * Gera na hora os meses que faltam de um contrato (logo depois de cadastrar ou prorrogar).
+     * Com {@code desde}, não gera nada antes desse mês: é o "não gerar os meses que já passaram"
+     * do cadastro, para contratos antigos cujos aluguéis já foram pagos no papel.
+     */
+    public List<Aluguel> gerarDoContrato(long contratoId, YearMonth desde) throws SQLException {
+        Contrato contrato = contratos.buscarPorId(contratoId)
+                .orElseThrow(() -> new RegraNegocioException("Contrato não encontrado."));
+        if (contrato.getStatus() != StatusContrato.ATIVO) {
+            return List.of();
+        }
+        if (desde != null) {
+            alugueis.salvarGerarDesde(contratoId, desde); // a geração ao entrar também respeita
+        } else {
+            desde = alugueis.gerarDesdePorContrato().get(contratoId);
+        }
+        return gerarMesesQueFaltam(contrato, alugueis.ultimoMesPorContrato().get(contratoId), desde);
+    }
+
+    /** Os meses que o contrato cobre, depois do último aluguel dele, até o mês atual. */
+    private List<Aluguel> gerarMesesQueFaltam(Contrato contrato, YearMonth ultimo, YearMonth desde)
+            throws SQLException {
+        YearMonth atual = YearMonth.from(hoje());
+        YearMonth mes = ultimo != null ? ultimo.plusMonths(1) : YearMonth.from(contrato.primeiroVencimento());
+        if (desde != null && desde.isAfter(mes)) {
+            mes = desde;
+        }
+        List<Aluguel> gerados = new ArrayList<>();
+        for (; !mes.isAfter(atual); mes = mes.plusMonths(1)) {
+            if (contrato.cobreCompetencia(mes)) {
+                Aluguel aluguel = new Aluguel(contrato, mes);
+                alugueis.salvar(aluguel);
+                gerados.add(aluguel);
+            }
+        }
+        return gerados;
+    }
+
+    /** Os meses que já venceram e que o contrato cobre (para a pergunta do cadastro). */
+    public static List<YearMonth> mesesQueJaVenceram(Contrato contrato, LocalDate hoje) {
+        List<YearMonth> meses = new ArrayList<>();
+        for (YearMonth mes = YearMonth.from(contrato.primeiroVencimento()); !mes.isAfter(YearMonth.from(hoje));
+                mes = mes.plusMonths(1)) {
+            if (contrato.cobreCompetencia(mes) && contrato.vencimentoDe(mes).isBefore(hoje)) {
+                meses.add(mes);
+            }
+        }
+        return meses;
     }
 
     private List<Aluguel> gerar(YearMonth mes) throws SQLException {
