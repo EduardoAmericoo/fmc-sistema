@@ -19,10 +19,10 @@ public enum Perfil {
             Acao.VER_CONTRATOS, Acao.CRIAR_CONTRATO, Acao.PRORROGAR_CONTRATO, Acao.ENCERRAR_CONTRATO,
             Acao.REAJUSTAR_CONTRATO, Acao.ANEXAR_DOCUMENTOS,
             Acao.VER_ALUGUEIS, Acao.GERAR_ALUGUEIS, Acao.RECEBER_ALUGUEL,
-            Acao.REGISTRAR_CONTATO_COBRANCA)),
+            Acao.REGISTRAR_CONTATO_COBRANCA, Acao.VER_CAIXA_BANCO)),
     FINANCEIRO("Financeiro", EnumSet.of(
             Acao.VER_IMOVEIS, Acao.VER_INQUILINOS, Acao.VER_CONTRATOS, Acao.VER_ALUGUEIS,
-            Acao.GERAR_ALUGUEIS, Acao.REGISTRAR_CONTATO_COBRANCA));
+            Acao.GERAR_ALUGUEIS, Acao.REGISTRAR_CONTATO_COBRANCA, Acao.VER_CAIXA_BANCO));
 
     private final String descricao;
     private final Set<Acao> permissoes;

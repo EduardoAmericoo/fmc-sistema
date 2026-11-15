@@ -35,6 +35,10 @@ public enum Acao {
     DISPENSAR_ENCARGOS("Aluguéis", "Dispensar multa, juros e correção ao receber (com motivo)", RECEBER_ALUGUEL),
     REGISTRAR_CONTATO_COBRANCA("Aluguéis", "Registrar contato de cobrança", VER_ALUGUEIS),
 
+    // [D5] BOARD-63 · Caixa e banco
+    VER_CAIXA_BANCO("Caixa e banco", "Ver o Caixa, o Banco e o movimento do mês", null),
+    INFORMAR_SALDO_INICIAL("Caixa e banco", "Informar o saldo inicial do Caixa e do Banco", VER_CAIXA_BANCO),
+
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),
     CRIAR_USUARIO("Usuários", "Criar usuário novo", VER_USUARIOS),
     EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS),
