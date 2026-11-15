@@ -1536,3 +1536,14 @@
 .link-ficha:hover {
     -fx-underline: true;
 }
+
+/* BOARD-189 · Mensagem de cobrança pronta (e-mail e WhatsApp) na janela de contato */
+.bloco-mensagem {
+    -fx-background-color: -fmc-fundo;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14 12 14;
+}
+
+.botao-secundario.botao-whatsapp .ikonli-font-icon {
+    -fx-icon-color: #1F8F4E;
+}
