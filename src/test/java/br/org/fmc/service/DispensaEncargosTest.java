@@ -212,11 +212,39 @@ class DispensaEncargosTest {
     // ---------- permissão ----------
 
     @Test
-    void regraProvisoriaSoOAdministradorPodeDispensar() {
+    void porPadraoSoOAdministradorTemAPermissaoDeDispensar() {
         assertTrue(ServicoRecebimento.podeDispensarEncargos(new Usuario("A", "a@exemplo.org", Perfil.ADMINISTRADOR)));
         assertFalse(ServicoRecebimento.podeDispensarEncargos(new Usuario("S", "s@exemplo.org", Perfil.SECRETARIA)));
         assertFalse(ServicoRecebimento.podeDispensarEncargos(new Usuario("F", "f@exemplo.org", Perfil.FINANCEIRO)));
         assertFalse(ServicoRecebimento.podeDispensarEncargos(null));
+    }
+
+    @Test
+    void administradorLiberaADispensaParaUmaPessoaDaSecretaria() throws Exception {
+        Usuario secretaria = entrarComo(Perfil.SECRETARIA);
+        assertFalse(recebimento.usuarioPodeDispensarEncargos());
+
+        // o Administrador marca a permissão nova para ela, na tela de Usuários
+        Sessao.encerrar();
+        acesso.login(ServicoAcesso.EMAIL_ADMIN_INICIAL, ServicoAcesso.SENHA_ADMIN_INICIAL);
+        java.util.Set<br.org.fmc.model.Acao> acoes = java.util.EnumSet.copyOf(secretaria.getPermissoes());
+        acoes.add(br.org.fmc.model.Acao.DISPENSAR_ENCARGOS);
+        acesso.alterarPermissoes(secretaria.getId(), acoes);
+        Sessao.encerrar();
+        acesso.login(secretaria.getEmail(), "teste123");
+
+        assertTrue(recebimento.usuarioPodeDispensarEncargos());
+        Recibo recibo = recebimento.receber(agosto(), HOJE, FormaPagamento.PIX, "", true, MOTIVO);
+        assertTrue(recibo.teveDispensa());
+        assertEquals(secretaria.getNome(), recibo.getDispensa().getAutorizadoPor().getNome());
+    }
+
+    @Test
+    void dispensarExigeReceberENaoVemNosOutrosPerfis() {
+        assertEquals(br.org.fmc.model.Acao.RECEBER_ALUGUEL, br.org.fmc.model.Acao.DISPENSAR_ENCARGOS.getRequisito());
+        assertFalse(Perfil.SECRETARIA.getPermissoes().contains(br.org.fmc.model.Acao.DISPENSAR_ENCARGOS));
+        assertFalse(Perfil.FINANCEIRO.getPermissoes().contains(br.org.fmc.model.Acao.DISPENSAR_ENCARGOS));
+        assertTrue(Perfil.ADMINISTRADOR.getPermissoes().contains(br.org.fmc.model.Acao.DISPENSAR_ENCARGOS));
     }
 
     @Test

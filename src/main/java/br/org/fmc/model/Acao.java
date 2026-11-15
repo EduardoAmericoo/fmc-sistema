@@ -32,6 +32,7 @@ public enum Acao {
     VER_ALUGUEIS("Aluguéis", "Ver aluguéis e números financeiros", null),
     GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),
     RECEBER_ALUGUEL("Aluguéis", "Receber aluguel e emitir recibo", VER_ALUGUEIS),
+    DISPENSAR_ENCARGOS("Aluguéis", "Dispensar multa, juros e correção ao receber (com motivo)", RECEBER_ALUGUEL),
     REGISTRAR_CONTATO_COBRANCA("Aluguéis", "Registrar contato de cobrança", VER_ALUGUEIS),
 
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),

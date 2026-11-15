@@ -5,7 +5,6 @@ import br.org.fmc.model.Aluguel;
 import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
-import br.org.fmc.model.Perfil;
 import br.org.fmc.model.Recibo;
 import br.org.fmc.model.Usuario;
 import br.org.fmc.repository.ReciboRepository;
@@ -34,18 +33,18 @@ public class ServicoRecebimento {
      * [D11] BOARD-66 · Quem pode dispensar multa, juros e correção de um recebimento.
      * É o ÚNICO lugar com esta regra: a tela e o receber() perguntam aqui.
      *
-     * TODO BOARD-66: regra provisória, depende de confirmação do cliente. Por enquanto só o
-     * perfil Administrador pode dispensar. Se o cliente quiser ajustar pessoa a pessoa, crie uma
-     * Acao (ex.: DISPENSAR_ENCARGOS) e troque o corpo por "usuario.pode(Acao.DISPENSAR_ENCARGOS)".
-     * Lembre de ajustar também SEM_PERMISSAO_PARA_DISPENSAR.
+     * É a permissão "Dispensar multa, juros e correção" (Acao.DISPENSAR_ENCARGOS): o
+     * Administrador já vem com ela, e ele mesmo escolhe, na tela de Usuários, quem mais pode
+     * dispensar (ex.: uma pessoa da Secretaria de confiança). Os outros perfis vêm sem ela.
      */
     public static boolean podeDispensarEncargos(Usuario usuario) {
-        return usuario != null && usuario.isAtivo() && usuario.getPerfil() == Perfil.ADMINISTRADOR;
+        return usuario != null && usuario.pode(Acao.DISPENSAR_ENCARGOS);
     }
 
     /** Explica, na tela e no erro, por que a pessoa não pode dispensar. Acompanha a regra acima. */
     public static final String SEM_PERMISSAO_PARA_DISPENSAR =
-            "Só o Administrador pode dispensar multa, juros e correção.";
+            "Você não tem permissão para dispensar multa, juros e correção. "
+                    + "O Administrador pode liberar na tela de Usuários.";
 
     /** O usuário logado pode dispensar encargos? (false se ninguém estiver logado) */
     public boolean usuarioPodeDispensarEncargos() {
