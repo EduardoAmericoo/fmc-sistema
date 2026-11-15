@@ -166,4 +166,41 @@ class FichaInquilinoTest {
         Sessao.encerrar();
         assertThrows(AcessoNegadoException.class, () -> servico.ficha(maria.getId()));
     }
+
+    // ---------- melhoria da SR2: resumo de como o inquilino costuma pagar ----------
+
+    @Test
+    void resumoPedeAtencaoQuandoMetadeFoiPagaComAtraso() throws Exception {
+        ServicoInquilinos.Resumo r = servico.ficha(maria.getId()).resumo();
+
+        assertEquals(ServicoInquilinos.Nivel.ATENCAO, r.nivel());
+        assertEquals("Atenção, atrasa com frequência: inquilino desde 01/2025 (1 ano e 9 meses) · "
+                + "1 de 2 aluguéis pagos em dia (50%) · hoje deve 2 aluguéis.", r.texto());
+    }
+
+    @Test
+    void resumoDeBomPagadorMesmoComUmAtrasoHoje() throws Exception {
+        List<Aluguel> lista = new java.util.ArrayList<>();
+        for (int mes = 2; mes <= 9; mes++) {
+            Aluguel a = new Aluguel(atual, YearMonth.of(2026, mes));
+            if (mes < 9) {
+                a.registrarPagamento(a.getVencimento()); // 7 pagos no dia
+            }
+            lista.add(a); // setembro em atraso
+        }
+        Ficha f = new Ficha(maria, List.of(atual), lista, List.of(), HOJE);
+
+        ServicoInquilinos.Resumo r = f.resumo();
+        assertEquals(ServicoInquilinos.Nivel.BOM, r.nivel());
+        assertEquals("Bom pagador: inquilino desde 01/2026 (9 meses) · 7 de 7 aluguéis pagos em dia (100%) · "
+                + "hoje deve 1 aluguel.", r.texto());
+    }
+
+    @Test
+    void resumoSemPagamentosAinda() {
+        Ficha f = new Ficha(maria, List.of(atual), List.of(), List.of(), HOJE);
+
+        assertEquals(ServicoInquilinos.Nivel.SEM_HISTORICO, f.resumo().nivel());
+        assertEquals("Ainda sem pagamentos: inquilino desde 01/2026 (9 meses).", f.resumo().texto());
+    }
 }
