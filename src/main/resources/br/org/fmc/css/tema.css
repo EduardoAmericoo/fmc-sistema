@@ -1455,3 +1455,50 @@
 .list-cell.tipo-item {
     -fx-padding: 4 8 4 24;
 }
+
+/* ===================== Caixa e banco, [D5] BOARD-63 ===================== */
+
+.barra-caixa,
+.barra-banco {
+    -fx-min-height: 10px;
+    -fx-max-height: 10px;
+    -fx-background-radius: 6;
+}
+
+.barra-caixa {
+    -fx-background-color: -fmc-azul-medio;
+}
+
+.barra-banco {
+    -fx-background-color: -fmc-azul;
+}
+
+.legenda-caixa,
+.legenda-banco {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+.valor-forte {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+/* Linha do total: traço em cima e tudo em negrito */
+.linha-total {
+    -fx-padding: 10 0 2 0;
+    -fx-border-color: -fmc-texto transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.linha-total .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-texto;
+}
+
+.kpi-valor-entrada {
+    -fx-text-fill: -fmc-sucesso;
+}
+
+.kpi-valor-saida {
+    -fx-text-fill: -fmc-erro;
+}
