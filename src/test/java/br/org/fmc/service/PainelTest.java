@@ -157,7 +157,7 @@ class PainelTest {
 
         assertEquals(List.of(
                 "ALTA 3 Aluguéis em atraso",
-                "ALTA 1 Inquilino com 2 ou mais aluguéis atrasados",
+                "ALTA 2 Inquilinos para cobrança", // BOARD-188: Ana (1 atrasado) e Maria (2)
                 "MEDIA 1 Aluguel em tolerância",
                 "ALTA 1 Contrato vencido",
                 "MEDIA 1 Contrato vence nos próximos 60 dias",
@@ -182,16 +182,20 @@ class PainelTest {
     }
 
     @Test
-    void listaDeCobrancaTemUmaLinhaPorInquilinoComDoisOuMaisAtrasados() throws Exception {
-        // No Painel: 1 inquilino (Maria, agosto e setembro). Ana tem só 1 aluguel atrasado e fica de fora.
+    void listaDeCobrancaTemTodosOsInquilinosEmAtrasoMenosQuemEstaNaTolerancia() throws Exception {
+        // BOARD-188 · No Painel: 2 inquilinos (Ana com 1 aluguel atrasado e Maria com 2). Carlos está
+        // na tolerância e fica de fora. Só Maria deve 2 ou mais: o detalhe lembra de avisar o fiador.
         Pendencia cobranca = servico.montar().pendencias().get(1);
-        assertEquals(1, cobranca.quantidade());
+        assertEquals(2, cobranca.quantidade());
+        assertEquals("1 deles deve 2 ou mais aluguéis: avisar também o fiador.", cobranca.detalhe());
 
-        // Na tela de Aluguéis, pela mesma regra: 1 linha, a de Maria, com os 2 aluguéis dela.
+        // Na tela de Aluguéis, pela mesma regra: Ana primeiro (vence 01/08, há mais tempo), depois Maria.
         List<ServicoAlugueis.Cobranca> lista = ServicoAlugueis.listaDeCobranca(
                 new ServicoAlugueis().listarEmAberto(), HOJE);
-        assertEquals(1, lista.size());
-        ServicoAlugueis.Cobranca maria = lista.get(0);
+        assertEquals(List.of("Ana Teste", "Maria Teste"),
+                lista.stream().map(c -> c.contrato().getInquilino().getNome()).toList());
+        assertEquals(new ServicoAlugueis.Faixas(1, 1, 0), ServicoAlugueis.faixas(lista));
+        ServicoAlugueis.Cobranca maria = lista.get(1);
         assertEquals("Maria Teste", maria.contrato().getInquilino().getNome());
         assertEquals(List.of("2026-08-09", "2026-09-09"),
                 maria.alugueis().stream().map(a -> a.getVencimento().toString()).toList());
@@ -205,8 +209,8 @@ class PainelTest {
     }
 
     @Test
-    void listaDeCobrancaComecaPorQuemDeveMaisAlugueisEContaAsFaixas() throws Exception {
-        // Ana passa a dever junho, julho e agosto (3); Maria continua com agosto e setembro (2).
+    void listaDeCobrancaComecaPorQuemEstaHaMaisTempoSemPagarEContaAsFaixas() throws Exception {
+        // Ana passa a dever junho, julho e agosto (3, desde 01/06); Maria continua com agosto e setembro (2).
         Contrato ana = new br.org.fmc.repository.ContratoRepository().listarTodos().stream()
                 .filter(c -> c.getInquilino().getNome().equals("Ana Teste")).findFirst().orElseThrow();
         aluguel(ana, YearMonth.of(2026, 6), null);
@@ -217,8 +221,10 @@ class PainelTest {
 
         assertEquals(List.of("Ana Teste 3", "Maria Teste 2"), lista.stream()
                 .map(c -> c.contrato().getInquilino().getNome() + " " + c.alugueis().size()).toList());
-        assertEquals(new ServicoAlugueis.Faixas(1, 1, 0), ServicoAlugueis.faixas(lista));
-        assertEquals(2, servico.montar().pendencias().get(1).quantidade()); // o Painel conta os mesmos 2
+        assertEquals(new ServicoAlugueis.Faixas(0, 1, 1), ServicoAlugueis.faixas(lista));
+        Pendencia cobranca = servico.montar().pendencias().get(1); // o Painel conta os mesmos 2
+        assertEquals(2, cobranca.quantidade());
+        assertEquals("2 deles devem 2 ou mais aluguéis: avisar também o fiador.", cobranca.detalhe());
     }
 
     @Test

@@ -205,40 +205,46 @@ public class ServicoAlugueis {
 
     /**
      * Os aluguéis em atraso dos inquilinos com 2 ou mais aluguéis atrasados (no mesmo contrato):
-     * é quem precisa ir para cobrança. O Painel conta esses inquilinos e a tela de Aluguéis
-     * mostra a lista de cobrança deles, pela mesma regra.
+     * é quando, além de cobrar o inquilino, a Fundação avisa o fiador. O Painel conta esses
+     * inquilinos à parte.
      */
     public static List<Aluguel> deInquilinosComDoisOuMaisAtrasados(List<Aluguel> lista, LocalDate hoje) {
-        List<Aluguel> emAtraso = lista.stream().filter(a -> a.getSituacao(hoje) == SituacaoAluguel.EM_ATRASO).toList();
+        List<Aluguel> emAtraso = emAtraso(lista, hoje);
         Map<Long, Long> porContrato = emAtraso.stream()
                 .collect(Collectors.groupingBy(a -> a.getContrato().getId(), Collectors.counting()));
         return emAtraso.stream().filter(a -> porContrato.get(a.getContrato().getId()) > 1).toList();
     }
 
+    /** Só os aluguéis em atraso, isto é, passados os dias de tolerância (quem está na tolerância não entra). */
+    public static List<Aluguel> emAtraso(List<Aluguel> lista, LocalDate hoje) {
+        return lista.stream().filter(a -> a.getSituacao(hoje) == SituacaoAluguel.EM_ATRASO).toList();
+    }
+
     /**
-     * A lista de cobrança: uma linha por inquilino com 2 ou mais aluguéis atrasados. Primeiro quem
-     * deve mais aluguéis; entre os que devem o mesmo número, quem está há mais tempo sem pagar.
+     * A lista de cobrança: uma linha por inquilino com aluguel em atraso (BOARD-188: todos, não só
+     * quem deve 2 ou mais). Primeiro quem está há mais tempo sem pagar (o vencimento mais antigo);
+     * no empate, quem deve mais aluguéis. A tela ainda reordena pela urgência do contato no empate.
      */
     public static List<Cobranca> listaDeCobranca(List<Aluguel> lista, LocalDate hoje) {
-        Map<Long, List<Aluguel>> porContrato = deInquilinosComDoisOuMaisAtrasados(lista, hoje).stream()
+        Map<Long, List<Aluguel>> porContrato = emAtraso(lista, hoje).stream()
                 .collect(Collectors.groupingBy(a -> a.getContrato().getId()));
         return porContrato.values().stream()
                 .map(doContrato -> new Cobranca(doContrato.get(0).getContrato(), doContrato.stream()
                         .sorted(Comparator.comparing(Aluguel::getVencimento)).toList()))
-                .sorted(Comparator.comparing((Cobranca c) -> c.alugueis().size()).reversed()
-                        .thenComparing(c -> c.maisAntigo().getVencimento())
+                .sorted(Comparator.comparing((Cobranca c) -> c.maisAntigo().getVencimento())
+                        .thenComparing(Comparator.comparing((Cobranca c) -> c.alugueis().size()).reversed())
                         .thenComparing(c -> c.contrato().getImovel().getCodigo()))
                 .toList();
     }
 
-    /** Quantos inquilinos da lista de cobrança devem 2, 3, e 4 ou mais aluguéis. */
-    public record Faixas(int dois, int tres, int quatroOuMais) {
+    /** Quantos inquilinos da lista de cobrança devem 1, 2, e 3 ou mais aluguéis. */
+    public record Faixas(int um, int dois, int tresOuMais) {
     }
 
     public static Faixas faixas(List<Cobranca> lista) {
+        int um = (int) lista.stream().filter(c -> c.alugueis().size() == 1).count();
         int dois = (int) lista.stream().filter(c -> c.alugueis().size() == 2).count();
-        int tres = (int) lista.stream().filter(c -> c.alugueis().size() == 3).count();
-        return new Faixas(dois, tres, lista.size() - dois - tres);
+        return new Faixas(um, dois, lista.size() - um - dois);
     }
 
     /** Quantos aluguéis há em cada situação e quanto somam, para o resumo no topo da tela. */

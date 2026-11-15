@@ -65,7 +65,7 @@ public class AlugueisController {
 
     /** Recortes que o Painel pede ao abrir esta tela, além das abas por situação. */
     public enum Recorte {
-        /** Lista de cobrança: uma linha por inquilino com 2 ou mais aluguéis atrasados. */
+        /** Lista de cobrança: uma linha por inquilino com aluguel em atraso (BOARD-188). */
         INQUILINOS_PARA_COBRANCA
     }
 
@@ -96,17 +96,17 @@ public class AlugueisController {
     @FXML
     private VBox resumoCobranca;
     @FXML
+    private Label contagemUmMes;
+    @FXML
     private Label contagemDoisMeses;
     @FXML
-    private Label contagemTresMeses;
+    private Label contagemTresOuMais;
     @FXML
-    private Label contagemQuatroMeses;
+    private Label valorUmMes;
     @FXML
     private Label valorDoisMeses;
     @FXML
-    private Label valorTresMeses;
-    @FXML
-    private Label valorQuatroMeses;
+    private Label valorTresOuMais;
     @FXML
     private VBox resumoMes;
     @FXML
@@ -546,7 +546,7 @@ public class AlugueisController {
                 contagem.setText(linhas.size() + (linhas.size() == 1 ? " inquilino para cobrança"
                         : " inquilinos para cobrança") + " · valores atualizados em " + Formatos.data(hoje));
                 tabelaCobranca.setPlaceholder(vazio("fth-check-circle", "Ninguém para cobrança",
-                        "Não há contratos com dois ou mais aluguéis vencidos em aberto."));
+                        "Nenhum inquilino com aluguel em atraso (passados os 5 dias de tolerância)."));
             } catch (RegraNegocioException e) {
                 contagem.setText(String.join(" ", e.getErros()));
             } catch (SQLException e) {
@@ -599,15 +599,16 @@ public class AlugueisController {
     }
 
     private void atualizarResumoCobranca(List<Linha> linhas) {
+        // BOARD-188: a lista tem todos os atrasados, então as faixas começam em 1 mês
+        List<Linha> um = linhas.stream().filter(l -> l.mesesEmAberto() == 1).toList();
         List<Linha> dois = linhas.stream().filter(l -> l.mesesEmAberto() == 2).toList();
-        List<Linha> tres = linhas.stream().filter(l -> l.mesesEmAberto() == 3).toList();
-        List<Linha> quatro = linhas.stream().filter(l -> l.mesesEmAberto() >= 4).toList();
+        List<Linha> tresOuMais = linhas.stream().filter(l -> l.mesesEmAberto() >= 3).toList();
+        contagemUmMes.setText("1 mês · " + um.size());
+        valorUmMes.setText(Formatos.moeda(somarAtualizados(um)));
         contagemDoisMeses.setText("2 meses · " + dois.size());
         valorDoisMeses.setText(Formatos.moeda(somarAtualizados(dois)));
-        contagemTresMeses.setText("3 meses · " + tres.size());
-        valorTresMeses.setText(Formatos.moeda(somarAtualizados(tres)));
-        contagemQuatroMeses.setText("4 ou mais · " + quatro.size());
-        valorQuatroMeses.setText(Formatos.moeda(somarAtualizados(quatro)));
+        contagemTresOuMais.setText("3 ou mais · " + tresOuMais.size());
+        valorTresOuMais.setText(Formatos.moeda(somarAtualizados(tresOuMais)));
     }
 
     private static BigDecimal somarAtualizados(List<Linha> linhas) {
