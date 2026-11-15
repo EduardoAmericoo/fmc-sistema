@@ -1,5 +1,6 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Recibo;
 import br.org.fmc.util.Formatos;
@@ -42,6 +43,7 @@ public class ReciboController {
     @FXML private Label titulo;
     @FXML private Label subtitulo;
     @FXML private VBox vias;
+    @FXML private VBox quadroDispensa;
     @FXML private HBox avisoSucesso;
     @FXML private Label textoSucesso;
     @FXML private HBox avisoErros;
@@ -82,6 +84,40 @@ public class ReciboController {
         for (String nomeVia : ReciboImpresso.VIAS) {
             vias.getChildren().add(via(r, nomeVia));
         }
+        preencherDispensa(recibo.getDispensa());
+    }
+
+    /** BOARD-66 · Para auditoria: o que foi dispensado, o motivo, quem autorizou e quando. */
+    private void preencherDispensa(DispensaEncargos d) {
+        mostrar(quadroDispensa, d != null);
+        if (d == null) {
+            return;
+        }
+        quadroDispensa.getChildren().setAll(
+                rotulo("ENCARGOS DISPENSADOS", "rotulo-secao"),
+                linhaDispensa("Multa", Formatos.moeda(d.getMulta())),
+                linhaDispensa("Juros", Formatos.moeda(d.getJuros())),
+                linhaDispensa("Correção", Formatos.moeda(d.getCorrecao())),
+                linhaDispensa("Total dispensado", Formatos.moeda(d.total())),
+                linhaDispensa("Motivo", d.getMotivo()),
+                linhaDispensa("Autorizado por", d.getAutorizadoPor().getNome()
+                        + " (" + d.getAutorizadoPor().getPerfil().getDescricao() + ")"),
+                linhaDispensa("Em", Formatos.data(d.getAutorizadoEm().toLocalDate()) + " às "
+                        + d.getAutorizadoEm().toLocalTime().withSecond(0).withNano(0)));
+    }
+
+    private static HBox linhaDispensa(String rotulo, String valor) {
+        Label nome = new Label(rotulo);
+        nome.setMinWidth(Region.USE_PREF_SIZE);
+        Region espaco = new Region();
+        HBox.setHgrow(espaco, Priority.ALWAYS);
+        Label texto = new Label(valor);
+        texto.setWrapText(true);
+        texto.setMinHeight(Region.USE_PREF_SIZE);
+        texto.getStyleClass().add("texto-forte");
+        HBox linha = new HBox(12, nome, espaco, texto);
+        linha.getStyleClass().add("linha-detalhe");
+        return linha;
     }
 
     /** Uma via do recibo, igual ao papel: cabeçalho, mês, composição, texto e assinatura. */

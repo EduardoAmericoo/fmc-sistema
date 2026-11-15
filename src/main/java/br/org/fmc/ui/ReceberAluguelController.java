@@ -16,13 +16,17 @@ import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
 /** Janela para receber um aluguel e emitir o recibo correspondente. */
@@ -32,6 +36,7 @@ public class ReceberAluguelController {
     private Aluguel aluguel;
     private ServicoRecebimento servico;
     private Consumer<Recibo> depoisDeReceber;
+    private boolean podeDispensar;
 
     @FXML private StackPane veu;
     @FXML private Label subtitulo;
@@ -48,6 +53,16 @@ public class ReceberAluguelController {
     @FXML private Label juros;
     @FXML private Label correcao;
     @FXML private Label total;
+    @FXML private Label seloMulta;
+    @FXML private Label seloJuros;
+    @FXML private Label seloCorrecao;
+    @FXML private HBox linhaDispensados;
+    @FXML private Label totalDispensado;
+    @FXML private HBox linhaDispensar;
+    @FXML private CheckBox campoDispensar;
+    @FXML private Label dicaDispensa;
+    @FXML private VBox blocoMotivo;
+    @FXML private TextArea campoMotivo;
     @FXML private DatePicker campoData;
     @FXML private ComboBox<FormaPagamento> campoForma;
     @FXML private TextField campoDocumento;
@@ -88,6 +103,12 @@ public class ReceberAluguelController {
             }
         });
         campoData.valueProperty().addListener((obs, antes, agora) -> atualizarEncargos());
+        campoDispensar.selectedProperty().addListener((obs, antes, agora) -> {
+            atualizarEncargos();
+            if (agora) {
+                campoMotivo.requestFocus();
+            }
+        });
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
                 fechar();
@@ -110,6 +131,7 @@ public class ReceberAluguelController {
         taxaLuz.setText(Formatos.moeda(aluguel.getTaxaLuz()));
         iptu.setText(Formatos.moeda(aluguel.getValorIptu()));
         outros.setText(Formatos.moeda(aluguel.getOutros()));
+        podeDispensar = servico.usuarioPodeDispensarEncargos();
         campoData.setValue(servico.hoje());
         atualizarEncargos();
     }
@@ -125,9 +147,45 @@ public class ReceberAluguelController {
             multa.setText(Formatos.moeda(encargos.getMulta()));
             juros.setText(Formatos.moeda(encargos.getJuros()));
             correcao.setText(Formatos.moeda(encargos.getCorrecao()));
-            total.setText(Formatos.moeda(aluguel.base().add(encargos.total())));
+            atualizarDispensa(encargos);
+            boolean dispensar = campoDispensar.isSelected();
+            totalDispensado.setText(Formatos.moeda(encargos.total().negate()));
+            total.setText(Formatos.moeda(servico.totalAReceber(aluguel, campoData.getValue(), dispensar)));
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
+        }
+    }
+
+    /**
+     * BOARD-66 · Liga ou desliga a opção de dispensa conforme a permissão e se há encargos, e mostra
+     * (ou esconde) o motivo, os selos "dispensado" e a linha com o total dispensado.
+     */
+    private void atualizarDispensa(Encargos encargos) {
+        boolean habilitada = podeDispensar && encargos.temEncargos();
+        if (!habilitada && campoDispensar.isSelected()) {
+            campoDispensar.setSelected(false); // o listener chama atualizarEncargos() de novo
+        }
+        campoDispensar.setDisable(!habilitada);
+        String porque = !podeDispensar ? ServicoRecebimento.SEM_PERMISSAO_PARA_DISPENSAR
+                : !encargos.temEncargos() ? "Pagamento dentro da tolerância: não há encargos para dispensar."
+                : null;
+        dicaDispensa.setText(porque == null ? "" : porque);
+        mostrar(dicaDispensa, porque != null);
+        // controle desabilitado não recebe o mouse: a dica fica no HBox em volta do checkbox
+        Tooltip.install(linhaDispensar, new Tooltip(porque == null
+                ? "Não cobrar multa, juros e correção deste pagamento (exige motivo)." : porque));
+
+        boolean dispensar = campoDispensar.isSelected();
+        mostrar(blocoMotivo, dispensar);
+        mostrar(linhaDispensados, dispensar);
+        for (Label selo : new Label[] {seloMulta, seloJuros, seloCorrecao}) {
+            mostrar(selo, dispensar);
+        }
+        for (Label valor : new Label[] {multa, juros, correcao}) {
+            valor.getStyleClass().remove("valor-dispensado");
+            if (dispensar) {
+                valor.getStyleClass().add("valor-dispensado");
+            }
         }
     }
 
@@ -138,8 +196,15 @@ public class ReceberAluguelController {
             mostrarErros("Informe uma data de pagamento válida.");
             return;
         }
+        boolean dispensar = campoDispensar.isSelected() && !campoDispensar.isDisable();
+        if (dispensar && campoMotivo.getText().isBlank()) {
+            mostrarErros("Informe o motivo da dispensa de multa, juros e correção.");
+            campoMotivo.requestFocus();
+            return;
+        }
         try {
-            Recibo recibo = servico.receber(aluguel, data, campoForma.getValue(), campoDocumento.getText());
+            Recibo recibo = servico.receber(aluguel, data, campoForma.getValue(), campoDocumento.getText(),
+                    dispensar, campoMotivo.getText());
             fechar();
             depoisDeReceber.accept(recibo);
         } catch (RegraNegocioException e) {

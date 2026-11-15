@@ -1412,6 +1412,27 @@
     -fx-max-width: 180;
 }
 
+/* [D11] BOARD-66 · Dispensa de encargos: valor riscado no quadro de encargos do recebimento */
+.valor-dispensado .text {
+    -fx-strikethrough: true;
+}
+
+.resumo-calculado .label.valor-dispensado {
+    -fx-text-fill: -fmc-texto-suave;
+}
+
+/* Quadro de auditoria da dispensa, na janela do recibo (só na tela, não sai na impressão) */
+.aviso-dispensa {
+    -fx-background-color: -fmc-alerta-fundo;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14 12 14;
+}
+
+/* o quadro azul pinta todos os textos de azul: o selo "dispensado" mantém a cor de alerta */
+.resumo-calculado .label.selo-alerta {
+    -fx-text-fill: -fmc-alerta;
+}
+
 /* ===================== Documentos do contrato por etapa, BOARD-42 ===================== */
 
 /* Título de cada etapa na lista de documentos (LOCAÇÃO, ENTRADA...) */

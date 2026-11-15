@@ -2,13 +2,18 @@ package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
+import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Recibo;
+import br.org.fmc.model.Usuario;
 import br.org.fmc.repository.ReciboRepository;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /** Regras para receber um aluguel e emitir seu recibo. */
 public class ServicoRecebimento {
@@ -25,9 +30,34 @@ public class ServicoRecebimento {
     }
 
     /**
-     * Multa, juros e correção se o aluguel for pago na data informada. Dispensar encargos é a
-     * [D11] BOARD-66 (com motivo e registro de quem dispensou): ainda não existe.
+     * [D11] BOARD-66 · Quem pode dispensar multa, juros e correção de um recebimento.
+     * É o ÚNICO lugar com esta regra: a tela e o receber() perguntam aqui.
+     *
+     * É a permissão "Dispensar multa, juros e correção" (Acao.DISPENSAR_ENCARGOS): o
+     * Administrador já vem com ela, e ele mesmo escolhe, na tela de Usuários, quem mais pode
+     * dispensar (ex.: uma pessoa da Secretaria de confiança). Os outros perfis vêm sem ela.
      */
+    public static boolean podeDispensarEncargos(Usuario usuario) {
+        return usuario != null && usuario.pode(Acao.DISPENSAR_ENCARGOS);
+    }
+
+    /** Explica, na tela e no erro, por que a pessoa não pode dispensar. Acompanha a regra acima. */
+    public static final String SEM_PERMISSAO_PARA_DISPENSAR =
+            "Você não tem permissão para dispensar multa, juros e correção. "
+                    + "O Administrador pode liberar na tela de Usuários.";
+
+    /** O usuário logado pode dispensar encargos? (false se ninguém estiver logado) */
+    public boolean usuarioPodeDispensarEncargos() {
+        return Sessao.estaLogado() && podeDispensarEncargos(Sessao.usuario());
+    }
+
+    /** Total a receber na data informada: o valor devido mais os encargos, a menos que sejam dispensados. */
+    public BigDecimal totalAReceber(Aluguel aluguel, LocalDate dataPagamento, boolean dispensarEncargos) {
+        Encargos encargos = calcularEncargos(aluguel, dataPagamento);
+        return dispensarEncargos ? aluguel.base() : aluguel.base().add(encargos.total());
+    }
+
+    /** Multa, juros e correção se o aluguel for pago na data informada (antes de qualquer dispensa). */
     public Encargos calcularEncargos(Aluguel aluguel, LocalDate dataPagamento) {
         if (aluguel == null || dataPagamento == null) {
             throw new RegraNegocioException("Informe o aluguel e a data do pagamento.");
@@ -44,8 +74,18 @@ public class ServicoRecebimento {
         return recibos.buscarDoAluguel(aluguel);
     }
 
+    /** Recebe o aluguel cobrando todos os encargos do contrato. */
     public Recibo receber(Aluguel aluguel, LocalDate dataPagamento, FormaPagamento formaPagamento,
             String documento) throws SQLException {
+        return receber(aluguel, dataPagamento, formaPagamento, documento, false, null);
+    }
+
+    /**
+     * Recebe o aluguel e emite o recibo. Com dispensarEncargos, multa, juros e correção não são
+     * cobrados (BOARD-66): fica gravado o que foi dispensado, o motivo, quem autorizou e quando.
+     */
+    public Recibo receber(Aluguel aluguel, LocalDate dataPagamento, FormaPagamento formaPagamento,
+            String documento, boolean dispensarEncargos, String motivoDispensa) throws SQLException {
         Sessao.exigir(Acao.RECEBER_ALUGUEL);
         if (aluguel == null) {
             throw new RegraNegocioException("Escolha um aluguel.");
@@ -63,6 +103,21 @@ public class ServicoRecebimento {
             throw new RegraNegocioException("Escolha a forma de pagamento.");
         }
         Encargos encargos = calcularEncargos(aluguel, dataPagamento);
-        return recibos.registrar(aluguel, dataPagamento, formaPagamento, encargos, documento, Sessao.usuario());
+        if (!dispensarEncargos) {
+            return recibos.registrar(aluguel, dataPagamento, formaPagamento, encargos, documento, Sessao.usuario());
+        }
+        if (!podeDispensarEncargos(Sessao.usuario())) {
+            throw new AcessoNegadoException(SEM_PERMISSAO_PARA_DISPENSAR);
+        }
+        if (!encargos.temEncargos()) {
+            throw new RegraNegocioException("Este pagamento não tem multa, juros ou correção para dispensar.");
+        }
+        if (motivoDispensa == null || motivoDispensa.isBlank()) {
+            throw new RegraNegocioException("Informe o motivo da dispensa de multa, juros e correção.");
+        }
+        DispensaEncargos dispensa = DispensaEncargos.de(encargos, motivoDispensa, Sessao.usuario(),
+                LocalDateTime.now(relogio).truncatedTo(ChronoUnit.SECONDS));
+        return recibos.registrar(aluguel, dataPagamento, formaPagamento, encargos.dispensados(), documento,
+                Sessao.usuario(), dispensa);
     }
 }

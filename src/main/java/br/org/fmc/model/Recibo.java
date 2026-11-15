@@ -21,6 +21,7 @@ public class Recibo {
     private final BigDecimal valorTotal;
     private final String documento;
     private final Usuario emitidoPor;
+    private final DispensaEncargos dispensa;
     private LocalDateTime dataEmissao = LocalDateTime.now();
 
     public Recibo(int ano, int sequencial, Aluguel aluguel, LocalDate dataPagamento,
@@ -30,6 +31,18 @@ public class Recibo {
 
     public Recibo(int ano, int sequencial, Aluguel aluguel, LocalDate dataPagamento,
                   FormaPagamento formaPagamento, Encargos encargos, String documento, Usuario emitidoPor) {
+        this(ano, sequencial, aluguel, dataPagamento, formaPagamento, encargos, documento, emitidoPor, null);
+    }
+
+    /**
+     * Recibo com dispensa de encargos (BOARD-66). Os encargos são os COBRADOS (zerados quando
+     * houve dispensa); os valores que deixaram de ser cobrados ficam na dispensa.
+     *
+     * @param dispensa null quando não houve dispensa
+     */
+    public Recibo(int ano, int sequencial, Aluguel aluguel, LocalDate dataPagamento,
+                  FormaPagamento formaPagamento, Encargos encargos, String documento, Usuario emitidoPor,
+                  DispensaEncargos dispensa) {
         if (sequencial <= 0) {
             throw new IllegalArgumentException("O número do recibo precisa ser maior que zero.");
         }
@@ -41,6 +54,7 @@ public class Recibo {
         this.encargos = Valida.obrigatorio(encargos, "os encargos");
         this.documento = Valida.textoOpcional(documento);
         this.emitidoPor = Valida.obrigatorio(emitidoPor, "quem emitiu o recibo");
+        this.dispensa = dispensa;
         this.valorTotal = aluguel.base().add(encargos.total());
     }
 
@@ -96,6 +110,15 @@ public class Recibo {
 
     public Usuario getEmitidoPor() {
         return emitidoPor;
+    }
+
+    /** Encargos dispensados neste recebimento (BOARD-66), ou null se não houve dispensa. */
+    public DispensaEncargos getDispensa() {
+        return dispensa;
+    }
+
+    public boolean teveDispensa() {
+        return dispensa != null;
     }
 
     public LocalDateTime getDataEmissao() {
