@@ -141,6 +141,8 @@ Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebim
 
 **Tela Caixa e banco (BOARD-63, D5).** No menu **Caixa e banco**: as disponibilidades de hoje (Caixa, Banco e total), e o movimento do mês de cada um (saldo anterior, entradas, saídas, saldo final e a lista de lançamentos com o saldo depois de cada um). O **saldo inicial** é informado uma vez pelo Administrador (permissão "Informar o saldo inicial"), com a data: quanto havia no Caixa e no Banco naquele dia. Recebimentos de antes dessa data não contam, porque já estão dentro do saldo informado. Secretaria e Financeiro veem a tela.
 
+**Cancelar recibo (BOARD-65, D10).** Na janela do recibo, o botão **Cancelar recibo** (permissão "Cancelar recibo", que só o Administrador tem por padrão) pede o motivo e, numa única transação: registra o cancelamento (tabela `recibo_cancelamento`, com motivo, quem e quando), volta o aluguel para "em aberto" e lança um **estorno** (saída) no Caixa ou no Banco, na data do cancelamento. O recibo e o número não são apagados e o número não é reaproveitado; o aluguel pode ser recebido de novo, com recibo novo. Para isso, a coluna `recibo.aluguel_id` deixou de ser UNIQUE: o `Database.inicializar` ajusta sozinho os bancos antigos (`db/Migracoes`), sem perder recibos. Receber duas vezes continua impossível, porque o recibo só é gravado se o aluguel ainda estava em aberto.
+
 ## Visual das telas (design system)
 
 O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):

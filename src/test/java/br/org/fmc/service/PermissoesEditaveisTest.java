@@ -103,7 +103,8 @@ class PermissoesEditaveisTest {
         Usuario admin = Sessao.usuario();
         Set<Acao> semReceber = EnumSet.allOf(Acao.class);
         semReceber.remove(Acao.RECEBER_ALUGUEL);
-        semReceber.remove(Acao.DISPENSAR_ENCARGOS); // depende de receber: se ficasse, traria o receber de volta
+        semReceber.remove(Acao.DISPENSAR_ENCARGOS);
+        semReceber.remove(Acao.CANCELAR_RECIBO); // estas duas dependem de receber: se ficassem, trariam o receber de volta
 
         servico.alterarPermissoes(admin.getId(), semReceber);
 
