@@ -22,6 +22,7 @@ import br.org.fmc.model.Reajuste;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.model.StatusContrato;
+import br.org.fmc.model.TipoDocumento;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoDocumentos;
 import br.org.fmc.service.Sessao;
@@ -309,13 +310,28 @@ public class DetalhesContratoController {
         List<DocumentoContrato> arquivados = todos.stream().filter(DocumentoContrato::arquivado).toList();
 
         secaoDocumentos.getChildren().add(titulo("Documentos · " + ativos.size()));
-        if (ativos.isEmpty()) {
-            secaoDocumentos.getChildren().add(veredito("veredito-neutro", "Nenhum documento anexado ainda."
-                    + (botaoEnviarDocumento.isVisible() ? " Use \"Enviar documento\" para anexar o contrato "
-                            + "assinado, RG/CPF, comprovantes..." : "")));
-        }
-        for (DocumentoContrato d : ativos) {
-            secaoDocumentos.getChildren().add(linhaDocumento(d));
+
+        // Como no protótipo: diz se a documentação obrigatória já está toda digitalizada.
+        List<TipoDocumento> faltam = ServicoDocumentos.faltando(contrato, todos);
+        secaoDocumentos.getChildren().add(faltam.isEmpty()
+                ? veredito("veredito-ok", "Documentação obrigatória completa e digitalizada.")
+                : veredito("veredito-alerta", (faltam.size() == 1 ? "1 documento obrigatório ainda está"
+                        : faltam.size() + " documentos obrigatórios ainda estão") + " só no papel: "
+                        + String.join(", ", faltam.stream().map(TipoDocumento::getDescricao).toList()) + "."));
+
+        // Agrupados pela etapa da locação (Locação, Entrada, Durante a locação, Saída, Outros).
+        for (TipoDocumento.Etapa etapa : TipoDocumento.Etapa.values()) {
+            List<DocumentoContrato> daEtapa = ativos.stream().filter(d -> d.tipo().getEtapa() == etapa)
+                    .sorted(java.util.Comparator.comparing(DocumentoContrato::data)).toList();
+            if (daEtapa.isEmpty()) {
+                continue;
+            }
+            Label grupo = new Label(etapa.getDescricao().toUpperCase(java.util.Locale.forLanguageTag("pt-BR")));
+            grupo.getStyleClass().add("documentos-etapa");
+            secaoDocumentos.getChildren().add(grupo);
+            for (DocumentoContrato d : daEtapa) {
+                secaoDocumentos.getChildren().add(linhaDocumento(d));
+            }
         }
         if (!arquivados.isEmpty()) {
             Button alternar = new Button((mostrarArquivados ? "Esconder arquivados" : "Mostrar arquivados")

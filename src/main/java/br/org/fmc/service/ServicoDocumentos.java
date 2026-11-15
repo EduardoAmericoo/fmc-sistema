@@ -140,6 +140,26 @@ public class ServicoDocumentos {
         documentos.marcarArquivado(documentoId, null);
     }
 
+    /**
+     * Os documentos obrigatórios deste contrato que ainda não foram digitalizados (estão só no
+     * papel), na ordem das etapas. Documento arquivado não conta.
+     */
+    public static List<TipoDocumento> faltando(Contrato contrato, List<DocumentoContrato> documentos) {
+        Set<TipoDocumento> enviados = new java.util.HashSet<>();
+        for (DocumentoContrato d : documentos) {
+            if (!d.arquivado()) {
+                enviados.add(d.tipo());
+            }
+        }
+        List<TipoDocumento> faltam = new ArrayList<>();
+        for (TipoDocumento tipo : TipoDocumento.values()) {
+            if (tipo.obrigatorioPara(contrato) && !enviados.contains(tipo)) {
+                faltam.add(tipo);
+            }
+        }
+        return faltam;
+    }
+
     // ---------- regras do arquivo ----------
 
     /** Confere existência, formato e tamanho; devolve o tamanho em bytes (ou -1 se houve erro). */

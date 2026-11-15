@@ -265,4 +265,42 @@ class DocumentosContratoTest {
         assertFalse(Perfil.FINANCEIRO.permite(Acao.ANEXAR_DOCUMENTOS));
         assertEquals(Acao.VER_CONTRATOS, Acao.ANEXAR_DOCUMENTOS.getRequisito());
     }
+
+    // ---------- documentos obrigatórios e etapas (como no protótipo) ----------
+
+    @Test
+    void contratoComFiadorSemDocumentosTemOitoObrigatoriosNoPapel() throws Exception {
+        List<TipoDocumento> faltam = ServicoDocumentos.faltando(contrato, servico.listar(contrato.getId()));
+
+        assertEquals(List.of(TipoDocumento.PROPOSTA_LOCACAO, TipoDocumento.RG_CPF_INQUILINO,
+                TipoDocumento.COMPROVANTE_RENDA, TipoDocumento.CONSULTA_CPF, TipoDocumento.DOCUMENTOS_FIADOR,
+                TipoDocumento.VISTORIA, TipoDocumento.CONTRATO_ASSINADO, TipoDocumento.TERMO_ENTREGA_CHAVES),
+                faltam);
+        // com fiador, o recibo de caução não é obrigatório; e os de saída só depois de encerrar
+        assertFalse(faltam.contains(TipoDocumento.COMPROVANTE_CAUCAO));
+        assertFalse(faltam.contains(TipoDocumento.VISTORIA_SAIDA));
+    }
+
+    @Test
+    void enviandoOsObrigatoriosADocumentacaoFicaCompletaEArquivadoNaoConta() throws Exception {
+        DocumentoContrato ultimo = null;
+        int n = 0;
+        for (TipoDocumento tipo : ServicoDocumentos.faltando(contrato, List.of())) {
+            ultimo = servico.enviar(contrato.getId(), tipo, HOJE, arquivo("doc" + (n++) + ".pdf", 100), null);
+        }
+        assertTrue(ServicoDocumentos.faltando(contrato, servico.listar(contrato.getId())).isEmpty());
+
+        servico.arquivar(ultimo.id());
+        assertEquals(List.of(ultimo.tipo()), ServicoDocumentos.faltando(contrato, servico.listar(contrato.getId())));
+    }
+
+    @Test
+    void todoTipoTemEtapaECadaEtapaTemTipo() {
+        for (TipoDocumento.Etapa etapa : TipoDocumento.Etapa.values()) {
+            assertTrue(java.util.Arrays.stream(TipoDocumento.values()).anyMatch(t -> t.getEtapa() == etapa),
+                    "etapa sem tipo: " + etapa);
+        }
+        assertEquals(TipoDocumento.Etapa.ENTRADA, TipoDocumento.CONTRATO_ASSINADO.getEtapa());
+        assertEquals("Contrato de locação", TipoDocumento.CONTRATO_ASSINADO.getDescricao());
+    }
 }
