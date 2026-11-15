@@ -33,6 +33,7 @@ public enum Acao {
     GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),
     RECEBER_ALUGUEL("Aluguéis", "Receber aluguel e emitir recibo", VER_ALUGUEIS),
     DISPENSAR_ENCARGOS("Aluguéis", "Dispensar multa, juros e correção ao receber (com motivo)", RECEBER_ALUGUEL),
+    CANCELAR_RECIBO("Aluguéis", "Cancelar recibo emitido por engano (com motivo e estorno)", RECEBER_ALUGUEL),
     REGISTRAR_CONTATO_COBRANCA("Aluguéis", "Registrar contato de cobrança", VER_ALUGUEIS),
 
     // [D5] BOARD-63 · Caixa e banco

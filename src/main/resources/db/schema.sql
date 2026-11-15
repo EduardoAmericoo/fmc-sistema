@@ -209,9 +209,13 @@ CREATE TABLE IF NOT EXISTS contrato_encerramento (
 
 -- BOARD-39 · Recibos de pagamento: um recibo por aluguel recebido.
 -- O pagamento, forma, referência do documento e encargos ficam preservados para auditoria.
+-- [D10] BOARD-65: o aluguel_id não é mais UNIQUE, porque um aluguel pode ter um recibo
+-- cancelado (tabela recibo_cancelamento) e depois o recibo novo. Receber duas vezes continua
+-- impossível: o recibo só é gravado se o aluguel ainda estava em aberto. Os bancos antigos
+-- são ajustados sozinhos pelo Database.inicializar (Migracoes).
 CREATE TABLE IF NOT EXISTS recibo (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    aluguel_id       INTEGER NOT NULL UNIQUE REFERENCES aluguel(id),
+    aluguel_id       INTEGER NOT NULL REFERENCES aluguel(id),
     ano              INTEGER NOT NULL,
     sequencial       INTEGER NOT NULL,
     data_pagamento   TEXT    NOT NULL,
@@ -307,3 +311,15 @@ CREATE TABLE IF NOT EXISTS lancamento (
     registrado_por INTEGER NOT NULL REFERENCES usuario(id),
     registrado_em  TEXT    NOT NULL
 );
+
+-- [D10] BOARD-65 · Recibo cancelado (emitido por engano). O recibo não é apagado: o número
+-- fica registrado como cancelado, com o motivo, quem cancelou e quando. Na mesma transação o
+-- aluguel volta a ficar em aberto e o valor sai do Caixa ou do Banco (lançamento ESTORNO).
+CREATE TABLE IF NOT EXISTS recibo_cancelamento (
+    recibo_id     INTEGER PRIMARY KEY REFERENCES recibo(id),
+    motivo        TEXT    NOT NULL,
+    cancelado_por INTEGER NOT NULL REFERENCES usuario(id),
+    cancelado_em  TEXT    NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS recibo_por_aluguel ON recibo(aluguel_id);

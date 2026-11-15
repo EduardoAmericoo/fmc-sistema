@@ -348,7 +348,7 @@ public class AlugueisController {
         // BOARD-60: depois de receber, a lista atualiza e o recibo abre na hora
         ReceberAluguelController.abrir(aluguel, new ServicoRecebimento(), recibo -> {
             carregarMes();
-            ReciboController.abrir(recibo, true);
+            ReciboController.abrir(recibo, true, this::carregarMes);
         });
     }
 
@@ -356,7 +356,7 @@ public class AlugueisController {
     private void verRecibo(Aluguel aluguel) {
         try {
             new ServicoRecebimento().reciboDoAluguel(aluguel).ifPresentOrElse(
-                    recibo -> ReciboController.abrir(recibo, false),
+                    recibo -> ReciboController.abrir(recibo, false, this::carregarMes),
                     () -> new Alert(Alert.AlertType.INFORMATION, "Este aluguel não tem recibo no sistema.").showAndWait());
         } catch (RegraNegocioException e) {
             new Alert(Alert.AlertType.WARNING, String.join(" ", e.getErros())).showAndWait();

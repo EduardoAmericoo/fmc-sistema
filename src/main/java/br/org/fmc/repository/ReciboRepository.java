@@ -75,6 +75,78 @@ public class ReciboRepository {
                 r.getValorTotal(), descricao, r.getId(), r.getEmitidoPor(), r.getDataEmissao());
     }
 
+    /**
+     * [D10] BOARD-65 · Cancela um recibo emitido por engano, tudo na mesma transação:
+     * 1. registra o cancelamento (motivo, quem e quando); o recibo e o número continuam guardados;
+     * 2. o aluguel volta a ficar em aberto (pode ser recebido de novo, com recibo novo);
+     * 3. o valor sai do Caixa ou do Banco, na data do cancelamento (lançamento ESTORNO).
+     *
+     * @return o lançamento de estorno gravado
+     */
+    public Lancamento cancelar(Recibo recibo, String motivo, Usuario usuario, LocalDateTime em) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try {
+                inserirCancelamento(conexao, recibo.getId(), motivo, usuario, em);
+                reabrirAluguel(conexao, recibo.getAluguel());
+                Lancamento estorno = estornoDoRecibo(recibo, motivo, usuario, em);
+                long id = LancamentoRepository.inserir(conexao, estorno);
+                conexao.commit();
+                recibo.getAluguel().cancelarPagamento();
+                recibo.getAluguel().setNumeroRecibo(null);
+                return new Lancamento(id, estorno.conta(), estorno.tipo(), estorno.data(), estorno.valor(),
+                        estorno.descricao(), estorno.reciboId(), estorno.registradoPor(), estorno.registradoEm());
+            } catch (SQLException | RuntimeException e) {
+                conexao.rollback();
+                throw e;
+            }
+        }
+    }
+
+    /** [D10] O estorno: o mesmo valor do recibo, como saída, na mesma conta, no dia do cancelamento. */
+    static Lancamento estornoDoRecibo(Recibo r, String motivo, Usuario usuario, LocalDateTime em) {
+        Aluguel a = r.getAluguel();
+        String descricao = "Estorno do recibo " + r.getNumero() + " (cancelado) · Aluguel "
+                + String.format("%02d/%d", a.getCompetencia().getMonthValue(), a.getCompetencia().getYear())
+                + " · " + a.getContrato().getNumero() + " · " + a.getContrato().getInquilino().getNome()
+                + " · motivo: " + motivo;
+        return new Lancamento(null, r.getConta(), TipoLancamento.ESTORNO, em.toLocalDate(),
+                r.getValorTotal().negate(), descricao, r.getId(), usuario, em);
+    }
+
+    private void inserirCancelamento(Connection conexao, long reciboId, String motivo, Usuario usuario,
+            LocalDateTime em) throws SQLException {
+        try (PreparedStatement st = conexao.prepareStatement("INSERT INTO recibo_cancelamento "
+                + "(recibo_id, motivo, cancelado_por, cancelado_em) VALUES (?, ?, ?, ?)")) {
+            st.setLong(1, reciboId);
+            st.setString(2, motivo);
+            st.setLong(3, usuario.getId());
+            st.setString(4, em.toString());
+            st.executeUpdate(); // cancelar duas vezes: a chave recibo_id não deixa
+        }
+    }
+
+    private void reabrirAluguel(Connection conexao, Aluguel aluguel) throws SQLException {
+        try (PreparedStatement st = conexao.prepareStatement(
+                "UPDATE aluguel SET data_pagamento = NULL WHERE id = ? AND data_pagamento IS NOT NULL")) {
+            st.setLong(1, aluguel.getId());
+            if (st.executeUpdate() != 1) {
+                throw new SQLException("Este aluguel não está mais como recebido.");
+            }
+        }
+    }
+
+    /** [D10] O recibo já foi cancelado? */
+    public boolean estaCancelado(long reciboId) throws SQLException {
+        try (Connection conexao = Database.conectar(); PreparedStatement st = conexao.prepareStatement(
+                "SELECT 1 FROM recibo_cancelamento WHERE recibo_id = ?")) {
+            st.setLong(1, reciboId);
+            try (ResultSet rs = st.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     private int proximoSequencial(Connection conexao, int ano) throws SQLException {
         try (PreparedStatement st = conexao.prepareStatement(
                 "SELECT COALESCE(MAX(sequencial), 0) + 1 FROM recibo WHERE ano = ?")) {
@@ -148,7 +220,8 @@ public class ReciboRepository {
                 + "FROM recibo r JOIN usuario u ON u.id = r.emitido_por "
                 + "LEFT JOIN recibo_dispensa d ON d.recibo_id = r.id "
                 + "LEFT JOIN usuario ud ON ud.id = d.autorizado_por "
-                + "WHERE r.aluguel_id = ?";
+                + "WHERE r.aluguel_id = ? "
+                + "AND NOT EXISTS (SELECT 1 FROM recibo_cancelamento c WHERE c.recibo_id = r.id)"; // [D10]
         try (Connection conexao = Database.conectar(); PreparedStatement st = conexao.prepareStatement(sql)) {
             st.setLong(1, aluguel.getId());
             try (ResultSet rs = st.executeQuery()) {

@@ -60,6 +60,7 @@ public final class Database {
                     st.execute(comando);
                 }
             }
+            Migracoes.aplicar(conexao); // ajustes em bancos criados por versões antigas
         }
     }
 
