@@ -68,10 +68,12 @@ class PermissoesUsuarioTest {
     void financeiroConsultaEGeraAlugueisSemReceberPagamento() {
         Usuario financeiro = new Usuario("Contabilidade", "contabilidade@exemplo.org", Perfil.FINANCEIRO);
         for (Tela tela : Tela.values()) {
-            assertEquals(tela != Tela.USUARIOS, financeiro.podeAbrir(tela), tela.name());
+            // Usuários e Importar planilha são só do Administrador
+            assertEquals(tela != Tela.USUARIOS && tela != Tela.IMPORTAR, financeiro.podeAbrir(tela), tela.name());
         }
         for (Acao acao : Acao.values()) {
-            boolean esperada = (acao.getRequisito() == null && acao != Acao.VER_USUARIOS)
+            boolean esperada = (acao.getRequisito() == null && acao != Acao.VER_USUARIOS
+                    && acao != Acao.IMPORTAR_DADOS)
                     || acao == Acao.GERAR_ALUGUEIS || acao == Acao.REGISTRAR_CONTATO_COBRANCA;
             assertEquals(esperada, financeiro.pode(acao), acao.name());
         }
