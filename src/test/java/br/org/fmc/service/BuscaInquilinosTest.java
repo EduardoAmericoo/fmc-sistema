@@ -51,9 +51,9 @@ class BuscaInquilinosTest {
     @Test
     void semBuscaListaTodosEmOrdemDeNome() throws Exception {
         List<String> todos = nomes("");
-        assertEquals(110, todos.size());
+        assertEquals(109, todos.size()); // 110 da carga, menos 1 inquilino arquivado de propósito
         assertEquals(todos.stream().sorted(String.CASE_INSENSITIVE_ORDER).toList(), todos);
-        assertEquals(110, nomes("   ").size());
+        assertEquals(109, nomes("   ").size());
     }
 
     @Test
