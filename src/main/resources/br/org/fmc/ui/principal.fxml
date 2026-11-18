@@ -49,6 +49,9 @@
                 <Button text="Usuários" userData="usuarios" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
                     <graphic><FontIcon iconLiteral="fth-shield"/></graphic>
                 </Button>
+                <Button text="Importar planilha" userData="importar" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
+                </Button>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
