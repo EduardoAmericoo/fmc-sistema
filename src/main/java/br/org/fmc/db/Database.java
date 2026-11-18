@@ -28,6 +28,11 @@ public final class Database {
         arquivo = novoArquivo;
     }
 
+    /** O arquivo do banco em uso (a importação de planilha faz um ensaio numa cópia dele). */
+    public static Path arquivo() {
+        return arquivo;
+    }
+
     /** A pasta onde fica o arquivo do banco (ex.: data/). Também guarda a caixa de saída simulada. */
     public static Path pasta() {
         Path pasta = arquivo.toAbsolutePath().getParent();

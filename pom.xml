@@ -78,6 +78,19 @@
             <version>2.0.3</version>
         </dependency>
 
+        <!-- Importar planilha: criar o modelo (.xlsx) e ler a planilha preenchida pela Fundação.
+             fastexcel é leve (poucas centenas de KB), ao contrário do Apache POI (mais de 10 MB). -->
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel</artifactId>
+            <version>0.18.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel-reader</artifactId>
+            <version>0.18.4</version>
+        </dependency>
+
         <!-- Testes automatizados -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
