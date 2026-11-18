@@ -51,15 +51,29 @@ public class ServicoDadosTeste {
     public static final String SENHA_TESTE = "teste123";
 
     /** O que foi carregado, para mostrar ao usuário. */
-    public record Resumo(int usuarios, int imoveis, int inquilinos, int contratos, int alugueis) {
+    public record Resumo(int usuarios, int imoveis, int inquilinos, int contratos, int alugueis, int recibos) {
         @Override
         public String toString() {
             return imoveis + " imóveis, " + inquilinos + " inquilinos, " + contratos + " contratos, "
-                    + alugueis + " aluguéis dos últimos 3 meses e " + usuarios + " usuários de teste.";
+                    + alugueis + " aluguéis dos últimos " + CargaHistoricoTeste.MESES + " meses (" + recibos
+                    + " recibos) e " + usuarios + " usuários de teste.";
         }
     }
 
     private final SistemaRepository sistema = new SistemaRepository();
+    /** Quem aparece como autor nos recibos e contatos do histórico de teste. */
+    private Usuario secretaria;
+    private Usuario aprendiz;
+
+    /** Quantos aluguéis cada contrato tem em aberto, pela coluna "situacao_financeira" do contratos.csv. */
+    private static Map<String, Integer> emAbertoDoCsv() {
+        Map<String, Integer> emAberto = new HashMap<>();
+        for (String[] c : ler("contratos.csv")) {
+            String situacao = c[9].strip();
+            emAberto.put(c[0], situacao.startsWith("2") ? 2 : situacao.startsWith("1") ? 1 : 0);
+        }
+        return emAberto;
+    }
 
     /**
      * Se o banco estiver vazio (primeira vez que o sistema abre), carrega os dados de teste.
@@ -89,8 +103,10 @@ public class ServicoDadosTeste {
             int imoveis = carregarImoveis();
             int inquilinos = carregarInquilinos();
             int contratos = carregarContratos();
-            int alugueis = carregarAlugueis(LocalDate.now());
-            return new Resumo(usuarios, imoveis, inquilinos, contratos, alugueis);
+            // 18 meses de histórico com recibos, cobrança, encerrados, reajustes e documentos
+            CargaHistoricoTeste.Resultado historico = new CargaHistoricoTeste(LocalDate.now(), Sessao.usuario(),
+                    secretaria, aprendiz).carregar(emAbertoDoCsv());
+            return new Resumo(usuarios, imoveis, inquilinos, contratos, historico.alugueis(), historico.recibos());
         } finally {
             acesso.sair();
         }
@@ -99,9 +115,9 @@ public class ServicoDadosTeste {
     /** Um usuário de cada perfil, mais a "jovem aprendiz" (Secretaria sem cadastrar inquilino novo). */
     private int carregarUsuarios(ServicoAcesso acesso) throws SQLException {
         acesso.criarUsuario("Ana Administradora Teste", "administrador@exemplo.org", Perfil.ADMINISTRADOR, SENHA_TESTE);
-        acesso.criarUsuario("Bruna Secretária Teste", "secretaria@exemplo.org", Perfil.SECRETARIA, SENHA_TESTE);
+        secretaria = acesso.criarUsuario("Bruna Secretária Teste", "secretaria@exemplo.org", Perfil.SECRETARIA, SENHA_TESTE);
         acesso.criarUsuario("Carlos Financeiro Teste", "financeiro@exemplo.org", Perfil.FINANCEIRO, SENHA_TESTE);
-        Usuario aprendiz = acesso.criarUsuario("Júlia Aprendiz Teste", "aprendiz@exemplo.org", Perfil.SECRETARIA, SENHA_TESTE);
+        aprendiz = acesso.criarUsuario("Júlia Aprendiz Teste", "aprendiz@exemplo.org", Perfil.SECRETARIA, SENHA_TESTE);
         Set<Acao> semCriarInquilino = EnumSet.copyOf(Perfil.SECRETARIA.getPermissoes());
         semCriarInquilino.remove(Acao.CRIAR_INQUILINO);
         acesso.alterarPermissoes(aprendiz.getId(), semCriarInquilino);
@@ -184,47 +200,6 @@ public class ServicoDadosTeste {
             }
         }
         return linhas.size();
-    }
-
-    /**
-     * Aluguéis de teste (BOARD-38): os dos 2 meses anteriores e do mês atual de cada contrato,
-     * para a tela de Aluguéis ter o que mostrar em todas as situações.
-     * Não é a geração do mês (BOARD-37): são gravados direto, como massa de teste.
-     *
-     * Os já vencidos ficam pagos, menos os que a coluna "situacao_financeira" do contratos.csv
-     * diz que estão em aberto: "1 mês em atraso" deixa o último vencido sem pagar,
-     * "2 meses em aberto" deixa os dois últimos.
-     */
-    int carregarAlugueis(LocalDate hoje) throws SQLException {
-        Map<String, String> financeira = new HashMap<>();
-        ler("contratos.csv").forEach(c -> financeira.put(c[0], c[9]));
-        AluguelRepository alugueis = new AluguelRepository();
-        YearMonth atual = YearMonth.from(hoje);
-        int total = 0;
-        for (Contrato contrato : new ContratoRepository().listarTodos()) {
-            String situacao = financeira.getOrDefault(contrato.getNumero(), "Em dia");
-            int emAberto = situacao.startsWith("2") ? 2 : situacao.startsWith("1") ? 1 : 0;
-            List<Aluguel> doContrato = new ArrayList<>();
-            for (YearMonth mes = atual.minusMonths(2); !mes.isAfter(atual); mes = mes.plusMonths(1)) {
-                if (contrato.cobreCompetencia(mes)) {
-                    doContrato.add(new Aluguel(contrato, mes));
-                }
-            }
-            List<Aluguel> vencidos = doContrato.stream().filter(a -> a.getVencimento().isBefore(hoje)).toList();
-            for (int i = 0; i < vencidos.size() - emAberto; i++) {
-                Aluguel a = vencidos.get(i);
-                // Paga no vencimento ou até 3 dias antes, variando de contrato para contrato.
-                a.registrarPagamento(a.getVencimento().minusDays(contrato.getId() % 4));
-            }
-            for (Aluguel a : doContrato) {
-                alugueis.salvar(a);
-                total++;
-            }
-            // Os dados de teste só têm os últimos 3 meses: o que vem antes conta como "pago no papel",
-            // para um contrato vencido prorrogado não ganhar anos de aluguel em aberto.
-            alugueis.salvarGerarDesde(contrato.getId(), atual.minusMonths(2));
-        }
-        return total;
     }
 
     private static Map<String, String[]> porContrato(List<String[]> linhas) {

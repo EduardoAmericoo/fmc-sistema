@@ -77,8 +77,53 @@ class DadosTesteTest {
                 .map(a -> a.getSituacao(alugueis.hoje())).toList();
         assertTrue(situacoes.contains(br.org.fmc.model.SituacaoAluguel.PAGO));
         assertTrue(situacoes.stream().anyMatch(s -> s != br.org.fmc.model.SituacaoAluguel.PAGO));
-        // Todo imóvel com contrato ficou ocupado, e só eles.
-        assertEquals(110, new ServicoImoveis().listar().stream().filter(i -> i.getSituacao() == SituacaoImovel.OCUPADO).count());
+        // Todo imóvel com contrato ativo ficou ocupado, e só eles (3 contratos foram encerrados de propósito).
+        assertEquals(107, new ServicoImoveis().listar().stream().filter(i -> i.getSituacao() == SituacaoImovel.OCUPADO).count());
+    }
+
+    @Test
+    void historicoDeTesteTemUmPoucoDeCadaSituacao() throws Exception {
+        ServicoDadosTeste.Resumo resumo = dados.recarregarDoZero();
+        entrarComoAdministrador();
+
+        // 18 meses de histórico, com recibos de verdade (eles alimentam o Caixa e o Banco)
+        assertTrue(resumo.alugueis() > 1000, "aluguéis: " + resumo.alugueis()); // cerca de 1.200 (muda com a data de hoje)
+        assertTrue(resumo.recibos() > 900, "recibos: " + resumo.recibos());
+        ServicoCaixaBanco caixa = new ServicoCaixaBanco();
+        assertTrue(caixa.semSaldoInicial().isEmpty());
+        assertTrue(caixa.disponibilidades().caixa().signum() > 0);
+        assertTrue(caixa.disponibilidades().banco().signum() > 0);
+
+        // Contratos encerrados, inquilino e imóvel arquivados, reajustes aplicados
+        List<Contrato> contratos = new ServicoContratos().listar();
+        assertEquals(3, contratos.stream().filter(c -> c.getStatus() == br.org.fmc.model.StatusContrato.ENCERRADO).count());
+        assertTrue(new ServicoInquilinos().listar().stream().anyMatch(i -> i.estaArquivado()));
+        assertTrue(new ServicoImoveis().listar().stream().anyMatch(i -> i.estaArquivado()));
+
+        // Cobrança: devedores de 1, 2 e 3+ meses, com contatos e promessas de todo tipo
+        List<ServicoCobranca.Linha> cobranca = new ServicoCobranca().listarParaCobranca();
+        ServicoAlugueis.Faixas faixas = ServicoAlugueis.faixas(ServicoAlugueis.listaDeCobranca(
+                new ServicoAlugueis().listarEmAberto(), new ServicoAlugueis().hoje()));
+        assertTrue(faixas.um() > 0 && faixas.dois() > 0 && faixas.tresOuMais() > 0, faixas.toString());
+        java.util.Set<br.org.fmc.model.SituacaoContato> situacoes = new java.util.HashSet<>();
+        cobranca.forEach(l -> situacoes.add(l.situacao()));
+        assertTrue(situacoes.containsAll(java.util.EnumSet.of(br.org.fmc.model.SituacaoContato.NUNCA_CONTATADO,
+                br.org.fmc.model.SituacaoContato.SEM_RETORNO, br.org.fmc.model.SituacaoContato.PROMESSA_VENCENDO,
+                br.org.fmc.model.SituacaoContato.PROMESSA_NAO_CUMPRIDA,
+                br.org.fmc.model.SituacaoContato.PROMESSA_NO_PRAZO)), situacoes.toString());
+
+        // Perfis de pagador: a ficha mostra bons pagadores e quem pede atenção
+        java.util.Set<ServicoInquilinos.Nivel> niveis = new java.util.HashSet<>();
+        ServicoInquilinos inquilinos = new ServicoInquilinos();
+        for (Contrato c : contratos) {
+            niveis.add(inquilinos.ficha(c.getInquilino().getId()).resumo().nivel());
+        }
+        assertTrue(niveis.containsAll(java.util.EnumSet.of(ServicoInquilinos.Nivel.BOM,
+                ServicoInquilinos.Nivel.REGULAR, ServicoInquilinos.Nivel.ATENCAO)), niveis.toString());
+
+        // Todo inquilino tem e-mail e celular (para a mensagem de cobrança)
+        assertTrue(inquilinos.listar().stream().allMatch(i -> i.getEmail() != null && !i.getEmail().isBlank()
+                && i.getTelefone() != null && !i.getTelefone().isBlank()));
     }
 
     @Test
