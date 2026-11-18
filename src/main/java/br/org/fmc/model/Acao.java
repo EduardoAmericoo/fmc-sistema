@@ -40,6 +40,9 @@ public enum Acao {
     VER_CAIXA_BANCO("Caixa e banco", "Ver o Caixa, o Banco e o movimento do mês", null),
     INFORMAR_SALDO_INICIAL("Caixa e banco", "Informar o saldo inicial do Caixa e do Banco", VER_CAIXA_BANCO),
 
+    // Importar planilha (revisão da SR2) · trazer os dados da Fundação de uma vez
+    IMPORTAR_DADOS("Importação", "Importar imóveis, inquilinos e contratos de uma planilha", null),
+
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),
     CRIAR_USUARIO("Usuários", "Criar usuário novo", VER_USUARIOS),
     EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS),
