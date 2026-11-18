@@ -53,6 +53,7 @@ public class ReceberAluguelController {
     @FXML private Label juros;
     @FXML private Label correcao;
     @FXML private Label total;
+    @FXML private Label totalRodape; // o mesmo total, no rodapé, sempre à vista
     @FXML private Label seloMulta;
     @FXML private Label seloJuros;
     @FXML private Label seloCorrecao;
@@ -85,6 +86,7 @@ public class ReceberAluguelController {
 
     @FXML
     private void initialize() {
+        totalRodape.textProperty().bind(total.textProperty());
         campoForma.getItems().setAll(FormaPagamento.values());
         campoForma.setValue(FormaPagamento.PIX);
         campoData.setConverter(new StringConverter<>() {

@@ -1547,3 +1547,11 @@
 .botao-secundario.botao-whatsapp .ikonli-font-icon {
     -fx-icon-color: #1F8F4E;
 }
+
+/* Janela Receber: o total a receber no rodapé, sempre à vista */
+.total-rodape {
+    -fx-font-family: "Urbanist";
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fmc-azul;
+}

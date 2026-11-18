@@ -269,7 +269,11 @@ public class ContratosController {
 
     private void montarTabela() {
         colunaNumero.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
-        colunaNumero.setCellFactory(c -> celula(ct -> rotulo(ct.getNumero(), "celula-nome")));
+        // Contrato e imóvel na mesma coluna (CT-1001 e, embaixo, IM-002 · Apto 102), como em Aluguéis:
+        // com uma coluna a menos, nome, aluguel, vigência e situação cabem sem cortar.
+        colunaNumero.setCellFactory(c -> celula(ct -> duasLinhas(ct.getNumero(),
+                ct.getImovel().getCodigo() + " · " + (ct.getImovel().getUnidade() != null
+                        ? ct.getImovel().getUnidade() : ct.getImovel().getEndereco()))));
         // Imóvel: código e, embaixo, a unidade (ou o endereço, se não tiver unidade).
         colunaImovel.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
         colunaImovel.setCellFactory(c -> celula(ct -> duasLinhas(
@@ -727,7 +731,10 @@ public class ContratosController {
     }
 
     private static VBox duasLinhas(String principal, String detalhe) {
-        return new VBox(2, rotulo(principal, "celula-nome"), rotulo(detalhe, "celula-detalhe"));
+        VBox caixa = new VBox(2, rotulo(principal, "celula-nome"), rotulo(detalhe, "celula-detalhe"));
+        // texto cortado na tabela ("Daniel Souza R…"): ao passar o mouse, aparece inteiro
+        Tooltip.install(caixa, new Tooltip(principal + (detalhe == null || detalhe.isBlank() ? "" : "\n" + detalhe)));
+        return caixa;
     }
 
     private static Label rotulo(String texto, String estilo) {
