@@ -32,7 +32,7 @@
         <HBox fx:id="cabecalho" alignment="BOTTOM_LEFT" spacing="24">
             <VBox spacing="6" HBox.hgrow="ALWAYS">
                 <Label text="Aluguéis e cobrança" styleClass="titulo"/>
-                <Label fx:id="contagem" styleClass="texto"/>
+                <Label fx:id="contagem" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
             </VBox>
         </HBox>
 

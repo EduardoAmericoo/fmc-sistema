@@ -37,9 +37,9 @@
             </HBox>
             <HBox spacing="20">
                 <VBox spacing="12" HBox.hgrow="ALWAYS">
-                    <HBox styleClass="linha-detalhe"><Label text="Competência"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="competencia"/></HBox>
-                    <HBox styleClass="linha-detalhe"><Label text="Vencimento"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="vencimento"/></HBox>
-                    <HBox styleClass="linha-detalhe"><Label text="Tolerância sem encargos até"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="tolerancia"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Competência"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="competencia" minWidth="-Infinity"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Vencimento"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="vencimento" minWidth="-Infinity"/></HBox>
+                    <HBox styleClass="linha-detalhe"><Label text="Sem multa até"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="tolerancia" minWidth="-Infinity"/></HBox>
                     <Label text="COMPOSIÇÃO" styleClass="rotulo-secao"/>
                     <HBox styleClass="linha-detalhe"><Label text="Aluguel"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="valorAluguel"/></HBox>
                     <HBox styleClass="linha-detalhe"><Label text="Taxa de luz"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="taxaLuz"/></HBox>
@@ -85,8 +85,13 @@
                     </content>
                 </ScrollPane>
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <!-- O total a receber sempre à vista, sem precisar rolar a janela -->
+            <VBox spacing="1" alignment="CENTER_LEFT">
+                <Label text="Total a receber" styleClass="rotulo"/>
+                <Label fx:id="totalRodape" styleClass="total-rodape"/>
+            </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Fechar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
             <Button text="Confirmar e emitir recibo" onAction="#confirmar" styleClass="botao-primario" defaultButton="true">
                 <graphic><FontIcon iconLiteral="fth-check-circle"/></graphic>
             </Button>

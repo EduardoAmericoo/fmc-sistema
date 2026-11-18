@@ -454,7 +454,10 @@ public class ImoveisController {
         linha1.getStyleClass().add("celula-nome");
         Label linha2 = new Label(detalhe);
         linha2.getStyleClass().add("celula-detalhe");
-        return new VBox(2, linha1, linha2);
+        VBox caixa = new VBox(2, linha1, linha2);
+        // texto cortado na tabela ("Av. Gonçalo Prado Rollemb…"): ao passar o mouse, aparece inteiro
+        Tooltip.install(caixa, new Tooltip(principal + (detalhe == null || detalhe.isBlank() ? "" : "\n" + detalhe)));
+        return caixa;
     }
 
     private static Label selo(String texto, String tipo) {

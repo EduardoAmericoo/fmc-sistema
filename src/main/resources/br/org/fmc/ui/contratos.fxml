@@ -38,9 +38,9 @@
         <HBox alignment="BOTTOM_LEFT" spacing="24">
             <VBox spacing="6" HBox.hgrow="ALWAYS">
                 <Label text="Contratos" styleClass="titulo"/>
-                <Label fx:id="contagem" styleClass="texto"/>
+                <Label fx:id="contagem" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
             </VBox>
-            <Button fx:id="botaoNovo" text="Novo contrato" onAction="#novo" styleClass="botao-primario">
+            <Button fx:id="botaoNovo" text="Novo contrato" onAction="#novo" styleClass="botao-primario" minWidth="-Infinity">
                 <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
             </Button>
         </HBox>
@@ -57,13 +57,13 @@
         <VBox styleClass="cartao-tabela" VBox.vgrow="ALWAYS">
             <TableView fx:id="tabela" styleClass="tabela-fmc" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colunaNumero" text="Contrato" prefWidth="90" minWidth="90"/>
-                    <TableColumn fx:id="colunaImovel" text="Imóvel" prefWidth="105" minWidth="100"/>
-                    <TableColumn fx:id="colunaInquilino" text="Inquilino" prefWidth="175" minWidth="140"/>
-                    <TableColumn fx:id="colunaAluguel" text="Aluguel" prefWidth="125" minWidth="125" styleClass="coluna-numero"/>
-                    <TableColumn fx:id="colunaVigencia" text="Vigência" prefWidth="210" minWidth="210"/>
-                    <TableColumn fx:id="colunaGarantia" text="Garantia" prefWidth="100" minWidth="95"/>
-                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="165" minWidth="165"/>
+                    <TableColumn fx:id="colunaNumero" text="Contrato e imóvel" prefWidth="140" minWidth="130"/>
+                    <TableColumn fx:id="colunaImovel" text="Imóvel" visible="false"/>
+                    <TableColumn fx:id="colunaInquilino" text="Inquilino" prefWidth="170" minWidth="150"/>
+                    <TableColumn fx:id="colunaAluguel" text="Aluguel" prefWidth="120" minWidth="118" styleClass="coluna-numero"/>
+                    <TableColumn fx:id="colunaVigencia" text="Vigência" prefWidth="205" minWidth="200"/>
+                    <TableColumn fx:id="colunaGarantia" text="Garantia" prefWidth="100" minWidth="98"/>
+                    <TableColumn fx:id="colunaSituacao" text="Situação" prefWidth="180" minWidth="178"/>
                 </columns>
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>

@@ -35,9 +35,9 @@
         <HBox alignment="BOTTOM_LEFT" spacing="24">
             <VBox spacing="6" HBox.hgrow="ALWAYS">
                 <Label text="Inquilinos" styleClass="titulo"/>
-                <Label fx:id="contagem" styleClass="texto"/>
+                <Label fx:id="contagem" styleClass="texto" wrapText="true" minHeight="-Infinity"/>
             </VBox>
-            <Button fx:id="botaoNovo" text="Novo inquilino" onAction="#novo" styleClass="botao-primario">
+            <Button fx:id="botaoNovo" text="Novo inquilino" onAction="#novo" styleClass="botao-primario" minWidth="-Infinity">
                 <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
             </Button>
         </HBox>
