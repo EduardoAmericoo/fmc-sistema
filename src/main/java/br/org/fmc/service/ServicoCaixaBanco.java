@@ -144,6 +144,77 @@ public class ServicoCaixaBanco {
         }
     }
 
+    /**
+     * Quanto dá para depositar do Caixa numa data: o menor saldo do Caixa daquele dia em diante.
+     * Assim, um depósito com data passada nunca deixa o Caixa negativo nos dias seguintes.
+     */
+    public BigDecimal disponivelParaDepositar(LocalDate data) throws SQLException {
+        Sessao.exigir(Acao.VER_CAIXA_BANCO);
+        List<Lancamento> caixa = considerados(Conta.CAIXA);
+        BigDecimal saldo = BigDecimal.ZERO;
+        for (Lancamento l : caixa) {
+            if (!l.data().isAfter(data)) {
+                saldo = saldo.add(l.valor());
+            }
+        }
+        BigDecimal menor = saldo;
+        for (Lancamento l : caixa) { // a lista vem em ordem de data
+            if (l.data().isAfter(data)) {
+                saldo = saldo.add(l.valor());
+                if (saldo.compareTo(menor) < 0) {
+                    menor = saldo;
+                }
+            }
+        }
+        return menor.max(BigDecimal.ZERO);
+    }
+
+    /**
+     * Registra o dinheiro e os cheques levados do Caixa para o Banco: sai do Caixa e entra no
+     * Banco o mesmo valor, na mesma gravação. O comprovante (número do depósito) é opcional.
+     */
+    public void depositarNoBanco(LocalDate data, BigDecimal valor, String comprovante) throws SQLException {
+        Sessao.exigir(Acao.DEPOSITAR_NO_BANCO);
+        List<String> erros = new ArrayList<>();
+        if (data == null) {
+            erros.add("Informe a data do depósito.");
+        } else {
+            if (data.isAfter(hoje())) {
+                erros.add("A data do depósito não pode ser no futuro.");
+            }
+            for (Conta conta : Conta.values()) {
+                Optional<Lancamento> inicial = lancamentos.saldoInicial(conta);
+                if (inicial.isPresent() && data.isBefore(inicial.get().data())) {
+                    erros.add("A data do depósito não pode ser antes do saldo inicial do " + conta + " ("
+                            + Formatos.data(inicial.get().data()) + ").");
+                }
+            }
+        }
+        if (valor == null || valor.signum() <= 0) {
+            erros.add("Informe o valor depositado, maior que zero.");
+        } else if (erros.isEmpty()) {
+            BigDecimal disponivel = disponivelParaDepositar(data);
+            if (valor.compareTo(disponivel) > 0) {
+                erros.add("O Caixa só tem " + Formatos.moeda(disponivel) + " para depositar em " + Formatos.data(data)
+                        + ". Confira o valor ou a data.");
+            }
+        }
+        String numero = comprovante == null ? "" : comprovante.trim();
+        if (numero.length() > 60) {
+            erros.add("O comprovante pode ter no máximo 60 caracteres.");
+        }
+        if (!erros.isEmpty()) {
+            throw new RegraNegocioException(erros);
+        }
+        String sufixo = (numero.isEmpty() ? "" : " · comprovante " + numero) + " · por " + Sessao.usuario().getNome();
+        LocalDateTime agora = LocalDateTime.now(relogio);
+        lancamentos.salvarDeposito(
+                new Lancamento(null, Conta.CAIXA, TipoLancamento.DEPOSITO, data, valor.negate(),
+                        "Levado ao Banco" + sufixo, null, Sessao.usuario(), agora),
+                new Lancamento(null, Conta.BANCO, TipoLancamento.DEPOSITO, data, valor,
+                        "Dinheiro e cheques vindos do Caixa" + sufixo, null, Sessao.usuario(), agora));
+    }
+
     /** Os meses que o seletor oferece: do primeiro lançamento (ou do saldo inicial) até o mês atual. */
     public List<YearMonth> meses() throws SQLException {
         Sessao.exigir(Acao.VER_CAIXA_BANCO);

@@ -7,7 +7,12 @@ public enum TipoLancamento {
     /** Recebimento de aluguel: gerado sozinho junto com o recibo. */
     RECEBIMENTO_ALUGUEL("Recebimento de aluguel"),
     /** Saída que desfaz um recebimento (cancelamento de recibo, D10). */
-    ESTORNO("Estorno");
+    ESTORNO("Estorno"),
+    /**
+     * Dinheiro e cheques levados do Caixa para o Banco: uma saída no Caixa e uma entrada no
+     * Banco, de mesmo valor, gravadas juntas. O total da Fundação não muda.
+     */
+    DEPOSITO("Depósito do Caixa no Banco");
 
     private final String descricao;
 

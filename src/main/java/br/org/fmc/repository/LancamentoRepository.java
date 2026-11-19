@@ -54,6 +54,24 @@ public class LancamentoRepository {
         }
     }
 
+    /**
+     * Grava o depósito do Caixa no Banco: a saída do Caixa e a entrada no Banco na MESMA
+     * transação (ou entram as duas, ou nenhuma), para o total da Fundação nunca ficar errado.
+     */
+    public void salvarDeposito(Lancamento saidaDoCaixa, Lancamento entradaNoBanco) throws SQLException {
+        try (Connection conexao = Database.conectar()) {
+            conexao.setAutoCommit(false);
+            try {
+                inserir(conexao, saidaDoCaixa);
+                inserir(conexao, entradaNoBanco);
+                conexao.commit();
+            } catch (SQLException | RuntimeException e) {
+                conexao.rollback();
+                throw e;
+            }
+        }
+    }
+
     /** Os lançamentos da conta entre as datas (inclusive), em ordem de data. */
     public List<Lancamento> listar(Conta conta, LocalDate de, LocalDate ate) throws SQLException {
         return consultar(SELECT + "WHERE l.conta = ? AND l.data >= ? AND l.data <= ? ORDER BY l.data, l.id",
