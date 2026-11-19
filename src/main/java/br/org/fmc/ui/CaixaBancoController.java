@@ -47,6 +47,7 @@ public class CaixaBancoController {
     private final ServicoCaixaBanco servico = new ServicoCaixaBanco();
 
     @FXML private Button botaoSaldoInicial;
+    @FXML private Button botaoDepositar;
     @FXML private HBox avisoSaldoInicial;
     @FXML private Label textoAvisoSaldo;
     @FXML private Label dataDisponibilidades;
@@ -108,6 +109,7 @@ public class CaixaBancoController {
             carregarMovimento();
         });
         montarTabela();
+        Permissoes.mostrarSe(botaoDepositar, Acao.DEPOSITAR_NO_BANCO);
         barra.widthProperty().addListener((obs, antes, agora) -> ajustarBarra());
         carregarTudo();
     }
@@ -266,6 +268,11 @@ public class CaixaBancoController {
     @FXML
     private void informarSaldoInicial() {
         SaldoInicialController.abrir(servico, this::carregarTudo);
+    }
+
+    @FXML
+    private void depositarNoBanco() {
+        DepositoController.abrir(servico, this::carregarTudo);
     }
 
     // ---------- seletor de mês (a lista vem do mais novo para o mais antigo) ----------

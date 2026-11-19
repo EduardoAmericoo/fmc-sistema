@@ -32,8 +32,12 @@
                     <Label text="Caixa e banco" styleClass="titulo"/>
                     <Label text="Movimento gerado pelos recibos, sem copiar entre planilhas." styleClass="texto"/>
                 </VBox>
+                <Button fx:id="botaoDepositar" text="Depositar no banco" onAction="#depositarNoBanco"
+                        styleClass="botao-secundario" minWidth="-Infinity">
+                    <graphic><FontIcon iconLiteral="fth-arrow-right-circle"/></graphic>
+                </Button>
                 <Button fx:id="botaoSaldoInicial" text="Informar saldo inicial" onAction="#informarSaldoInicial"
-                        styleClass="botao-primario">
+                        styleClass="botao-primario" minWidth="-Infinity">
                     <graphic><FontIcon iconLiteral="fth-edit-3"/></graphic>
                 </Button>
             </HBox>
@@ -67,7 +71,7 @@
                       maxHeight="-Infinity">
                     <Label text="Regra do processo financeiro" styleClass="rotulo"/>
                     <Label wrapText="true" minHeight="-Infinity"
-                           text="Pagamento em dinheiro ou cheque entra no Caixa. PIX, transferência e boleto entram no Banco. Cada recibo lança o valor sozinho, na data do pagamento."/>
+                           text="Pagamento em dinheiro ou cheque entra no Caixa. PIX, transferência e boleto entram no Banco. Cada recibo lança o valor sozinho, na data do pagamento. Quando o dinheiro e os cheques forem levados ao banco, use &quot;Depositar no banco&quot;."/>
                     <Label fx:id="textoSaldoInicial" wrapText="true" minHeight="-Infinity"/>
                 </VBox>
             </HBox>
