@@ -52,6 +52,9 @@
                 <Button text="Importar planilha" userData="importar" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
                     <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
                 </Button>
+                <Button text="Cópias de segurança" userData="copias" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                    <graphic><FontIcon iconLiteral="fth-database"/></graphic>
+                </Button>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>

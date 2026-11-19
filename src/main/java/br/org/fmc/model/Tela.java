@@ -17,7 +17,8 @@ public enum Tela {
     CONTRATOS("contratos", "Contratos", Acao.VER_CONTRATOS),
     CAIXA_BANCO("caixa-banco", "Caixa e banco", Acao.VER_CAIXA_BANCO),
     USUARIOS("usuarios", "Usuários", Acao.VER_USUARIOS),
-    IMPORTAR("importar", "Importar planilha", Acao.IMPORTAR_DADOS);
+    IMPORTAR("importar", "Importar planilha", Acao.IMPORTAR_DADOS),
+    COPIAS("copias", "Cópias de segurança", Acao.FAZER_COPIA_SEGURANCA);
 
     private final String arquivo;
     private final String titulo;

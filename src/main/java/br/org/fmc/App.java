@@ -2,6 +2,7 @@ package br.org.fmc;
 
 import br.org.fmc.db.Database;
 import br.org.fmc.service.ServicoAcesso;
+import br.org.fmc.service.ServicoCopiaSeguranca;
 import br.org.fmc.service.ServicoDadosTeste;
 import br.org.fmc.ui.Navegador;
 import br.org.fmc.ui.Tema;
@@ -39,6 +40,19 @@ public class App extends Application {
             carregarDadosDeTeste(stage, true);
         } else if (!"nao".equalsIgnoreCase(opcao)) {
             carregarDadosDeTeste(stage, false);
+        }
+    }
+
+    /**
+     * Ao fechar o sistema, faz a cópia de segurança do dia (data/copias), sem perguntar nada.
+     * Se der errado, o sistema fecha do mesmo jeito: a cópia é uma proteção extra.
+     */
+    @Override
+    public void stop() {
+        try {
+            new ServicoCopiaSeguranca().copiaAutomatica(java.time.LocalDate.now());
+        } catch (Exception e) {
+            System.err.println("Não foi possível fazer a cópia de segurança automática: " + e.getMessage());
         }
     }
 
