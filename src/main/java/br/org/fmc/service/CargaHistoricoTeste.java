@@ -118,12 +118,32 @@ class CargaHistoricoTeste {
             alugueis.salvarGerarDesde(c.getId(), inicio);
         }
         cancelarERefazer(paraCancelar);
+        depositarCaixaTodoMes(inicio);
         carregarContatos();
         int encerrados = encerrarEArquivar(saidas);
         int reajustes = aplicarReajustes();
         int documentos = anexarDocumentos(todos, saidas);
         return new Resultado(totalAlugueis, totalRecibos, totalDispensas, totalContatos, encerrados, reajustes,
                 documentos);
+    }
+
+    /**
+     * Todo dia 3, o dinheiro e os cheques do mês anterior são levados ao banco, deixando
+     * R$ 200,00 de troco no Caixa. Assim o Caixa tem saídas e o saldo dele fica realista.
+     */
+    private void depositarCaixaTodoMes(YearMonth inicio) throws SQLException {
+        ServicoCaixaBanco caixaBanco = new ServicoCaixaBanco();
+        BigDecimal troco = new BigDecimal("200.00");
+        for (YearMonth m = inicio; m.isBefore(YearMonth.from(hoje)); m = m.plusMonths(1)) {
+            LocalDate dia = m.plusMonths(1).atDay(3);
+            if (dia.isAfter(hoje)) {
+                break;
+            }
+            BigDecimal valor = caixaBanco.disponivelParaDepositar(dia).subtract(troco);
+            if (valor.signum() > 0) {
+                caixaBanco.depositarNoBanco(dia, valor, "DEP-" + m.getYear() + String.format("%02d", m.getMonthValue()));
+            }
+        }
     }
 
     /** Três contratos de bons pagadores que já terminaram: as chaves foram devolvidas há 2 a 4 meses. */

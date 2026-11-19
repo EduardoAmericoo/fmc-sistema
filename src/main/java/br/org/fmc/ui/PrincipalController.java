@@ -5,6 +5,7 @@ import br.org.fmc.model.Usuario;
 import br.org.fmc.service.ServicoAcesso;
 import br.org.fmc.service.ServicoSistema;
 import br.org.fmc.service.Sessao;
+import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -13,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -85,24 +87,40 @@ public class PrincipalController {
         Navegador.mostrarLogin();
     }
 
-    /** Cada botão do menu só aparece se o perfil de quem entrou pode abrir a tela dele. */
+    /**
+     * Cada botão do menu só aparece se o perfil de quem entrou pode abrir a tela dele.
+     * A seção (Operação, Cadastros, Gestão) some quando nenhuma tela dela aparece.
+     */
     private void esconderTelasSemPermissao() {
-        for (Node item : menu.getChildren()) {
-            if (item.getUserData() instanceof String arquivo) {
-                boolean pode = Tela.porArquivo(arquivo).map(Sessao::podeAbrir).orElse(false);
-                item.setVisible(pode);
-                item.setManaged(pode);
+        for (Node secao : menu.getChildren()) {
+            boolean algumaVisivel = false;
+            for (Node item : itensDa(secao)) {
+                if (item.getUserData() instanceof String arquivo) {
+                    boolean pode = Tela.porArquivo(arquivo).map(Sessao::podeAbrir).orElse(false);
+                    item.setVisible(pode);
+                    item.setManaged(pode);
+                    algumaVisivel |= pode;
+                }
             }
+            secao.setVisible(algumaVisivel);
+            secao.setManaged(algumaVisivel);
         }
     }
 
     private void abrir(String tela) {
         Navegador.abrir(tela);
-        for (Node item : menu.getChildren()) {
-            item.getStyleClass().remove("ativo");
-            if (tela.equals(item.getUserData())) {
-                item.getStyleClass().add("ativo");
+        for (Node secao : menu.getChildren()) {
+            for (Node item : itensDa(secao)) {
+                item.getStyleClass().remove("ativo");
+                if (tela.equals(item.getUserData())) {
+                    item.getStyleClass().add("ativo");
+                }
             }
         }
+    }
+
+    /** Os botões de uma seção do menu (o título da seção fica de fora: não tem userData). */
+    private static List<Node> itensDa(Node secao) {
+        return secao instanceof Pane caixa ? caixa.getChildren() : List.of(secao);
     }
 }

@@ -39,6 +39,8 @@ public enum Acao {
     // [D5] BOARD-63 · Caixa e banco
     VER_CAIXA_BANCO("Caixa e banco", "Ver o Caixa, o Banco e o movimento do mês", null),
     INFORMAR_SALDO_INICIAL("Caixa e banco", "Informar o saldo inicial do Caixa e do Banco", VER_CAIXA_BANCO),
+    TRANSFERIR_CAIXA_BANCO("Caixa e banco", "Registrar depósito do Caixa no Banco e saque do Banco para o Caixa",
+            VER_CAIXA_BANCO),
 
     // Importar planilha (revisão da SR2) · trazer os dados da Fundação de uma vez
     IMPORTAR_DADOS("Importação", "Importar imóveis, inquilinos e contratos de uma planilha", null),

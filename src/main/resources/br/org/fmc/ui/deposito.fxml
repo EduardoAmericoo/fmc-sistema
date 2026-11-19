@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Depósito e saque entre o Caixa e o Banco (revisão da SR2):
+  - depósito: o dinheiro e os cheques do Caixa levados ao banco (sai do Caixa, entra no Banco);
+  - saque: dinheiro tirado do banco para o Caixa (troco, pagamento pequeno em dinheiro).
+  Os dois lançamentos (saída e entrada) são gravados juntos; o total da Fundação não muda.
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="veu" styleClass="veu" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.org.fmc.ui.DepositoController">
+    <fx:define>
+        <ToggleGroup fx:id="grupoSentido"/>
+    </fx:define>
+    <VBox styleClass="janela" maxWidth="560" maxHeight="-Infinity">
+        <StackPane.margin><Insets top="32" right="32" bottom="32" left="32"/></StackPane.margin>
+        <HBox styleClass="janela-topo" spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Depositar ou sacar" styleClass="janela-titulo"/>
+                <Label text="Dinheiro que passa do Caixa para o Banco, ou do Banco para o Caixa."
+                       styleClass="janela-sub" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+            <Button onAction="#fechar" styleClass="botao-icone" accessibleText="Fechar">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+        </HBox>
+        <VBox styleClass="janela-corpo" spacing="8">
+            <HBox fx:id="avisoErros" styleClass="aviso-erro" spacing="10">
+                <FontIcon iconLiteral="fth-alert-circle"/>
+                <Label fx:id="textoErros" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <Label text="O que foi feito? *" styleClass="rotulo"/>
+            <RadioButton fx:id="opcaoDeposito" text="Depósito: do Caixa para o Banco" toggleGroup="$grupoSentido"
+                         selected="true"/>
+            <RadioButton fx:id="opcaoSaque" text="Saque: do Banco para o Caixa (troco, pagamento pequeno)"
+                         toggleGroup="$grupoSentido"/>
+
+            <Label fx:id="rotuloData" text="Data do depósito *" labelFor="$campoData" styleClass="rotulo">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Label>
+            <DatePicker fx:id="campoData" prefWidth="200" styleClass="campo" promptText="dd/mm/aaaa"/>
+
+            <Label fx:id="rotuloValor" text="Valor depositado *" labelFor="$campoValor" styleClass="rotulo">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Label>
+            <TextField fx:id="campoValor" styleClass="campo" promptText="0,00"/>
+            <Label fx:id="dicaDisponivel" styleClass="dica" wrapText="true" minHeight="-Infinity"/>
+
+            <Label text="Comprovante" labelFor="$campoComprovante" styleClass="rotulo">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Label>
+            <TextField fx:id="campoComprovante" styleClass="campo" promptText="Número do comprovante do banco (opcional)"/>
+
+            <HBox styleClass="resumo-calculado" spacing="10" alignment="TOP_LEFT">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+                <FontIcon iconLiteral="fth-info"/>
+                <Label fx:id="explicacao" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </VBox>
+        <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
+            <Button fx:id="botaoSalvar" text="Registrar depósito" onAction="#salvar" styleClass="botao-primario"
+                    defaultButton="true">
+                <graphic><FontIcon iconLiteral="fth-check"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</StackPane>
