@@ -43,6 +43,11 @@ public enum Acao {
     // Importar planilha (revisão da SR2) · trazer os dados da Fundação de uma vez
     IMPORTAR_DADOS("Importação", "Importar imóveis, inquilinos e contratos de uma planilha", null),
 
+    // Cópia de segurança (revisão da SR2) · não perder os dados se o computador der problema
+    FAZER_COPIA_SEGURANCA("Cópias de segurança", "Ver as cópias e fazer uma cópia agora (também em pen drive)", null),
+    RESTAURAR_COPIA_SEGURANCA("Cópias de segurança", "Restaurar uma cópia (o sistema volta para aquela data)",
+            FAZER_COPIA_SEGURANCA),
+
     VER_USUARIOS("Usuários", "Ver a lista de usuários", null),
     CRIAR_USUARIO("Usuários", "Criar usuário novo", VER_USUARIOS),
     EDITAR_PERMISSOES("Usuários", "Ajustar permissões de usuários", VER_USUARIOS),
