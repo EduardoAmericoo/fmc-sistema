@@ -26,35 +26,45 @@
                 <Label text="Gestão de aluguéis" styleClass="marca-sub"/>
             </VBox>
 
-            <VBox fx:id="menu" spacing="2">
-                <Label text="MENU" styleClass="secao-menu"/>
-                <Button text="Painel" userData="painel" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-grid"/></graphic>
-                </Button>
-                <Button text="Aluguéis e cobrança" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
-                </Button>
-                <Button text="Caixa e banco" userData="caixa-banco" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-credit-card"/></graphic>
-                </Button>
-                <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-home"/></graphic>
-                </Button>
-                <Button text="Inquilinos" userData="inquilinos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-users"/></graphic>
-                </Button>
-                <Button text="Contratos" userData="contratos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-file-text"/></graphic>
-                </Button>
-                <Button text="Usuários" userData="usuarios" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-shield"/></graphic>
-                </Button>
-                <Button text="Importar planilha" userData="importar" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
-                </Button>
-                <Button text="Cópias de segurança" userData="copias" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
-                    <graphic><FontIcon iconLiteral="fth-database"/></graphic>
-                </Button>
+            <!-- Menu em seções, como no protótipo: Operação (o dia a dia), Cadastros e Gestão.
+                 A seção some sozinha quando a pessoa não pode abrir nenhuma tela dela. -->
+            <VBox fx:id="menu" spacing="14">
+                <VBox styleClass="secao" spacing="2">
+                    <Label text="OPERAÇÃO" styleClass="secao-menu"/>
+                    <Button text="Painel" userData="painel" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-grid"/></graphic>
+                    </Button>
+                    <Button text="Aluguéis e cobrança" userData="alugueis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-dollar-sign"/></graphic>
+                    </Button>
+                    <Button text="Caixa e banco" userData="caixa-banco" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-credit-card"/></graphic>
+                    </Button>
+                </VBox>
+                <VBox styleClass="secao" spacing="2">
+                    <Label text="CADASTROS" styleClass="secao-menu"/>
+                    <Button text="Inquilinos" userData="inquilinos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-users"/></graphic>
+                    </Button>
+                    <Button text="Imóveis" userData="imoveis" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-home"/></graphic>
+                    </Button>
+                    <Button text="Contratos" userData="contratos" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-file-text"/></graphic>
+                    </Button>
+                </VBox>
+                <VBox styleClass="secao" spacing="2">
+                    <Label text="GESTÃO" styleClass="secao-menu"/>
+                    <Button text="Usuários" userData="usuarios" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-shield"/></graphic>
+                    </Button>
+                    <Button text="Importar planilha" userData="importar" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
+                    </Button>
+                    <Button text="Cópias de segurança" userData="copias" onAction="#abrirTela" styleClass="item-menu" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-database"/></graphic>
+                    </Button>
+                </VBox>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
