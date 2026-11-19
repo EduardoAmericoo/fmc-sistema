@@ -58,7 +58,7 @@ public class LancamentoRepository {
      * Grava o depósito do Caixa no Banco: a saída do Caixa e a entrada no Banco na MESMA
      * transação (ou entram as duas, ou nenhuma), para o total da Fundação nunca ficar errado.
      */
-    public void salvarDeposito(Lancamento saidaDoCaixa, Lancamento entradaNoBanco) throws SQLException {
+    public void salvarTransferencia(Lancamento saidaDoCaixa, Lancamento entradaNoBanco) throws SQLException {
         try (Connection conexao = Database.conectar()) {
             conexao.setAutoCommit(false);
             try {

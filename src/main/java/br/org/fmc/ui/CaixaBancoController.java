@@ -109,7 +109,7 @@ public class CaixaBancoController {
             carregarMovimento();
         });
         montarTabela();
-        Permissoes.mostrarSe(botaoDepositar, Acao.DEPOSITAR_NO_BANCO);
+        Permissoes.mostrarSe(botaoDepositar, Acao.TRANSFERIR_CAIXA_BANCO);
         barra.widthProperty().addListener((obs, antes, agora) -> ajustarBarra());
         carregarTudo();
     }

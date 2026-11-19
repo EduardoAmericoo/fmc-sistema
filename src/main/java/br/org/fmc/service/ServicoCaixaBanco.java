@@ -144,21 +144,31 @@ public class ServicoCaixaBanco {
         }
     }
 
-    /**
-     * Quanto dá para depositar do Caixa numa data: o menor saldo do Caixa daquele dia em diante.
-     * Assim, um depósito com data passada nunca deixa o Caixa negativo nos dias seguintes.
-     */
+    /** Quanto dá para depositar do Caixa no Banco numa data (ver {@link #disponivelEm}). */
     public BigDecimal disponivelParaDepositar(LocalDate data) throws SQLException {
+        return disponivelEm(Conta.CAIXA, data);
+    }
+
+    /** Quanto dá para sacar do Banco para o Caixa numa data (ver {@link #disponivelEm}). */
+    public BigDecimal disponivelParaSacar(LocalDate data) throws SQLException {
+        return disponivelEm(Conta.BANCO, data);
+    }
+
+    /**
+     * Quanto dá para tirar de uma conta numa data: o menor saldo dela daquele dia em diante.
+     * Assim, um depósito ou saque com data passada nunca deixa a conta negativa nos dias seguintes.
+     */
+    public BigDecimal disponivelEm(Conta conta, LocalDate data) throws SQLException {
         Sessao.exigir(Acao.VER_CAIXA_BANCO);
-        List<Lancamento> caixa = considerados(Conta.CAIXA);
+        List<Lancamento> lista = considerados(conta);
         BigDecimal saldo = BigDecimal.ZERO;
-        for (Lancamento l : caixa) {
+        for (Lancamento l : lista) {
             if (!l.data().isAfter(data)) {
                 saldo = saldo.add(l.valor());
             }
         }
         BigDecimal menor = saldo;
-        for (Lancamento l : caixa) { // a lista vem em ordem de data
+        for (Lancamento l : lista) { // a lista vem em ordem de data
             if (l.data().isAfter(data)) {
                 saldo = saldo.add(l.valor());
                 if (saldo.compareTo(menor) < 0) {
@@ -170,33 +180,48 @@ public class ServicoCaixaBanco {
     }
 
     /**
-     * Registra o dinheiro e os cheques levados do Caixa para o Banco: sai do Caixa e entra no
-     * Banco o mesmo valor, na mesma gravação. O comprovante (número do depósito) é opcional.
+     * Depósito: o dinheiro e os cheques levados do Caixa para o Banco. Sai do Caixa e entra no
+     * Banco o mesmo valor, na mesma gravação. O comprovante é opcional.
      */
     public void depositarNoBanco(LocalDate data, BigDecimal valor, String comprovante) throws SQLException {
-        Sessao.exigir(Acao.DEPOSITAR_NO_BANCO);
+        transferir(Conta.CAIXA, data, valor, comprovante);
+    }
+
+    /**
+     * Saque: dinheiro tirado do Banco para o Caixa (ex.: troco ou um pagamento pequeno em
+     * dinheiro). Sai do Banco e entra no Caixa o mesmo valor, na mesma gravação.
+     */
+    public void sacarParaOCaixa(LocalDate data, BigDecimal valor, String comprovante) throws SQLException {
+        transferir(Conta.BANCO, data, valor, comprovante);
+    }
+
+    /** Leva o valor da conta de origem para a outra (Caixa para Banco = depósito; Banco para Caixa = saque). */
+    public void transferir(Conta origem, LocalDate data, BigDecimal valor, String comprovante) throws SQLException {
+        Sessao.exigir(Acao.TRANSFERIR_CAIXA_BANCO);
+        boolean deposito = origem == Conta.CAIXA;
+        String nome = deposito ? "depósito" : "saque";
         List<String> erros = new ArrayList<>();
         if (data == null) {
-            erros.add("Informe a data do depósito.");
+            erros.add("Informe a data do " + nome + ".");
         } else {
             if (data.isAfter(hoje())) {
-                erros.add("A data do depósito não pode ser no futuro.");
+                erros.add("A data do " + nome + " não pode ser no futuro.");
             }
             for (Conta conta : Conta.values()) {
                 Optional<Lancamento> inicial = lancamentos.saldoInicial(conta);
                 if (inicial.isPresent() && data.isBefore(inicial.get().data())) {
-                    erros.add("A data do depósito não pode ser antes do saldo inicial do " + conta + " ("
+                    erros.add("A data do " + nome + " não pode ser antes do saldo inicial do " + conta + " ("
                             + Formatos.data(inicial.get().data()) + ").");
                 }
             }
         }
         if (valor == null || valor.signum() <= 0) {
-            erros.add("Informe o valor depositado, maior que zero.");
+            erros.add(deposito ? "Informe o valor depositado, maior que zero." : "Informe o valor sacado, maior que zero.");
         } else if (erros.isEmpty()) {
-            BigDecimal disponivel = disponivelParaDepositar(data);
+            BigDecimal disponivel = disponivelEm(origem, data);
             if (valor.compareTo(disponivel) > 0) {
-                erros.add("O Caixa só tem " + Formatos.moeda(disponivel) + " para depositar em " + Formatos.data(data)
-                        + ". Confira o valor ou a data.");
+                erros.add("O " + origem + " só tem " + Formatos.moeda(disponivel) + " para " + (deposito ? "depositar"
+                        : "sacar") + " em " + Formatos.data(data) + ". Confira o valor ou a data.");
             }
         }
         String numero = comprovante == null ? "" : comprovante.trim();
@@ -208,12 +233,16 @@ public class ServicoCaixaBanco {
         }
         String sufixo = (numero.isEmpty() ? "" : " · comprovante " + numero) + " · por " + Sessao.usuario().getNome();
         LocalDateTime agora = LocalDateTime.now(relogio);
-        lancamentos.salvarDeposito(
-                new Lancamento(null, Conta.CAIXA, TipoLancamento.DEPOSITO, data, valor.negate(),
-                        "Levado ao Banco" + sufixo, null, Sessao.usuario(), agora),
-                new Lancamento(null, Conta.BANCO, TipoLancamento.DEPOSITO, data, valor,
-                        "Dinheiro e cheques vindos do Caixa" + sufixo, null, Sessao.usuario(), agora));
+        TipoLancamento tipo = deposito ? TipoLancamento.DEPOSITO : TipoLancamento.SAQUE;
+        Conta destino = deposito ? Conta.BANCO : Conta.CAIXA;
+        lancamentos.salvarTransferencia(
+                new Lancamento(null, origem, tipo, data, valor.negate(),
+                        (deposito ? "Levado ao Banco" : "Sacado para o Caixa") + sufixo, null, Sessao.usuario(), agora),
+                new Lancamento(null, destino, tipo, data, valor,
+                        (deposito ? "Dinheiro e cheques vindos do Caixa" : "Dinheiro sacado do Banco") + sufixo, null,
+                        Sessao.usuario(), agora));
     }
+
 
     /** Os meses que o seletor oferece: do primeiro lançamento (ou do saldo inicial) até o mês atual. */
     public List<YearMonth> meses() throws SQLException {

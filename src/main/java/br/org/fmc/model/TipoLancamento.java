@@ -12,7 +12,9 @@ public enum TipoLancamento {
      * Dinheiro e cheques levados do Caixa para o Banco: uma saída no Caixa e uma entrada no
      * Banco, de mesmo valor, gravadas juntas. O total da Fundação não muda.
      */
-    DEPOSITO("Depósito do Caixa no Banco");
+    DEPOSITO("Depósito do Caixa no Banco"),
+    /** O contrário do depósito: dinheiro sacado do Banco para o Caixa (troco, pagamento pequeno). */
+    SAQUE("Saque do Banco para o Caixa");
 
     private final String descricao;
 

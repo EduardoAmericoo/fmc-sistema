@@ -111,13 +111,53 @@ class DepositoCaixaBancoTest {
 
     @Test
     void secretariaDepositaEFinanceiroSoConsulta() throws Exception {
-        assertTrue(Perfil.SECRETARIA.getPermissoes().contains(Acao.DEPOSITAR_NO_BANCO));
-        assertFalse(Perfil.FINANCEIRO.getPermissoes().contains(Acao.DEPOSITAR_NO_BANCO));
+        assertTrue(Perfil.SECRETARIA.getPermissoes().contains(Acao.TRANSFERIR_CAIXA_BANCO));
+        assertFalse(Perfil.FINANCEIRO.getPermissoes().contains(Acao.TRANSFERIR_CAIXA_BANCO));
         acesso.criarUsuario("Carlos Financeiro", "financeiro@exemplo.org", Perfil.FINANCEIRO, "teste123");
         Sessao.encerrar();
         acesso.login("financeiro@exemplo.org", "teste123");
 
         assertThrows(AcessoNegadoException.class,
                 () -> caixaBanco.depositarNoBanco(LocalDate.of(2026, 10, 20), reais("100.00"), ""));
+        assertThrows(AcessoNegadoException.class,
+                () -> caixaBanco.sacarParaOCaixa(LocalDate.of(2026, 10, 20), reais("100.00"), ""));
+    }
+
+    @Test
+    void saqueTiraDoBancoPoeNoCaixaESemMudarOTotal() throws Exception {
+        caixaBanco.sacarParaOCaixa(LocalDate.of(2026, 10, 15), reais("300.00"), "SAQ-77");
+
+        ServicoCaixaBanco.Disponibilidades d = caixaBanco.disponibilidades();
+        mesmoValor("1300.00", d.caixa());
+        mesmoValor("4700.00", d.banco());
+        mesmoValor("6000.00", d.total());
+        ServicoCaixaBanco.Movimento banco = caixaBanco.movimento(Conta.BANCO, OUTUBRO);
+        mesmoValor("300.00", banco.saidas());
+        assertEquals(TipoLancamento.SAQUE, banco.linhas().get(0).lancamento().tipo());
+        assertTrue(banco.linhas().get(0).lancamento().descricao().contains("comprovante SAQ-77"));
+        mesmoValor("300.00", caixaBanco.movimento(Conta.CAIXA, OUTUBRO).entradas());
+    }
+
+    @Test
+    void naoDeixaSacarMaisDoQueOBancoTemNemDeixarONegativoDepois() throws Exception {
+        RegraNegocioException e = assertThrows(RegraNegocioException.class,
+                () -> caixaBanco.sacarParaOCaixa(LocalDate.of(2026, 10, 20), reais("5000.01"), ""));
+        assertTrue(e.getErros().get(0).contains("O Banco só tem R$ 5.000,00 para sacar"), e.getErros().toString());
+
+        caixaBanco.sacarParaOCaixa(LocalDate.of(2026, 10, 20), reais("4000.00"), "");
+        // em 10/10 o Banco tinha 5.000,00, mas depois do saque de 20/10 só sobram 1.000,00
+        mesmoValor("1000.00", caixaBanco.disponivelParaSacar(LocalDate.of(2026, 10, 10)));
+        assertThrows(RegraNegocioException.class,
+                () -> caixaBanco.sacarParaOCaixa(LocalDate.of(2026, 10, 10), reais("1500.00"), ""));
+    }
+
+    @Test
+    void depositoESaqueNoMesmoMesSeCompensam() throws Exception {
+        caixaBanco.sacarParaOCaixa(LocalDate.of(2026, 10, 5), reais("500.00"), "");   // Caixa 1.500
+        caixaBanco.depositarNoBanco(LocalDate.of(2026, 10, 25), reais("1500.00"), ""); // Caixa 0
+
+        mesmoValor("0.00", caixaBanco.disponibilidades().caixa());
+        mesmoValor("6000.00", caixaBanco.disponibilidades().banco());
+        mesmoValor("0.00", caixaBanco.disponivelParaDepositar(LocalDate.of(2026, 10, 5)));
     }
 }

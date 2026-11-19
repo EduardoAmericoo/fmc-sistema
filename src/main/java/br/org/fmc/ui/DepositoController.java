@@ -1,5 +1,6 @@
 package br.org.fmc.ui;
 
+import br.org.fmc.model.Conta;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoCaixaBanco;
 import br.org.fmc.util.Formatos;
@@ -12,7 +13,10 @@ import java.time.format.DateTimeParseException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -20,7 +24,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 
-/** Janela "Depositar no banco" (revisão da SR2): o dinheiro e os cheques do Caixa levados ao banco. */
+/** Janela "Depositar ou sacar" (revisão da SR2): dinheiro do Caixa levado ao banco, ou sacado do banco para o Caixa. */
 public class DepositoController {
 
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -35,6 +39,17 @@ public class DepositoController {
     @FXML private TextField campoValor;
     @FXML private Label dicaDisponivel;
     @FXML private TextField campoComprovante;
+    @FXML private ToggleGroup grupoSentido;
+    @FXML private RadioButton opcaoDeposito;
+    @FXML private Label rotuloData;
+    @FXML private Label rotuloValor;
+    @FXML private Label explicacao;
+    @FXML private Button botaoSalvar;
+
+    /** De onde sai o dinheiro: Caixa (depósito) ou Banco (saque). */
+    private Conta origem() {
+        return opcaoDeposito.isSelected() ? Conta.CAIXA : Conta.BANCO;
+    }
 
     public static void abrir(ServicoCaixaBanco servico, Runnable depoisDeSalvar) {
         FXMLLoader carregador = new FXMLLoader(DepositoController.class.getResource("/br/org/fmc/ui/deposito.fxml"));
@@ -68,6 +83,14 @@ public class DepositoController {
             }
         });
         campoData.valueProperty().addListener((obs, antes, agora) -> mostrarDisponivel());
+        grupoSentido.selectedToggleProperty().addListener((obs, antes, agora) -> {
+            if (agora == null) {
+                antes.setSelected(true); // sempre um dos dois marcado
+                return;
+            }
+            mostrarSentido();
+        });
+        mostrarSentido();
         veu.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
                 fechar();
@@ -82,7 +105,21 @@ public class DepositoController {
         mostrarDisponivel();
     }
 
-    /** Embaixo do valor: quanto o Caixa tem para depositar na data escolhida. */
+    /** Troca os textos da janela conforme a escolha: depósito ou saque. */
+    private void mostrarSentido() {
+        boolean deposito = origem() == Conta.CAIXA;
+        rotuloData.setText(deposito ? "Data do depósito *" : "Data do saque *");
+        rotuloValor.setText(deposito ? "Valor depositado *" : "Valor sacado *");
+        botaoSalvar.setText(deposito ? "Registrar depósito" : "Registrar saque");
+        explicacao.setText(deposito
+                ? "O valor sai do Caixa e entra no Banco na mesma data. O total da Fundação não muda: só troca de lugar."
+                : "O valor sai do Banco e entra no Caixa na mesma data. Use para o troco do caixa ou para um "
+                        + "pagamento pequeno em dinheiro.");
+        mostrar(avisoErros, false);
+        mostrarDisponivel();
+    }
+
+    /** Embaixo do valor: quanto a conta de origem tem para depositar ou sacar na data escolhida. */
     private void mostrarDisponivel() {
         LocalDate data = campoData.getValue();
         if (servico == null || data == null) {
@@ -90,9 +127,10 @@ public class DepositoController {
             return;
         }
         try {
-            BigDecimal disponivel = servico.disponivelParaDepositar(data);
-            dicaDisponivel.setText("O Caixa tem " + Formatos.moeda(disponivel) + " para depositar em "
-                    + Formatos.data(data) + ".");
+            Conta origem = origem();
+            BigDecimal disponivel = servico.disponivelEm(origem, data);
+            dicaDisponivel.setText("O " + origem + " tem " + Formatos.moeda(disponivel) + " para "
+                    + (origem == Conta.CAIXA ? "depositar" : "sacar") + " em " + Formatos.data(data) + ".");
         } catch (SQLException | RegraNegocioException e) {
             dicaDisponivel.setText("");
         }
@@ -103,7 +141,7 @@ public class DepositoController {
         try {
             LocalDate data = campoData.getConverter().fromString(campoData.getEditor().getText());
             BigDecimal valor = campoValor.getText().isBlank() ? null : Formatos.lerValor(campoValor.getText());
-            servico.depositarNoBanco(data, valor, campoComprovante.getText());
+            servico.transferir(origem(), data, valor, campoComprovante.getText());
             fechar();
             depoisDeSalvar.run();
         } catch (RegraNegocioException e) {
