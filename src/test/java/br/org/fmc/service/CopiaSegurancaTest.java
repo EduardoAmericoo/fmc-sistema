@@ -140,4 +140,87 @@ class CopiaSegurancaTest {
         assertThrows(AcessoNegadoException.class, () -> copias.fazerAgora());
         assertThrows(AcessoNegadoException.class, () -> copias.restaurar(feita.arquivo()));
     }
+
+    /** Um documento anexado a um contrato, como o ServicoDocumentos grava em data/documentos. */
+    private Path documento(String relativo, String conteudo) throws Exception {
+        Path arquivo = ServicoDocumentos.pastaDocumentos().resolve(relativo);
+        Files.createDirectories(arquivo.getParent());
+        Files.writeString(arquivo, conteudo);
+        return arquivo;
+    }
+
+    @Test
+    void copiaGuardaTambemOsDocumentosNaPastaEspelho() throws Exception {
+        documento("contrato-1/vistoria.pdf", "laudo");
+        copias.fazerAgora();
+        documento("contrato-2/rg.jpg", "foto");
+        copias.copiaAutomatica(LocalDate.of(2026, 11, 19));
+
+        Path espelho = copias.pastaEspelhoDocumentos();
+        assertEquals("laudo", Files.readString(espelho.resolve("contrato-1/vistoria.pdf")));
+        assertEquals("foto", Files.readString(espelho.resolve("contrato-2/rg.jpg")));
+        assertEquals(2, copias.listar().size()); // a pasta espelho não aparece como cópia
+    }
+
+    @Test
+    void penDriveEmZipLevaOBancoEOsDocumentosEDevolveTudo() throws Exception {
+        Path laudo = documento("contrato-1/vistoria.pdf", "laudo de entrada");
+        Path penDrive = pasta.resolve("pendrive").resolve("Copia Sistema FMC.zip");
+        copias.salvarEm(penDrive);
+        assertTrue(Files.size(penDrive) > 0);
+
+        // o computador "estragou": o cadastro novo e o documento sumiram
+        acesso.criarUsuario("Bruna Teste", "bruna@exemplo.org", Perfil.SECRETARIA, "teste123");
+        Files.delete(laudo);
+        apagar(copias.pastaEspelhoDocumentos());
+
+        copias.restaurar(penDrive);
+
+        assertEquals(1, usuarios());
+        assertEquals("laudo de entrada", Files.readString(laudo));
+    }
+
+    @Test
+    void restaurarCopiaDaListaDevolveDocumentosQueSumiram() throws Exception {
+        Path laudo = documento("contrato-1/vistoria.pdf", "laudo");
+        Copia feita = copias.fazerAgora();
+        Files.delete(laudo); // apagado por engano direto na pasta
+
+        copias.restaurar(feita.arquivo());
+
+        assertEquals("laudo", Files.readString(laudo));
+    }
+
+    @Test
+    void zipQueNaoEhDoSistemaNaoMudaNada() throws Exception {
+        Path zip = pasta.resolve("fotos.zip");
+        try (java.util.zip.ZipOutputStream z = new java.util.zip.ZipOutputStream(Files.newOutputStream(zip))) {
+            z.putNextEntry(new java.util.zip.ZipEntry("foto.jpg"));
+            z.write("não é banco".getBytes());
+            z.closeEntry();
+        }
+        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> copias.restaurar(zip));
+        assertTrue(e.getErros().get(0).contains("não é uma cópia do Sistema FMC"), e.getErros().toString());
+        assertTrue(copias.listar().isEmpty());
+    }
+
+    @Test
+    void aoAbrirSoFazACopiaDoDiaSeAindaNaoHouver() throws Exception {
+        LocalDate hoje = LocalDate.of(2026, 11, 19);
+        assertTrue(copias.copiaAutomaticaSeFaltar(hoje));
+        assertFalse(copias.copiaAutomaticaSeFaltar(hoje));
+        assertEquals(1, copias.listar().size());
+        assertEquals("Automática", copias.listar().get(0).tipo().getDescricao());
+        assertEquals("Manual", Tipo.MANUAL.getDescricao());
+    }
+
+    private static void apagar(Path pasta) throws Exception {
+        if (Files.exists(pasta)) {
+            try (var todos = Files.walk(pasta)) {
+                for (Path p : todos.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                    Files.delete(p);
+                }
+            }
+        }
+    }
 }

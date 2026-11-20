@@ -27,6 +27,13 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Database.inicializar();
+        // Se o sistema não foi fechado direito ontem (queda de energia, computador desligado),
+        // a cópia do dia ainda não existe: faz agora, antes de qualquer mudança.
+        try {
+            new ServicoCopiaSeguranca().copiaAutomaticaSeFaltar(java.time.LocalDate.now());
+        } catch (Exception e) {
+            System.err.println("Não foi possível fazer a cópia de segurança ao abrir: " + e.getMessage());
+        }
         new ServicoAcesso().garantirAdministradorInicial();
 
         Tema.aplicar();
