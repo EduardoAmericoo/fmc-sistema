@@ -1555,3 +1555,45 @@
     -fx-font-weight: bold;
     -fx-text-fill: -fmc-azul;
 }
+
+/* Vistorias com fotos (revisão da SR2): cartão de cada foto, moldura e lacre */
+.cartao-foto {
+    -fx-background-color: white;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+.moldura-foto {
+    -fx-background-color: #F1F3F5;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.lacre-ok {
+    -fx-text-fill: -fmc-sucesso;
+    -fx-font-size: 12px;
+}
+
+.lacre-ok .ikonli-font-icon {
+    -fx-icon-color: -fmc-sucesso;
+}
+
+.lacre-alerta {
+    -fx-text-fill: -fmc-erro-escuro;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.lacre-alerta .ikonli-font-icon {
+    -fx-icon-color: -fmc-erro-escuro;
+}
+
+.comparacao-comodo {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: -fmc-borda;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 12;
+}

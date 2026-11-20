@@ -12,6 +12,8 @@ import br.org.fmc.model.Caucao;
 import br.org.fmc.model.Conjuge;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.DocumentoContrato;
+import br.org.fmc.model.EtapaVistoria;
+import br.org.fmc.model.FotoVistoria;
 import br.org.fmc.model.Encerramento;
 import br.org.fmc.model.Fiador;
 import br.org.fmc.model.Fianca;
@@ -25,6 +27,7 @@ import br.org.fmc.model.StatusContrato;
 import br.org.fmc.model.TipoDocumento;
 import br.org.fmc.service.RegraNegocioException;
 import br.org.fmc.service.ServicoDocumentos;
+import br.org.fmc.service.ServicoVistorias;
 import br.org.fmc.service.Sessao;
 import br.org.fmc.util.Formatos;
 import java.awt.Desktop;
@@ -84,6 +87,9 @@ public class DetalhesContratoController {
     private final ServicoDocumentos servicoDocumentos = new ServicoDocumentos();
     /** A seção de documentos é refeita depois de enviar, arquivar ou reativar. */
     private final VBox secaoDocumentos = new VBox(8);
+    /** Resumo das vistorias com fotos (refeito quando a janela de vistorias muda algo). */
+    private final VBox secaoVistorias = new VBox(8);
+    private final ServicoVistorias servicoVistorias = new ServicoVistorias();
     private boolean mostrarArquivados;
 
     /** O contrato aberto e o que fazer quando ele muda por esta janela. */
@@ -154,7 +160,8 @@ public class DetalhesContratoController {
         if (c.getStatus() == StatusContrato.ATIVO || !c.getReajustes().isEmpty()) {
             corpo.getChildren().add(secaoReajuste(c, hoje));
         }
-        corpo.getChildren().add(secaoDocumentos);
+        corpo.getChildren().addAll(secaoVistorias, secaoDocumentos);
+        carregarVistorias();
         carregarDocumentos();
         boolean podeReajustar = c.reajustePendente(hoje) && Sessao.pode(Acao.REAJUSTAR_CONTRATO);
         botaoReajustar.setVisible(podeReajustar);
@@ -410,6 +417,37 @@ public class DetalhesContratoController {
     @FXML
     private void enviarDocumento() {
         EnviarDocumentoController.abrir(contrato, servicoDocumentos, doc -> carregarDocumentos());
+    }
+
+    /** Botão "Vistorias (fotos)": contrato encerrado abre na saída; os outros, na entrada. */
+    @FXML
+    private void abrirVistorias() {
+        EtapaVistoria etapa = contrato.getStatus() == StatusContrato.ENCERRADO ? EtapaVistoria.SAIDA
+                : EtapaVistoria.ENTRADA;
+        VistoriasController.abrir(contrato, etapa, this::carregarVistorias);
+    }
+
+    // ---------- vistorias com fotos ----------
+
+    /** Resumo das vistorias: quantas fotos na entrada e na saída. */
+    private void carregarVistorias() {
+        secaoVistorias.getChildren().clear();
+        secaoVistorias.getChildren().add(titulo("Vistorias com fotos"));
+        try {
+            List<FotoVistoria> fotos = servicoVistorias.listar(contrato.getId());
+            long entrada = fotos.stream().filter(f -> f.etapa() == EtapaVistoria.ENTRADA && !f.arquivada()).count();
+            long saida = fotos.stream().filter(f -> f.etapa() == EtapaVistoria.SAIDA && !f.arquivada()).count();
+            secaoVistorias.getChildren().add(veredito(entrada > 0 ? "veredito-ok" : "veredito-neutro",
+                    "Entrada: " + quantasFotos(entrada) + " · Saída: " + quantasFotos(saida)
+                            + ". Veja, compare e gere o laudo em \"Vistorias (fotos)\"."));
+        } catch (SQLException | RegraNegocioException e) {
+            secaoVistorias.getChildren().add(veredito("veredito-erro", "Não foi possível carregar as vistorias: "
+                    + e.getMessage()));
+        }
+    }
+
+    private static String quantasFotos(long n) {
+        return n == 0 ? "nenhuma foto" : n + (n == 1 ? " foto" : " fotos");
     }
 
     /**

@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
@@ -79,7 +80,20 @@ public class EncerrarContratoController {
     }
 
     @FXML
+    private Button botaoVistoriaSaida;
+
+    /**
+     * Atalho: antes de encerrar, registrar as fotos de como o inquilino devolveu o imóvel (abre a
+     * janela de vistorias por cima; ao fechá-la, volta para cá).
+     */
+    @FXML
+    private void vistoriaSaida() {
+        VistoriasController.abrir(contrato, br.org.fmc.model.EtapaVistoria.SAIDA, null);
+    }
+
+    @FXML
     private void initialize() {
+        Permissoes.mostrarSe(botaoVistoriaSaida, br.org.fmc.model.Acao.REGISTRAR_VISTORIA);
         campoMotivo.getItems().setAll(MotivoEncerramento.values());
         // "Outro motivo" pede uma explicação.
         campoMotivo.valueProperty().addListener((obs, antes, agora) -> rotuloObservacao.setText(
