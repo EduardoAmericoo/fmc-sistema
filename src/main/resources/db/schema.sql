@@ -331,3 +331,22 @@ CREATE TABLE IF NOT EXISTS contrato_gerar_desde (
     contrato_id INTEGER PRIMARY KEY REFERENCES contrato(id),
     gerar_desde TEXT    NOT NULL
 );
+
+-- Vistorias com fotos (revisão da SR2, ideia da reunião com o professor): fotos do imóvel na
+-- entrega das chaves (entrada) e na devolução (saída), por cômodo. A foto é reduzida e copiada para
+-- data/documentos/vistorias. O hash (SHA-256) do arquivo guardado é o "lacre": se alguém editar a
+-- foto depois, o sistema percebe. Não existe excluir: só arquivar (foto enviada por engano).
+CREATE TABLE IF NOT EXISTS vistoria_foto (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    contrato_id   INTEGER NOT NULL REFERENCES contrato(id) ON DELETE CASCADE,
+    etapa         TEXT    NOT NULL,
+    comodo        TEXT    NOT NULL,
+    observacao    TEXT,
+    arquivo       TEXT    NOT NULL UNIQUE,
+    nome_original TEXT    NOT NULL,
+    hash_sha256   TEXT    NOT NULL,
+    registrada_em TEXT    NOT NULL,
+    registrada_por TEXT   NOT NULL,
+    tirada_em     TEXT,
+    arquivada_em  TEXT
+)
