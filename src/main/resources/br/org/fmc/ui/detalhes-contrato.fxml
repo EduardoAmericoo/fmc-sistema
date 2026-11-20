@@ -46,6 +46,10 @@
                     styleClass="botao-secundario">
                 <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
             </Button>
+            <Button fx:id="botaoVistorias" text="Vistorias (fotos)" onAction="#abrirVistorias"
+                    styleClass="botao-secundario">
+                <graphic><FontIcon iconLiteral="fth-camera"/></graphic>
+            </Button>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="botaoReajustar" text="Aplicar reajuste" onAction="#reajustar" styleClass="botao-primario"
                     managed="false" visible="false">

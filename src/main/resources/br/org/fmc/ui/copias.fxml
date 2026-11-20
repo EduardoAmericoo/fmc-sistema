@@ -25,7 +25,7 @@
         <VBox styleClass="conteudo" spacing="20">
             <VBox spacing="6">
                 <Label text="Cópias de segurança" styleClass="titulo"/>
-                <Label text="Todos os dados do sistema ficam em um arquivo neste computador. As cópias protegem a Fundação se o computador estragar, for trocado ou se algo for apagado por engano."
+                <Label text="Os dados do sistema (o banco de dados e os documentos anexados aos contratos) ficam neste computador. As cópias protegem a Fundação se o computador estragar, for trocado ou se algo for apagado por engano."
                        styleClass="texto" wrapText="true" minHeight="-Infinity"/>
             </VBox>
 
@@ -54,7 +54,7 @@
                 </VBox>
                 <VBox styleClass="cartao-resumo, passo-importacao" spacing="10" maxWidth="Infinity" maxHeight="Infinity" GridPane.columnIndex="2">
                     <Label text="Fora do computador" styleClass="subtitulo"/>
-                    <Label text="Uma vez por semana, salve uma cópia em um pen drive ou HD externo e guarde longe do computador. Se ele estragar, é essa cópia que salva os dados."
+                    <Label text="Uma vez por semana, salve uma cópia completa (banco e documentos, num arquivo .zip) em um pen drive ou HD externo e guarde longe do computador. Se ele estragar, é essa cópia que salva os dados."
                            styleClass="texto" wrapText="true" minHeight="-Infinity" VBox.vgrow="ALWAYS"/>
                     <Button text="Salvar cópia em…" onAction="#salvarEm" styleClass="botao-secundario" minWidth="-Infinity">
                         <graphic><FontIcon iconLiteral="fth-hard-drive"/></graphic>
@@ -88,7 +88,7 @@
                     <TableView fx:id="tabela" styleClass="tabela-fmc" prefHeight="360">
                         <columns>
                             <TableColumn fx:id="colunaQuando" text="Feita em" prefWidth="220" minWidth="180"/>
-                            <TableColumn fx:id="colunaTipo" text="Tipo" prefWidth="260" minWidth="180"/>
+                            <TableColumn fx:id="colunaTipo" text="Tipo de cópia" prefWidth="260" minWidth="180"/>
                             <TableColumn fx:id="colunaTamanho" text="Tamanho" prefWidth="120" minWidth="90"/>
                             <TableColumn fx:id="colunaAcoes" text="" prefWidth="160" minWidth="140" sortable="false"/>
                         </columns>

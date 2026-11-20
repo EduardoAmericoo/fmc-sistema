@@ -28,6 +28,8 @@ public enum Acao {
     ENCERRAR_CONTRATO("Contratos", "Encerrar contrato (saída do inquilino)", VER_CONTRATOS),
     REAJUSTAR_CONTRATO("Contratos", "Aplicar o reajuste anual do aluguel", VER_CONTRATOS),
     ANEXAR_DOCUMENTOS("Contratos", "Anexar documentos (e arquivar os enviados por engano)", VER_CONTRATOS),
+    REGISTRAR_VISTORIA("Contratos", "Registrar as fotos da vistoria de entrada e de saída (e arquivar as enviadas por engano)",
+            VER_CONTRATOS),
 
     VER_ALUGUEIS("Aluguéis", "Ver aluguéis e números financeiros", null),
     GERAR_ALUGUEIS("Aluguéis", "Gerar os aluguéis do mês", VER_ALUGUEIS),

@@ -66,6 +66,10 @@
         </VBox>
 
         <HBox styleClass="janela-rodape" spacing="12" alignment="CENTER_RIGHT">
+            <Button fx:id="botaoVistoriaSaida" text="Fotos da vistoria de saída" onAction="#vistoriaSaida"
+                    styleClass="botao-secundario">
+                <graphic><FontIcon iconLiteral="fth-camera"/></graphic>
+            </Button>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Cancelar" onAction="#fechar" styleClass="botao-secundario"/>
             <Button text="Encerrar contrato" onAction="#confirmar" styleClass="botao-primario" defaultButton="true">

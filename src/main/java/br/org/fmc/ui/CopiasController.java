@@ -61,9 +61,9 @@ public class CopiasController {
     private void initialize() {
         mostrar(avisoOk, false);
         mostrar(avisoErros, false);
-        textoAutomatica.setText("Ao fechar o sistema, ele guarda sozinho a cópia do dia. Ficam as cópias dos últimos "
+        textoAutomatica.setText("Ao abrir e ao fechar o sistema, ele guarda sozinho a cópia do dia, com os documentos anexados aos contratos. Ficam as cópias dos últimos "
                 + ServicoCopiaSeguranca.DIAS_GUARDADOS + " dias; as mais antigas são apagadas.");
-        textoPasta.setText("Pasta: " + servico.pasta().toAbsolutePath());
+        textoPasta.setText("Pasta: " + servico.pasta().toAbsolutePath() + " (os documentos ficam na subpasta documentos)");
         Permissoes.mostrarSe(botaoRestaurarArquivo, Acao.RESTAURAR_COPIA_SEGURANCA);
 
         colunaQuando.setCellValueFactory(c -> new SimpleStringProperty(quando(c.getValue().feitaEm())));
@@ -129,8 +129,8 @@ public class CopiasController {
         FileChooser seletor = new FileChooser();
         seletor.setTitle("Salvar cópia de segurança");
         seletor.setInitialFileName("Copia Sistema FMC " + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                + ".db");
-        seletor.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cópia do Sistema FMC", "*.db"));
+                + ".zip");
+        seletor.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cópia completa do Sistema FMC (banco e documentos)", "*.zip"));
         File destino = seletor.showSaveDialog(janela());
         if (destino == null) {
             return;
@@ -145,7 +145,7 @@ public class CopiasController {
     private void restaurarDeArquivo() {
         FileChooser seletor = new FileChooser();
         seletor.setTitle("Escolher a cópia para restaurar");
-        seletor.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cópia do Sistema FMC", "*.db"));
+        seletor.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cópia do Sistema FMC", "*.zip", "*.db"));
         File escolhida = seletor.showOpenDialog(janela());
         if (escolhida != null) {
             restaurar(escolhida.toPath(), "o arquivo " + escolhida.getName());
