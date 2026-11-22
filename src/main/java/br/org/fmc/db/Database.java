@@ -13,14 +13,36 @@ import java.sql.Statement;
 /**
  * Conexão com o banco SQLite.
  *
- * O banco é um único arquivo (por padrão, data/fmc.db), parecido com o
- * db.sqlite3 do Django. As tabelas são criadas a partir de db/schema.sql.
+ * O banco é um único arquivo (fmc.db), parecido com o db.sqlite3 do Django.
+ * As tabelas são criadas a partir de db/schema.sql.
+ *
+ * Onde fica a pasta de dados (banco, documentos, cópias e caixa de saída):
+ * - rodando pelo código (mvnw ou VS Code): data/, na pasta do projeto, como sempre;
+ * - no programa pronto (FMC.exe, instalado ou portátil): %LOCALAPPDATA%\FMC\data
+ *   (ex.: C:\Users\maria\AppData\Local\FMC\data). O programa instalado fica em
+ *   "Arquivos de Programas", onde o Windows não deixa gravar; além disso, assim o
+ *   atalho da Área de Trabalho e uma versão nova do programa enxergam os mesmos dados.
  */
 public final class Database {
 
-    private static Path arquivo = Path.of("data", "fmc.db");
+    private static Path arquivo = pastaPadrao(System.getProperty("jpackage.app-path"),
+            System.getenv("LOCALAPPDATA")).resolve("fmc.db");
 
     private Database() {
+    }
+
+    /**
+     * A pasta de dados padrão. O jpackage, que monta o FMC.exe, avisa que o sistema está rodando
+     * como programa pronto pela propriedade "jpackage.app-path" (o caminho do FMC.exe).
+     *
+     * @param caminhoDoExe  o valor de jpackage.app-path (null rodando pelo código)
+     * @param localAppData  a pasta %LOCALAPPDATA% do Windows
+     */
+    static Path pastaPadrao(String caminhoDoExe, String localAppData) {
+        if (caminhoDoExe == null || caminhoDoExe.isBlank() || localAppData == null || localAppData.isBlank()) {
+            return Path.of("data");
+        }
+        return Path.of(localAppData, "FMC", "data");
     }
 
     /** Troca o arquivo do banco (usado nos testes para não mexer nos dados reais). */
