@@ -5,6 +5,7 @@ import br.org.fmc.model.ContatoCobranca;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
+import br.org.fmc.model.EtapaVistoria;
 import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.MotivoEncerramento;
@@ -56,8 +57,16 @@ class CargaHistoricoTeste {
 
     /** O que a carga fez, para o resumo da tela e para os testes. */
     record Resultado(int alugueis, int recibos, int dispensas, int contatos, int encerrados, int reajustes,
-            int documentos) {
+            int documentos, int fotosVistoria) {
     }
+
+    /**
+     * Um exemplo de vistoria com fotos, para a aba Comparar e o laudo terem o que mostrar:
+     * a Sala na entrada (limpa) e na saída (com estragos). As fotos estão em
+     * dados-teste/vistorias e são de domínio público (CC0); a origem está no LEIA-ME.txt de lá.
+     */
+    static final String COMODO_EXEMPLO = "Sala";
+    static final String OBS_SAIDA_EXEMPLO = "Teto e paredes com reboco descascando, piso danificado e entulho no chão";
 
     private final LocalDate hoje;
     private final Usuario admin;
@@ -123,8 +132,9 @@ class CargaHistoricoTeste {
         int encerrados = encerrarEArquivar(saidas);
         int reajustes = aplicarReajustes();
         int documentos = anexarDocumentos(todos, saidas);
+        int fotos = registrarVistorias(saidas);
         return new Resultado(totalAlugueis, totalRecibos, totalDispensas, totalContatos, encerrados, reajustes,
-                documentos);
+                documentos, fotos);
     }
 
     /**
@@ -361,5 +371,61 @@ class CargaHistoricoTeste {
             throw new IllegalStateException("Não foi possível criar os documentos fictícios.", e);
         }
         return total;
+    }
+
+    /**
+     * O exemplo de vistoria com fotos fica no primeiro contrato encerrado (o inquilino já saiu,
+     * então há a entrada e a saída para comparar).
+     *
+     * @return quantas fotos foram registradas (0 se não houver contrato encerrado)
+     */
+    private int registrarVistorias(Map<Long, LocalDate> saidas) throws SQLException {
+        Long contrato = saidas.keySet().stream().sorted().findFirst().orElse(null);
+        if (contrato == null) {
+            return 0;
+        }
+        ServicoVistorias servico = new ServicoVistorias();
+        int total = 0;
+        Path pasta = null;
+        try {
+            pasta = Files.createTempDirectory("fotos-vistoria-ficticias");
+            Path entrada = copiarFoto(pasta, "sala-entrada.jpg");
+            Path saida = copiarFoto(pasta, "sala-saida.jpg");
+            total += servico.adicionar(contrato, EtapaVistoria.ENTRADA, COMODO_EXEMPLO,
+                    "Em bom estado: paredes pintadas, portas e piso sem estragos", List.of(entrada)).size();
+            total += servico.adicionar(contrato, EtapaVistoria.SAIDA, COMODO_EXEMPLO,
+                    OBS_SAIDA_EXEMPLO, List.of(saida)).size();
+        } catch (IOException e) {
+            throw new IllegalStateException("Não foi possível preparar as fotos fictícias de vistoria.", e);
+        } finally {
+            apagarPasta(pasta);
+        }
+        return total;
+    }
+
+    /** Copia uma foto de dados-teste/vistorias para a pasta temporária (o serviço recebe arquivos). */
+    private static Path copiarFoto(Path pasta, String nome) throws IOException {
+        try (var in = CargaHistoricoTeste.class.getResourceAsStream("/dados-teste/vistorias/" + nome)) {
+            if (in == null) {
+                throw new IOException("Foto de teste não encontrada: " + nome);
+            }
+            Path destino = pasta.resolve(nome);
+            Files.copy(in, destino);
+            return destino;
+        }
+    }
+
+    private static void apagarPasta(Path pasta) {
+        if (pasta == null) {
+            return;
+        }
+        try (var arquivos = Files.list(pasta)) {
+            for (Path p : arquivos.toList()) {
+                Files.deleteIfExists(p);
+            }
+            Files.deleteIfExists(pasta);
+        } catch (IOException e) {
+            // pasta temporária: o Windows limpa depois
+        }
     }
 }

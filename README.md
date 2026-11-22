@@ -1,6 +1,9 @@
 # Sistema Fundação Manuel Cruz
 
 [![Testes](https://github.com/EduardoAmericoo/fmc-sistema/actions/workflows/testes.yml/badge.svg)](https://github.com/EduardoAmericoo/fmc-sistema/actions/workflows/testes.yml)
+[![Versão](https://img.shields.io/github/v/release/EduardoAmericoo/fmc-sistema?label=vers%C3%A3o)](https://github.com/EduardoAmericoo/fmc-sistema/releases/latest)
+![Windows](https://img.shields.io/badge/plataforma-Windows-1D4D7A)
+![Java 21](https://img.shields.io/badge/Java-21-1D4D7A)
 
 Sistema de gestão de imóveis e aluguéis para a **Fundação Manuel Cruz** (Aracaju, SE), uma entidade sem fins lucrativos
 com 124 imóveis para aluguel que presta contas ao Ministério Público de Sergipe.
@@ -19,7 +22,7 @@ O cliente validou o protótipo: *"resolve 90% dos meus problemas"*.
 ## Testar agora
 
 O sistema é um aplicativo de **Windows**. Ele já abre com dados fictícios para testar: 124 imóveis, 110 inquilinos,
-110 contratos e 18 meses de aluguéis, recibos e cobrança.
+110 contratos e 18 meses de aluguéis, recibos, cobrança e vistorias com fotos.
 
 ### Opção 1: instalar o programa (recomendado)
 
@@ -36,15 +39,12 @@ Na primeira vez, o Windows pode mostrar o aviso **"O Windows protegeu o computad
 não tem assinatura digital. Clique em **Mais informações** e depois em **Executar assim mesmo**.
 
 **Sem permissão para instalar programas?** Na mesma página há o **`FMC-Sistema-<versão>-windows.zip`**, a versão
-portátil: extraia, abra a pasta **FMC** e dê dois cliques em **`FMC.exe`**. O `FMC.exe` precisa ficar dentro da pasta
-dele; para ter um ícone na Área de Trabalho, clique com o botão direito no `FMC.exe` → **Enviar para → Área de
-trabalho (criar atalho)**.
+portátil: extraia, abra a pasta **FMC** e dê dois cliques em **`FMC.exe`**.
 
 ### Opção 2: rodar pelo código
 
-1. Instale o **Java 21** (Temurin): https://adoptium.net (escolha a versão 21 LTS).
-2. Baixe o código: no topo desta página, **Code → Download ZIP**, e extraia; ou clone com o Git.
-3. Abra o PowerShell dentro da pasta do projeto e rode:
+Com o **Java 21** instalado ([Temurin](https://adoptium.net), versão 21 LTS), baixe o código (**Code → Download ZIP**)
+e, no PowerShell, dentro da pasta do projeto:
 
 ```powershell
 .\mvnw.cmd javafx:run
@@ -60,10 +60,8 @@ Na primeira vez demora alguns minutos, porque o `mvnw` baixa o Maven e as biblio
 | `secretaria@exemplo.org` | `teste123` | Secretaria | cadastros, contratos, aluguéis, recebimento e cobrança |
 | `financeiro@exemplo.org` | `teste123` | Financeiro | consulta, geração de aluguéis, contatos de cobrança e Caixa |
 | `aprendiz@exemplo.org` | `teste123` | Secretaria com uma permissão a menos | igual à Secretaria, mas não cadastra inquilino novo |
-| `administrador@exemplo.org` | `teste123` | Administrador | igual ao `admin@fmc.org` |
 
-Estas senhas valem só para os dados fictícios de demonstração. Na versão instalada na Fundação, os dados de teste
-ficam desligados (veja [Versão da Fundação](#versão-da-fundação)).
+Estas senhas valem só para os dados fictícios de demonstração. Os nomes, CPFs e fotos são inventados.
 
 ## Roteiro de 5 minutos
 
@@ -74,8 +72,9 @@ ficam desligados (veja [Versão da Fundação](#versão-da-fundação)).
 3. Na aba **Para cobrança**, escolha um inquilino e registre um **contato**: não atendeu, prometeu pagar (com a data)
    ou sem acordo. Dali também sai a mensagem pronta por e-mail ou WhatsApp.
 4. Em **Caixa e banco**, veja o recebimento lançado sozinho e o saldo do dia.
-5. Em **Contratos**, abra os detalhes de um contrato: garantia (fiador ou caução), documentos, **vistorias com fotos**
-   e laudo em PDF, prorrogação, reajuste e encerramento.
+5. Em **Contratos**, abra os detalhes de um contrato: garantia (fiador ou caução), documentos, prorrogação, reajuste e
+   encerramento. No contrato encerrado **CT-1043** (filtro **Encerrados**), abra **Vistorias (fotos)** e, na aba
+   **Comparar entrada e saída**, veja a sala na entrega das chaves e na devolução, lado a lado; dali sai o laudo em PDF.
 6. Saia e entre como **`financeiro@exemplo.org`**: os botões de receber e cadastrar não aparecem, porque o perfil não tem
    essas permissões. Como **`admin@fmc.org`**, a tela **Usuários** mostra como liberar ação por ação para cada pessoa.
 
@@ -98,167 +97,38 @@ Nada é apagado: recibo errado é cancelado com motivo e estorno, e inquilinos, 
 
 ## Tecnologias e arquitetura
 
-- **Java 21** e **JavaFX 21** (FXML + CSS), com **Maven** (wrapper `mvnw`) e testes em **JUnit 5**.
-- Visual: **AtlantaFX** (tema PrimerLight), ícones **Feather** (Ikonli) e fontes Urbanist e Plus Jakarta Sans,
-  seguindo o design system da Fundação (azul `#1D4D7A`).
-- **SQLite** (`sqlite-jdbc`), **PDFBox** (recibo, laudo e demonstrativo), **Angus Mail** (e-mail SMTP) e
-  **fastexcel** (planilhas).
+| Camada | Tecnologia |
+|---|---|
+| Linguagem e telas | Java 21, JavaFX 21 (FXML + CSS), AtlantaFX, ícones Feather (Ikonli) |
+| Banco de dados | SQLite, num único arquivo local |
+| Documentos | PDFBox (recibo, laudo de vistoria e demonstrativo), fastexcel (planilhas) |
+| E-mail | Angus Mail (SMTP com senha de app) |
+| Build e testes | Maven, JUnit 5, GitHub Actions, instalador com `jpackage` |
 
 É um **aplicativo de desktop, sem servidor**: a Fundação usa um computador só e não tem equipe de TI. O banco é um único
-arquivo SQLite (`data/fmc.db`), fácil de copiar, e por isso a cópia de segurança é automática. A única saída para a
-internet é o envio de e-mail; o WhatsApp só abre um link `wa.me` no navegador.
+arquivo, fácil de copiar, e a cópia de segurança é automática. A única saída para a internet é o envio de e-mail; o
+WhatsApp só abre um link `wa.me` no navegador.
 
-O código é organizado em camadas, cada uma com um papel só:
+O código é organizado em camadas, cada uma com um papel só, o que deixa as regras de negócio testáveis sem abrir telas:
 
 ```
 tela (ui)  →  regra de negócio (service)  →  banco (repository)  →  SQLite (db)
                      usando as classes do domínio (model)
 ```
 
-As permissões são conferidas duas vezes: o botão some na tela e o service recusa a ação.
+O visual segue o design system da Fundação (azul `#1D4D7A`, fontes Urbanist e Plus Jakarta Sans) e o protótipo
+aprovado pelo cliente.
 
-## Para quem desenvolve
+## Qualidade e segurança
 
-### O que instalar (uma vez só)
-
-1. **JDK 21**: https://adoptium.net (versão 21 LTS).
-2. **VS Code**: https://code.visualstudio.com, com a extensão **Extension Pack for Java** (o VS Code sugere sozinho).
-3. **GitHub Desktop** (opcional): https://desktop.github.com. No GitHub Desktop: **File → Clone repository**,
-   escolha `fmc-sistema` e clique em **Open in Visual Studio Code**.
-
-Não é preciso instalar o Maven: o `mvnw` baixa tudo sozinho.
-
-### Rodar e testar
-
-**No VS Code:** aba *Run and Debug* (Ctrl+Shift+D), escolha **"Rodar o sistema"** e aperte F5. Ela roda sem
-depuração: os breakpoints (bolinhas vermelhas) não pausam o sistema. Para investigar um erro passo a passo, escolha
-**"Depurar (para quem programa: para nos breakpoints)"**. Aí o sistema para em cada breakpoint e só continua com F5
-(parece travado, mas está esperando).
-
-**No PowerShell:**
-
-```powershell
-.\mvnw.cmd javafx:run
-```
-
-```powershell
-.\mvnw.cmd test
-```
-
-Os testes rodam num banco temporário, sem mexer no seu. O GitHub Actions roda todos eles em cada Pull Request e em cada
-merge na `main`; o merge só é liberado com os testes passando.
-
-O sistema foi feito e testado só no Windows.
-
-### Gerar o instalador e o .zip (para o Release)
-
-```powershell
-.\scripts\gerar-exe.ps1
-```
-
-O script compila o sistema e usa o `jpackage` (vem no JDK 21) para montar, em `target\pacote`:
-
-- **`Instalar-FMC-<versão>.exe`**: o instalador, que cria os atalhos na Área de Trabalho e no menu Iniciar;
-- **`FMC-Sistema-<versão>-windows.zip`**: a versão portátil, com o `FMC.exe` e um Java embutido.
-
-Os dois vão anexados na página de Releases do GitHub. Para o instalador, o computador que gera precisa do
-**WiX Toolset 3.14** (gratuito): baixe o `wix314-binaries.zip` em https://github.com/wixtoolset/wix3/releases e
-extraia em `%LOCALAPPDATA%\wix314`. Sem o WiX, `.\scripts\gerar-exe.ps1 -SemInstalador` gera só o `.zip`.
-Quem instala o FMC não precisa de nada disso.
-
-### Dados de teste
-
-Na primeira vez que o sistema abre com o banco vazio (logo depois de baixar o projeto ou de apagar a pasta `data/`),
-ele carrega sozinho os dados fictícios e avisa numa janelinha. Se o banco já tem algum cadastro, nada é mexido.
-Os dados ficam em `src/main/resources/dados-teste/*.csv`; o histórico de 18 meses é montado por `CargaHistoricoTeste`.
-
-**Para apagar tudo e recarregar do zero** (por exemplo, antes de uma apresentação):
-
-- **No VS Code:** escolha **"Rodar com dados de teste (apaga tudo e recarrega)"** e aperte ▶. Depois, volte para
-  **"Rodar o sistema"**, senão o F5 apaga tudo de novo na próxima vez.
-- **No PowerShell:** `$env:FMC_DADOS_TESTE="recarregar"; .\mvnw.cmd javafx:run`
-
-⚠️ Recarregar **apaga todos os dados** do seu banco local. Cada pessoa tem o seu banco (`data/fmc.db`, que não vai para
-o GitHub).
-
-⚠️ Nunca use nomes ou CPFs reais da Fundação como dados de teste.
-
-### Banco de dados
-
-O banco é o arquivo `fmc.db`, criado ao abrir o sistema, dentro da pasta de dados:
-
-- rodando pelo código (`mvnw` ou VS Code): `data/`, na pasta do projeto;
-- no programa pronto (instalado ou portátil): `%LOCALAPPDATA%\FMC\data`, por exemplo
-  `C:\Users\maria\AppData\Local\FMC\data`. Fica fora da pasta do programa porque o Windows não deixa gravar em
-  "Arquivos de Programas", e assim os dados continuam lá ao atualizar ou desinstalar o programa.
-
-As tabelas estão em
-`src/main/resources/db/schema.sql`, com `CREATE TABLE IF NOT EXISTS`. Mudanças em tabelas que já existem passam por
-`db/Migracoes`, para os bancos antigos se ajustarem sozinhos. Não use `;` dentro de comentários do `schema.sql`: o
-arquivo é dividido por `;`.
-
-Na mesma pasta de dados, fora do banco, ficam `documentos/` (documentos e fotos de vistoria), `copias/` (cópias de
-segurança) e `caixa-de-saida/` (e-mails simulados). Para recomeçar do zero com os dados de teste, feche o sistema e
-apague a pasta de dados.
-
-### Onde fica cada coisa
-
-| Pasta | O que vai lá |
-|---|---|
-| `src/main/java/br/org/fmc/model` | Classes do domínio (Imovel, Inquilino, Contrato, Garantia…), enums e regras simples |
-| `src/main/java/br/org/fmc/repository` | SQL com `PreparedStatement`, um repository por assunto |
-| `src/main/java/br/org/fmc/service` | Regras de negócio, permissões (`Sessao.exigir`) e transações |
-| `src/main/java/br/org/fmc/ui` | Controllers das telas e utilitários de tela |
-| `src/main/java/br/org/fmc/db` | Conexão, schema e migrações |
-| `src/main/java/br/org/fmc/util` | PDF (recibo, laudo, demonstrativo), e-mail, senha, formatos e EXIF das fotos |
-| `src/main/resources/br/org/fmc/ui` | Telas `.fxml` (dá para editar no Scene Builder) |
-| `src/main/resources/br/org/fmc/css/tema.css` | Cores e medidas do design system |
-| `src/main/resources/db/schema.sql` | Tabelas do banco |
-| `src/test/java` | Testes automatizados (JUnit) |
-
-Cada pacote tem um `package-info.java` explicando o que entra nele.
-
-### Visual das telas
-
-- **AtlantaFX** dá a base dos controles e **`css/tema.css`** aplica as cores e medidas da Fundação.
-- **Ícones:** pacote Feather do Ikonli. No FXML: `<FontIcon iconLiteral="fth-home"/>`
-  (lista: https://kordamp.org/ikonli/cheat-sheet-feather.html).
-- **Modelo para telas novas:** a tela de Inquilinos (`inquilinos.fxml` + `InquilinosController`): cabeçalho com título
-  e botão principal, tabela num cartão (`tabela-fmc`) e o formulário numa janela por cima (`Navegador.mostrarJanela`).
-
-### Combinados de Git
-
-1. **Ninguém faz commit direto na `main`.** Tudo entra por Pull Request, com os testes passando e 1 aprovação.
-2. **Uma tarefa do Plane = uma branch**, no modelo `tipo/BOARD-numero-descricao`.
-   Ex.: `feature/BOARD-53-cadastro-usuarios` (tipos: `feature/`, `fix/`, `melhoria/`, `docs/`, `test/`).
-3. Antes de criar a branch, atualize a `main` (**Pull**).
-4. Commits pequenos, no modelo `tipo(BOARD-numero): o que foi feito`.
-   Ex.: `feat(BOARD-53): cria tela de cadastro de usuários`.
-5. Antes do Pull Request, o sistema precisa compilar, abrir e passar nos testes.
-
-## Versão da Fundação
-
-Para instalar no computador da Fundação, com dados reais:
-
-1. **Desligue os dados de teste** com a variável de ambiente `FMC_DADOS_TESTE=nao`. Sem ela, o sistema começa com os
-   dados fictícios e com o e-mail simulado.
-2. **Troque a senha do Administrador** no primeiro acesso, pelo menu "Trocar minha senha".
-3. **Configure o e-mail** para o "Esqueci a senha" e as mensagens de cobrança. A senha da conta fica só nas
-   variáveis de ambiente do Windows, nunca no código nem no GitHub.
-
-| Variável | Exemplo |
-|---|---|
-| `FMC_SMTP_HOST` | `smtp.gmail.com` |
-| `FMC_SMTP_PORTA` | `587` |
-| `FMC_SMTP_USUARIO` | `sistema@fundacao.org` |
-| `FMC_SMTP_SENHA` | senha de app da conta (no Gmail: Conta Google → Segurança → Senhas de app) |
-| `FMC_SMTP_REMETENTE` | opcional; por padrão, o próprio usuário |
-
-Sem `FMC_SMTP_HOST` e com `FMC_DADOS_TESTE=nao`, a recuperação por e-mail fica desligada e só o Administrador gera
-senha provisória.
-
-4. **Proteja os dados pessoais (LGPD):** ligue a criptografia de disco do Windows e salve a cópia de segurança num
-   pen drive criptografado. O banco guarda CPFs, rendas e telefones.
+- **363 testes automatizados** das regras de negócio, rodando no GitHub a cada mudança. Nenhuma mudança entra sem
+  os testes passando.
+- **Senhas** guardadas só como hash (PBKDF2 com sal), com senha forte obrigatória e pausa depois de 5 tentativas erradas.
+- **Permissões conferidas duas vezes:** o botão some na tela e a regra de negócio recusa a ação.
+- **Trilha de auditoria:** recibos, cancelamentos, dispensas, contatos, documentos e fotos guardam quem fez e quando.
+- **Fotos de vistoria com lacre:** cada foto guarda a sua impressão digital (SHA-256), que acusa se ela for editada depois.
+- **Dados pessoais (LGPD):** os dados ficam só no computador da Fundação, na pasta do usuário do Windows, com cópia de
+  segurança automática. Nenhum dado de inquilino vai para a internet.
 
 ## Equipe
 
