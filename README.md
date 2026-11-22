@@ -73,8 +73,8 @@ Estas senhas valem só para os dados fictícios de demonstração. Os nomes, CPF
    ou sem acordo. Dali também sai a mensagem pronta por e-mail ou WhatsApp.
 4. Em **Caixa e banco**, veja o recebimento lançado sozinho e o saldo do dia.
 5. Em **Contratos**, abra os detalhes de um contrato: garantia (fiador ou caução), documentos, prorrogação, reajuste e
-   encerramento. Em **Vistorias (fotos)**, compare lado a lado as fotos de cada cômodo na entrada e na saída do
-   inquilino e gere o laudo em PDF.
+   encerramento. No contrato encerrado **CT-1043** (filtro **Encerrados**), abra **Vistorias (fotos)** e, na aba
+   **Comparar entrada e saída**, veja a sala na entrega das chaves e na devolução, lado a lado; dali sai o laudo em PDF.
 6. Saia e entre como **`financeiro@exemplo.org`**: os botões de receber e cadastrar não aparecem, porque o perfil não tem
    essas permissões. Como **`admin@fmc.org`**, a tela **Usuários** mostra como liberar ação por ação para cada pessoa.
 

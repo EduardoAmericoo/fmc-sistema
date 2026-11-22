@@ -100,6 +100,17 @@ class DadosTesteTest {
         assertTrue(new ServicoInquilinos().listar().stream().anyMatch(i -> i.estaArquivado()));
         assertTrue(new ServicoImoveis().listar().stream().anyMatch(i -> i.estaArquivado()));
 
+        // Um exemplo de vistoria com fotos: a Sala na entrada e na saída, lado a lado, com o lacre certo
+        Contrato encerrado = contratos.stream().filter(c -> c.getStatus() == br.org.fmc.model.StatusContrato.ENCERRADO)
+                .min(java.util.Comparator.comparing(Contrato::getId)).orElseThrow();
+        ServicoVistorias vistorias = new ServicoVistorias();
+        List<ServicoVistorias.Comodo> comparacao = vistorias.comparacao(encerrado.getId());
+        assertEquals(1, comparacao.size());
+        assertEquals("Sala", comparacao.get(0).nome());
+        assertEquals(1, comparacao.get(0).entrada().size());
+        assertEquals(1, comparacao.get(0).saida().size());
+        assertTrue(vistorias.listar(encerrado.getId()).stream().allMatch(ServicoVistorias::lacreConfere));
+
         // Cobrança: devedores de 1, 2 e 3+ meses, com contatos e promessas de todo tipo
         List<ServicoCobranca.Linha> cobranca = new ServicoCobranca().listarParaCobranca();
         ServicoAlugueis.Faixas faixas = ServicoAlugueis.faixas(ServicoAlugueis.listaDeCobranca(

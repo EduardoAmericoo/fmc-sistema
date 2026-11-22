@@ -1,0 +1,12 @@
+Fotos de exemplo da vistoria nos dados de teste (CargaHistoricoTeste).
+
+Elas aparecem na Sala do primeiro contrato encerrado, na entrada e na saída, para mostrar a aba Comparar
+e o laudo em PDF. As duas são de domínio público (CC0), publicadas no Unsplash e copiadas do Wikimedia Commons
+em 22/11/2026, reduzidas para 960 px de largura:
+
+- sala-entrada.jpg: "Door in a white room (Unsplash).jpg"
+  https://commons.wikimedia.org/wiki/File:Door_in_a_white_room_(Unsplash).jpg
+- sala-saida.jpg: "Cracked Cream Walls (Unsplash).jpg"
+  https://commons.wikimedia.org/wiki/File:Cracked_Cream_Walls_(Unsplash).jpg
+
+Não são fotos de imóveis da Fundação.
