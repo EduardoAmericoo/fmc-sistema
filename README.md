@@ -21,15 +21,24 @@ O cliente validou o protótipo: *"resolve 90% dos meus problemas"*.
 O sistema é um aplicativo de **Windows**. Ele já abre com dados fictícios para testar: 124 imóveis, 110 inquilinos,
 110 contratos e 18 meses de aluguéis, recibos e cobrança.
 
-### Opção 1: baixar o programa pronto (recomendado)
+### Opção 1: instalar o programa (recomendado)
 
-1. Abra a página de [**versões (Releases)**](https://github.com/EduardoAmericoo/fmc-sistema/releases/latest) e baixe o arquivo `.zip`.
-2. Extraia o `.zip` numa pasta qualquer, por exemplo na Área de Trabalho.
-3. Abra a pasta extraída e dê dois cliques em **`FMC.exe`**.
+1. Abra a página de [**versões (Releases)**](https://github.com/EduardoAmericoo/fmc-sistema/releases/latest) e baixe
+   o **`Instalar-FMC-<versão>.exe`**.
+2. Dê dois cliques no arquivo baixado e siga o instalador: **Next → Install → Finish**. O Windows pede a confirmação
+   de administrador, como em qualquer programa.
+3. Abra o **FMC** pelo ícone que aparece na Área de Trabalho ou no menu Iniciar.
 
-Não é preciso instalar Java nem nada mais: o programa já vem com tudo.
+Não é preciso instalar Java nem nada mais: o programa já vem com tudo. Para desinstalar, use
+**Configurações → Aplicativos → FMC → Desinstalar**.
+
 Na primeira vez, o Windows pode mostrar o aviso **"O Windows protegeu o computador"**, porque o programa é novo e
 não tem assinatura digital. Clique em **Mais informações** e depois em **Executar assim mesmo**.
+
+**Sem permissão para instalar programas?** Na mesma página há o **`FMC-Sistema-<versão>-windows.zip`**, a versão
+portátil: extraia, abra a pasta **FMC** e dê dois cliques em **`FMC.exe`**. O `FMC.exe` precisa ficar dentro da pasta
+dele; para ter um ícone na Área de Trabalho, clique com o botão direito no `FMC.exe` → **Enviar para → Área de
+trabalho (criar atalho)**.
 
 ### Opção 2: rodar pelo código
 
@@ -141,16 +150,21 @@ merge na `main`; o merge só é liberado com os testes passando.
 
 O sistema foi feito e testado só no Windows.
 
-### Gerar o FMC.exe (para o Release)
+### Gerar o instalador e o .zip (para o Release)
 
 ```powershell
 .\scripts\gerar-exe.ps1
 ```
 
-O script compila o sistema e usa o `jpackage` (vem no JDK 21) para montar a pasta `target\pacote\FMC`, com o
-`FMC.exe` e um Java embutido, e o arquivo `target\pacote\FMC-Sistema-<versão>-windows.zip`. É esse `.zip` que vai
-anexado na página de Releases do GitHub. Ele é portátil: a pessoa extrai e abre, sem instalar nada. A pasta `data`
-(banco, documentos e cópias) é criada dentro da pasta `FMC`, ao lado do `FMC.exe`.
+O script compila o sistema e usa o `jpackage` (vem no JDK 21) para montar, em `target\pacote`:
+
+- **`Instalar-FMC-<versão>.exe`**: o instalador, que cria os atalhos na Área de Trabalho e no menu Iniciar;
+- **`FMC-Sistema-<versão>-windows.zip`**: a versão portátil, com o `FMC.exe` e um Java embutido.
+
+Os dois vão anexados na página de Releases do GitHub. Para o instalador, o computador que gera precisa do
+**WiX Toolset 3.14** (gratuito): baixe o `wix314-binaries.zip` em https://github.com/wixtoolset/wix3/releases e
+extraia em `%LOCALAPPDATA%\wix314`. Sem o WiX, `.\scripts\gerar-exe.ps1 -SemInstalador` gera só o `.zip`.
+Quem instala o FMC não precisa de nada disso.
 
 ### Dados de teste
 
@@ -171,13 +185,21 @@ o GitHub).
 
 ### Banco de dados
 
-O banco é o arquivo `data/fmc.db`, criado ao abrir o sistema. As tabelas estão em
+O banco é o arquivo `fmc.db`, criado ao abrir o sistema, dentro da pasta de dados:
+
+- rodando pelo código (`mvnw` ou VS Code): `data/`, na pasta do projeto;
+- no programa pronto (instalado ou portátil): `%LOCALAPPDATA%\FMC\data`, por exemplo
+  `C:\Users\maria\AppData\Local\FMC\data`. Fica fora da pasta do programa porque o Windows não deixa gravar em
+  "Arquivos de Programas", e assim os dados continuam lá ao atualizar ou desinstalar o programa.
+
+As tabelas estão em
 `src/main/resources/db/schema.sql`, com `CREATE TABLE IF NOT EXISTS`. Mudanças em tabelas que já existem passam por
 `db/Migracoes`, para os bancos antigos se ajustarem sozinhos. Não use `;` dentro de comentários do `schema.sql`: o
 arquivo é dividido por `;`.
 
-Fora do banco ficam `data/documentos/` (documentos e fotos de vistoria), `data/copias/` (cópias de segurança) e
-`data/caixa-de-saida/` (e-mails simulados).
+Na mesma pasta de dados, fora do banco, ficam `documentos/` (documentos e fotos de vistoria), `copias/` (cópias de
+segurança) e `caixa-de-saida/` (e-mails simulados). Para recomeçar do zero com os dados de teste, feche o sistema e
+apague a pasta de dados.
 
 ### Onde fica cada coisa
 
