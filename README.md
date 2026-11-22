@@ -141,6 +141,17 @@ merge na `main`; o merge só é liberado com os testes passando.
 
 O sistema foi feito e testado só no Windows.
 
+### Gerar o FMC.exe (para o Release)
+
+```powershell
+.\scripts\gerar-exe.ps1
+```
+
+O script compila o sistema e usa o `jpackage` (vem no JDK 21) para montar a pasta `target\pacote\FMC`, com o
+`FMC.exe` e um Java embutido, e o arquivo `target\pacote\FMC-Sistema-<versão>-windows.zip`. É esse `.zip` que vai
+anexado na página de Releases do GitHub. Ele é portátil: a pessoa extrai e abre, sem instalar nada. A pasta `data`
+(banco, documentos e cópias) é criada dentro da pasta `FMC`, ao lado do `FMC.exe`.
+
 ### Dados de teste
 
 Na primeira vez que o sistema abre com o banco vazio (logo depois de baixar o projeto ou de apagar a pasta `data/`),
