@@ -1,0 +1,20 @@
+Copyright (c) 2026 Eduardo Américo Bezerra da Silva. Todos os direitos reservados.
+
+Este software, incluindo o código-fonte, as telas, a documentação e os arquivos que o
+acompanham, é de propriedade exclusiva do titular acima.
+
+É permitido apenas baixar, compilar e executar este software para fins de avaliação, por
+exemplo em programas de incentivo, bancas acadêmicas ou processos seletivos.
+
+Sem autorização prévia e por escrito do titular, não é permitido:
+- copiar, modificar, adaptar ou criar obras derivadas;
+- distribuir, publicar, sublicenciar, vender ou alugar;
+- usar no todo ou em parte para fins comerciais ou em produção.
+
+Os dados que acompanham o software (pasta src/main/resources/dados-teste) são fictícios e
+servem apenas para demonstração.
+
+O SOFTWARE É FORNECIDO "NO ESTADO EM QUE SE ENCONTRA", SEM GARANTIAS DE QUALQUER TIPO. O
+TITULAR NÃO SE RESPONSABILIZA POR DANOS DECORRENTES DO SEU USO.
+
+Pedidos de autorização: abra uma issue neste repositório no GitHub.

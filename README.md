@@ -1,58 +1,250 @@
 # Sistema Fundação Manuel Cruz
 
-Sistema de gestão de imóveis e aluguéis da Fundação Manuel Cruz.
-Projeto 2 da CESAR School (GTI/POO). Java 21+, JavaFX, SQLite e Maven.
+[![Testes](https://github.com/EduardoAmericoo/fmc-sistema/actions/workflows/testes.yml/badge.svg)](https://github.com/EduardoAmericoo/fmc-sistema/actions/workflows/testes.yml)
 
-## O que instalar (uma vez só)
+Sistema de gestão de imóveis e aluguéis para a **Fundação Manuel Cruz** (Aracaju, SE), uma entidade sem fins lucrativos
+com 124 imóveis para aluguel que presta contas ao Ministério Público de Sergipe.
 
-1. **JDK 21 ou mais novo**: https://adoptium.net (escolha a versão 21 LTS).
-2. **VS Code**: https://code.visualstudio.com, com a extensão **Extension Pack for Java**.
-   O VS Code sugere a extensão sozinho ao abrir o projeto.
-3. **GitHub Desktop**: https://desktop.github.com
+A Fundação controlava contratos, aluguéis, cobrança e caixa em papel e em planilhas. O sistema reúne tudo num só lugar:
+gera os aluguéis do mês sozinho, calcula multa, juros e correção, emite recibo, organiza a cobrança dos atrasados e
+mostra o saldo do Caixa e do Banco. Tudo fica registrado com quem fez e quando, para a prestação de contas.
+O cliente validou o protótipo: *"resolve 90% dos meus problemas"*.
 
-Não é preciso instalar o Maven. O projeto traz o `mvnw`, que baixa tudo sozinho na primeira vez.
+| Painel | Aluguéis | Cobrança |
+|---|---|---|
+| ![Painel](https://raw.githubusercontent.com/EduardoAmericoo/fmc-sistema/prints-dos-prs/site-desenvolvimento/02-painel.png) | ![Aluguéis](https://raw.githubusercontent.com/EduardoAmericoo/fmc-sistema/prints-dos-prs/site-desenvolvimento/06-alugueis.png) | ![Cobrança](https://raw.githubusercontent.com/EduardoAmericoo/fmc-sistema/prints-dos-prs/site-desenvolvimento/07-cobranca.png) |
+| **Contratos** | **Recibo em PDF** | **Caixa e banco** |
+| ![Contratos](https://raw.githubusercontent.com/EduardoAmericoo/fmc-sistema/prints-dos-prs/site-desenvolvimento/05-contratos.png) | ![Recibo](https://raw.githubusercontent.com/EduardoAmericoo/fmc-sistema/prints-dos-prs/site-desenvolvimento/13-recibo-pdf.png) | ![Caixa e banco](https://raw.githubusercontent.com/EduardoAmericoo/fmc-sistema/prints-dos-prs/site-desenvolvimento/08-caixa-banco.png) |
 
-## Como pegar o projeto
+## Testar agora
 
-1. No GitHub Desktop: **File → Clone repository**, escolha `fmc-sistema`.
-2. Clique em **Open in Visual Studio Code**.
+O sistema é um aplicativo de **Windows**. Ele já abre com dados fictícios para testar: 124 imóveis, 110 inquilinos,
+110 contratos e 18 meses de aluguéis, recibos e cobrança.
 
-## Como rodar
+### Opção 1: instalar o programa (recomendado)
 
-**Pelo VS Code:** abra a aba *Run and Debug* (Ctrl+Shift+D) e clique em **▶ Rodar o sistema** (ou aperte F5). Ela roda sem depuração: as bolinhas vermelhas (breakpoints) não pausam o sistema. Para investigar um erro passo a passo, escolha **"Depurar (para quem programa)"**; aí o sistema para em cada breakpoint e só continua com F5 (parece travado, mas está esperando). Para apagar todos os breakpoints: aba Run and Debug, seção *Breakpoints*, botão "Remove All Breakpoints".
+1. Abra a página de [**versões (Releases)**](https://github.com/EduardoAmericoo/fmc-sistema/releases/latest) e baixe
+   o **`Instalar-FMC-<versão>.exe`**.
+2. Dê dois cliques no arquivo baixado e siga o instalador: **Next → Install → Finish**. O Windows pede a confirmação
+   de administrador, como em qualquer programa.
+3. Abra o **FMC** pelo ícone que aparece na Área de Trabalho ou no menu Iniciar.
 
-**Pelo terminal** (dentro da pasta do projeto):
+Não é preciso instalar Java nem nada mais: o programa já vem com tudo. Para desinstalar, use
+**Configurações → Aplicativos → FMC → Desinstalar**.
 
+Na primeira vez, o Windows pode mostrar o aviso **"O Windows protegeu o computador"**, porque o programa é novo e
+não tem assinatura digital. Clique em **Mais informações** e depois em **Executar assim mesmo**.
+
+**Sem permissão para instalar programas?** Na mesma página há o **`FMC-Sistema-<versão>-windows.zip`**, a versão
+portátil: extraia, abra a pasta **FMC** e dê dois cliques em **`FMC.exe`**. O `FMC.exe` precisa ficar dentro da pasta
+dele; para ter um ícone na Área de Trabalho, clique com o botão direito no `FMC.exe` → **Enviar para → Área de
+trabalho (criar atalho)**.
+
+### Opção 2: rodar pelo código
+
+1. Instale o **Java 21** (Temurin): https://adoptium.net (escolha a versão 21 LTS).
+2. Baixe o código: no topo desta página, **Code → Download ZIP**, e extraia; ou clone com o Git.
+3. Abra o PowerShell dentro da pasta do projeto e rode:
+
+```powershell
+.\mvnw.cmd javafx:run
 ```
-mvnw javafx:run
-```
 
-Na primeira vez demora alguns minutos, porque baixa o Maven, o JavaFX e o driver do SQLite.
+Na primeira vez demora alguns minutos, porque o `mvnw` baixa o Maven e as bibliotecas sozinho.
 
-## Primeiro acesso
+### Acessos para teste
 
-O sistema nasce com um único usuário, o **Administrador**:
+| E-mail | Senha | Perfil | O que vê |
+|---|---|---|---|
+| `admin@fmc.org` | `Fmc@2026` | Administrador | tudo, inclusive usuários, permissões, importação e cópias |
+| `secretaria@exemplo.org` | `teste123` | Secretaria | cadastros, contratos, aluguéis, recebimento e cobrança |
+| `financeiro@exemplo.org` | `teste123` | Financeiro | consulta, geração de aluguéis, contatos de cobrança e Caixa |
+| `aprendiz@exemplo.org` | `teste123` | Secretaria com uma permissão a menos | igual à Secretaria, mas não cadastra inquilino novo |
+| `administrador@exemplo.org` | `teste123` | Administrador | igual ao `admin@fmc.org` |
 
-| E-mail | Senha |
+Estas senhas valem só para os dados fictícios de demonstração. Na versão instalada na Fundação, os dados de teste
+ficam desligados (veja [Versão da Fundação](#versão-da-fundação)).
+
+## Roteiro de 5 minutos
+
+1. Entre como **`secretaria@exemplo.org`**. O **Painel** mostra os números do mês e o que precisa de atenção:
+   aluguéis atrasados, contratos vencendo, reajustes e promessas de pagamento. Clique numa pendência para ir à tela já filtrada.
+2. Em **Aluguéis e cobrança**, clique em **Em atraso** e depois em **Receber** num aluguel. O sistema calcula
+   multa, juros e correção. Confirme e veja o **recibo**, que pode ser impresso ou salvo em PDF.
+3. Na aba **Para cobrança**, escolha um inquilino e registre um **contato**: não atendeu, prometeu pagar (com a data)
+   ou sem acordo. Dali também sai a mensagem pronta por e-mail ou WhatsApp.
+4. Em **Caixa e banco**, veja o recebimento lançado sozinho e o saldo do dia.
+5. Em **Contratos**, abra os detalhes de um contrato: garantia (fiador ou caução), documentos, **vistorias com fotos**
+   e laudo em PDF, prorrogação, reajuste e encerramento.
+6. Saia e entre como **`financeiro@exemplo.org`**: os botões de receber e cadastrar não aparecem, porque o perfil não tem
+   essas permissões. Como **`admin@fmc.org`**, a tela **Usuários** mostra como liberar ação por ação para cada pessoa.
+
+## Funcionalidades
+
+| Módulo | O que faz |
 |---|---|
-| `admin@fmc.org` | `Fmc@2026` |
+| Acesso | Login com limite de tentativas; perfis (Administrador, Secretaria, Financeiro) e permissões ajustáveis ação por ação para cada pessoa; senha provisória com troca no 1º acesso; senha forte; bloqueio de usuário; "Esqueci a senha" com código por e-mail |
+| Imóveis | Cadastro de casas e apartamentos, filtros, arquivar e reativar; a situação "Ocupado" vem do contrato |
+| Inquilinos | Cadastro com CPF validado e máscaras, busca, arquivar e reativar, ficha com o histórico de pagamento e o nível de pagador |
+| Contratos | Garantia obrigatória (fiador ou caução de 3 aluguéis) e renda de 3× o aluguel; prorrogar, encerrar e reajuste anual; documentos por etapa; vistorias de entrada e de saída com fotos, comparação, lacre SHA-256 e laudo em PDF |
+| Aluguéis | Geração automática contrato por contrato; recebimento com multa, juros e correção; recibo em janela, impressão e PDF; dispensa de encargos com motivo; cancelamento de recibo com estorno |
+| Cobrança | Todos os atrasados, do mais antigo ao mais novo; fiador ou caução; histórico de contatos e promessas; mensagem pronta por e-mail ou WhatsApp |
+| Caixa e banco | Lançamento automático de cada recibo; saldo do dia e movimento do mês; saldo inicial; depósito e saque entre Caixa e Banco |
+| Painel | Pendências com atalho para a tela filtrada |
+| Gestão | Importar planilha `.xlsx` (com prévia dos erros, tudo ou nada); cópia de segurança automática ao abrir e ao fechar, manual, para pen drive e restaurar |
 
-É ele quem cadastra os outros usuários. Esta senha é só para desenvolvimento e testes; a troca de senha pelo próprio usuário é a história desejável D2.
+Nada é apagado: recibo errado é cancelado com motivo e estorno, e inquilinos, imóveis, documentos e fotos são arquivados.
+É uma exigência da prestação de contas.
 
-### Esqueci a senha (código por e-mail)
+## Tecnologias e arquitetura
 
-Na tela de login, **"Esqueci minha senha"** manda um código de 6 números para o e-mail cadastrado. Com ele, a pessoa cria uma senha nova sozinha, sem depender do Administrador. Travas de segurança:
+- **Java 21** e **JavaFX 21** (FXML + CSS), com **Maven** (wrapper `mvnw`) e testes em **JUnit 5**.
+- Visual: **AtlantaFX** (tema PrimerLight), ícones **Feather** (Ikonli) e fontes Urbanist e Plus Jakarta Sans,
+  seguindo o design system da Fundação (azul `#1D4D7A`).
+- **SQLite** (`sqlite-jdbc`), **PDFBox** (recibo, laudo e demonstrativo), **Angus Mail** (e-mail SMTP) e
+  **fastexcel** (planilhas).
 
-- o código vale 15 minutos e só uma vez;
-- 5 códigos errados cancelam o pedido;
-- a tela responde igual exista o e-mail ou não;
-- usuário bloqueado não recupera a senha;
-- chega um e-mail avisando que a senha foi trocada.
+É um **aplicativo de desktop, sem servidor**: a Fundação usa um computador só e não tem equipe de TI. O banco é um único
+arquivo SQLite (`data/fmc.db`), fácil de copiar, e por isso a cópia de segurança é automática. A única saída para a
+internet é o envio de e-mail; o WhatsApp só abre um link `wa.me` no navegador.
 
-**Como o e-mail sai:**
+O código é organizado em camadas, cada uma com um papel só:
 
-- **Com os dados de teste ligados** (o normal no desenvolvimento), nada é enviado de verdade. Cada e-mail vira um arquivo `.txt` em `data/caixa-de-saida/`, e a janela tem o botão "Abrir caixa de saída" para ver o código.
-- **Para enviar de verdade** (versão da Fundação), defina estas variáveis de ambiente no Windows. A senha nunca vai para o código nem para o GitHub.
+```
+tela (ui)  →  regra de negócio (service)  →  banco (repository)  →  SQLite (db)
+                     usando as classes do domínio (model)
+```
+
+As permissões são conferidas duas vezes: o botão some na tela e o service recusa a ação.
+
+## Para quem desenvolve
+
+### O que instalar (uma vez só)
+
+1. **JDK 21**: https://adoptium.net (versão 21 LTS).
+2. **VS Code**: https://code.visualstudio.com, com a extensão **Extension Pack for Java** (o VS Code sugere sozinho).
+3. **GitHub Desktop** (opcional): https://desktop.github.com. No GitHub Desktop: **File → Clone repository**,
+   escolha `fmc-sistema` e clique em **Open in Visual Studio Code**.
+
+Não é preciso instalar o Maven: o `mvnw` baixa tudo sozinho.
+
+### Rodar e testar
+
+**No VS Code:** aba *Run and Debug* (Ctrl+Shift+D), escolha **"Rodar o sistema"** e aperte F5. Ela roda sem
+depuração: os breakpoints (bolinhas vermelhas) não pausam o sistema. Para investigar um erro passo a passo, escolha
+**"Depurar (para quem programa: para nos breakpoints)"**. Aí o sistema para em cada breakpoint e só continua com F5
+(parece travado, mas está esperando).
+
+**No PowerShell:**
+
+```powershell
+.\mvnw.cmd javafx:run
+```
+
+```powershell
+.\mvnw.cmd test
+```
+
+Os testes rodam num banco temporário, sem mexer no seu. O GitHub Actions roda todos eles em cada Pull Request e em cada
+merge na `main`; o merge só é liberado com os testes passando.
+
+O sistema foi feito e testado só no Windows.
+
+### Gerar o instalador e o .zip (para o Release)
+
+```powershell
+.\scripts\gerar-exe.ps1
+```
+
+O script compila o sistema e usa o `jpackage` (vem no JDK 21) para montar, em `target\pacote`:
+
+- **`Instalar-FMC-<versão>.exe`**: o instalador, que cria os atalhos na Área de Trabalho e no menu Iniciar;
+- **`FMC-Sistema-<versão>-windows.zip`**: a versão portátil, com o `FMC.exe` e um Java embutido.
+
+Os dois vão anexados na página de Releases do GitHub. Para o instalador, o computador que gera precisa do
+**WiX Toolset 3.14** (gratuito): baixe o `wix314-binaries.zip` em https://github.com/wixtoolset/wix3/releases e
+extraia em `%LOCALAPPDATA%\wix314`. Sem o WiX, `.\scripts\gerar-exe.ps1 -SemInstalador` gera só o `.zip`.
+Quem instala o FMC não precisa de nada disso.
+
+### Dados de teste
+
+Na primeira vez que o sistema abre com o banco vazio (logo depois de baixar o projeto ou de apagar a pasta `data/`),
+ele carrega sozinho os dados fictícios e avisa numa janelinha. Se o banco já tem algum cadastro, nada é mexido.
+Os dados ficam em `src/main/resources/dados-teste/*.csv`; o histórico de 18 meses é montado por `CargaHistoricoTeste`.
+
+**Para apagar tudo e recarregar do zero** (por exemplo, antes de uma apresentação):
+
+- **No VS Code:** escolha **"Rodar com dados de teste (apaga tudo e recarrega)"** e aperte ▶. Depois, volte para
+  **"Rodar o sistema"**, senão o F5 apaga tudo de novo na próxima vez.
+- **No PowerShell:** `$env:FMC_DADOS_TESTE="recarregar"; .\mvnw.cmd javafx:run`
+
+⚠️ Recarregar **apaga todos os dados** do seu banco local. Cada pessoa tem o seu banco (`data/fmc.db`, que não vai para
+o GitHub).
+
+⚠️ Nunca use nomes ou CPFs reais da Fundação como dados de teste.
+
+### Banco de dados
+
+O banco é o arquivo `fmc.db`, criado ao abrir o sistema, dentro da pasta de dados:
+
+- rodando pelo código (`mvnw` ou VS Code): `data/`, na pasta do projeto;
+- no programa pronto (instalado ou portátil): `%LOCALAPPDATA%\FMC\data`, por exemplo
+  `C:\Users\maria\AppData\Local\FMC\data`. Fica fora da pasta do programa porque o Windows não deixa gravar em
+  "Arquivos de Programas", e assim os dados continuam lá ao atualizar ou desinstalar o programa.
+
+As tabelas estão em
+`src/main/resources/db/schema.sql`, com `CREATE TABLE IF NOT EXISTS`. Mudanças em tabelas que já existem passam por
+`db/Migracoes`, para os bancos antigos se ajustarem sozinhos. Não use `;` dentro de comentários do `schema.sql`: o
+arquivo é dividido por `;`.
+
+Na mesma pasta de dados, fora do banco, ficam `documentos/` (documentos e fotos de vistoria), `copias/` (cópias de
+segurança) e `caixa-de-saida/` (e-mails simulados). Para recomeçar do zero com os dados de teste, feche o sistema e
+apague a pasta de dados.
+
+### Onde fica cada coisa
+
+| Pasta | O que vai lá |
+|---|---|
+| `src/main/java/br/org/fmc/model` | Classes do domínio (Imovel, Inquilino, Contrato, Garantia…), enums e regras simples |
+| `src/main/java/br/org/fmc/repository` | SQL com `PreparedStatement`, um repository por assunto |
+| `src/main/java/br/org/fmc/service` | Regras de negócio, permissões (`Sessao.exigir`) e transações |
+| `src/main/java/br/org/fmc/ui` | Controllers das telas e utilitários de tela |
+| `src/main/java/br/org/fmc/db` | Conexão, schema e migrações |
+| `src/main/java/br/org/fmc/util` | PDF (recibo, laudo, demonstrativo), e-mail, senha, formatos e EXIF das fotos |
+| `src/main/resources/br/org/fmc/ui` | Telas `.fxml` (dá para editar no Scene Builder) |
+| `src/main/resources/br/org/fmc/css/tema.css` | Cores e medidas do design system |
+| `src/main/resources/db/schema.sql` | Tabelas do banco |
+| `src/test/java` | Testes automatizados (JUnit) |
+
+Cada pacote tem um `package-info.java` explicando o que entra nele.
+
+### Visual das telas
+
+- **AtlantaFX** dá a base dos controles e **`css/tema.css`** aplica as cores e medidas da Fundação.
+- **Ícones:** pacote Feather do Ikonli. No FXML: `<FontIcon iconLiteral="fth-home"/>`
+  (lista: https://kordamp.org/ikonli/cheat-sheet-feather.html).
+- **Modelo para telas novas:** a tela de Inquilinos (`inquilinos.fxml` + `InquilinosController`): cabeçalho com título
+  e botão principal, tabela num cartão (`tabela-fmc`) e o formulário numa janela por cima (`Navegador.mostrarJanela`).
+
+### Combinados de Git
+
+1. **Ninguém faz commit direto na `main`.** Tudo entra por Pull Request, com os testes passando e 1 aprovação.
+2. **Uma tarefa do Plane = uma branch**, no modelo `tipo/BOARD-numero-descricao`.
+   Ex.: `feature/BOARD-53-cadastro-usuarios` (tipos: `feature/`, `fix/`, `melhoria/`, `docs/`, `test/`).
+3. Antes de criar a branch, atualize a `main` (**Pull**).
+4. Commits pequenos, no modelo `tipo(BOARD-numero): o que foi feito`.
+   Ex.: `feat(BOARD-53): cria tela de cadastro de usuários`.
+5. Antes do Pull Request, o sistema precisa compilar, abrir e passar nos testes.
+
+## Versão da Fundação
+
+Para instalar no computador da Fundação, com dados reais:
+
+1. **Desligue os dados de teste** com a variável de ambiente `FMC_DADOS_TESTE=nao`. Sem ela, o sistema começa com os
+   dados fictícios e com o e-mail simulado.
+2. **Troque a senha do Administrador** no primeiro acesso, pelo menu "Trocar minha senha".
+3. **Configure o e-mail** para o "Esqueci a senha" e as mensagens de cobrança. A senha da conta fica só nas
+   variáveis de ambiente do Windows, nunca no código nem no GitHub.
 
 | Variável | Exemplo |
 |---|---|
@@ -62,109 +254,17 @@ Na tela de login, **"Esqueci minha senha"** manda um código de 6 números para 
 | `FMC_SMTP_SENHA` | senha de app da conta (no Gmail: Conta Google → Segurança → Senhas de app) |
 | `FMC_SMTP_REMETENTE` | opcional; por padrão, o próprio usuário |
 
-Com `FMC_DADOS_TESTE=nao` e sem `FMC_SMTP_HOST`, a recuperação por e-mail fica desligada, e só o Administrador gera senha provisória.
+Sem `FMC_SMTP_HOST` e com `FMC_DADOS_TESTE=nao`, a recuperação por e-mail fica desligada e só o Administrador gera
+senha provisória.
 
-## Como rodar os testes
+4. **Proteja os dados pessoais (LGPD):** ligue a criptografia de disco do Windows e salve a cópia de segurança num
+   pen drive criptografado. O banco guarda CPFs, rendas e telefones.
 
-```
-mvnw test
-```
+## Equipe
 
-## Onde fica cada coisa
+Projeto 2 da CESAR School (disciplinas GTI e POO), Grupo 2, em parceria com a Fundação Manuel Cruz.
 
-| Pasta | O que vai lá |
-|---|---|
-| `src/main/java/br/org/fmc/model` | Classes do domínio: Imovel, Inquilino, Contrato, Garantia… |
-| `src/main/java/br/org/fmc/repository` | Acesso ao banco: salvar, buscar, listar |
-| `src/main/java/br/org/fmc/service` | Regras de negócio: CPF, encargos, recibo… |
-| `src/main/java/br/org/fmc/ui` | Controllers das telas |
-| `src/main/java/br/org/fmc/db` | Conexão com o SQLite |
-| `src/main/java/br/org/fmc/util` | Utilitários (formatação, validações gerais) |
-| `src/main/resources/br/org/fmc/ui` | Telas `.fxml` (dá para editar no Scene Builder) |
-| `src/main/resources/br/org/fmc/css/tema.css` | Cores e fontes do design system |
-| `src/main/resources/db/schema.sql` | Tabelas do banco |
-| `src/test/java` | Testes automatizados (JUnit) |
+## Licença
 
-Cada pacote tem um arquivo `package-info.java` explicando o que entra nele.
-
-**Fluxo de uma funcionalidade:** tela (`ui`) → regra (`service`) → banco (`repository`), usando as classes de `model`.
-
-## Banco de dados
-
-O banco é o arquivo `data/fmc.db`, criado automaticamente ao abrir o sistema.
-Ele **não** vai para o GitHub: cada pessoa tem o seu, com dados de teste.
-Para recomeçar do zero, apague a pasta `data/`.
-
-Para criar uma tabela nova, acrescente um `CREATE TABLE IF NOT EXISTS ...` em `schema.sql`.
-
-⚠️ Nunca use nomes ou CPFs reais da Fundação como dados de teste.
-
-## Dados de teste
-
-O sistema já vem com dados fictícios para testar e apresentar (124 imóveis, 110 inquilinos, 110 contratos com fiador ou caução e usuários de teste).
-
-**Você não precisa fazer nada:** na primeira vez que o sistema abre com o banco vazio (por exemplo, logo depois de
-baixar o projeto ou de apagar a pasta `data/`), ele carrega os dados de teste sozinho e avisa numa janelinha.
-Se o seu banco já tem algum cadastro, nada é mexido.
-
-**Para apagar tudo e recarregar do zero** (por exemplo, antes de uma apresentação):
-
-- **No VS Code:** em Run and Debug (Ctrl+Shift+D), escolha no topo **"Rodar com dados de teste (apaga tudo e recarrega)"** e aperte ▶.
-  Depois, volte a escolher **"Rodar o sistema"**, senão o F5 vai apagar tudo de novo na próxima vez.
-- **No terminal (Windows):** `$env:FMC_DADOS_TESTE="recarregar"; .\mvnw.cmd javafx:run`
-- **No terminal (Mac/Linux):** `FMC_DADOS_TESTE=recarregar ./mvnw javafx:run`
-
-⚠️ Recarregar **apaga todos os dados** do seu banco local. O banco é de cada pessoa (`data/fmc.db`, não vai para o
-GitHub): o que você cadastra não aparece para os outros, e o que eles cadastram não aparece para você.
-
-Na versão entregue à Fundação, a carga automática deve ser desligada com `FMC_DADOS_TESTE=nao`.
-
-Acessos depois da carga:
-
-| E-mail | Senha | Perfil |
-|---|---|---|
-| `admin@fmc.org` | `Fmc@2026` | Administrador inicial (o mesmo de sempre) |
-| `administrador@exemplo.org` | `teste123` | Administrador |
-| `secretaria@exemplo.org` | `teste123` | Secretaria |
-| `financeiro@exemplo.org` | `teste123` | Financeiro (consulta, demonstrativo em PDF e contato de cobrança) |
-| `aprendiz@exemplo.org` | `teste123` | Secretaria que não pode cadastrar inquilino novo |
-
-Os dados ficam em `src/main/resources/dados-teste/*.csv`, exportados da planilha "Dados de teste FMC". Os aluguéis de demonstração são os dos 2 meses anteriores e do mês atual. Não há botão de gerar (BOARD-37): ao entrar, o sistema gera sozinho os aluguéis do mês atual e de algum mês que tenha ficado para trás, sem duplicar.
-
-Na tabela de aluguéis, a ação **PDF simulado** salva um demonstrativo fictício para apresentação. O arquivo traz o aviso **SIMULAÇÃO — SEM VALOR PARA PAGAMENTO** e não contém linha digitável, código de barras, PIX ou dados bancários. Não deve ser enviado como boleto para cobrança real.
-
-Na tela **Aluguéis e cobrança**, a aba **Aluguéis** permite registrar recebimentos: a data, a forma e a referência do pagamento ficam no recibo, e multa, juros e correção seguem as regras do contrato. A aba **Para cobrança** agrupa contratos com dois ou mais aluguéis em atraso. Em cada ligação, o botão **Contato** registra o que deu (não atendeu, prometeu pagar com a data, sem acordo ou telefone errado). A coluna **Contato** mostra em que pé está cada inquilino e a lista vem em ordem de urgência: promessa vencida, nunca contatado, sem retorno e, por último, promessas no prazo. O Painel avisa das promessas a partir de 5 dias antes da data e das que passaram sem pagamento. O histórico completo aparece na janela de contato e na ficha do inquilino.
-
-**Dispensa de encargos (BOARD-66).** Ao receber um aluguel em atraso, a opção **"Dispensar multa, juros e correção"** faz o total a receber cair para o valor devido. O **motivo** é obrigatório, e o sistema grava os valores dispensados (multa, juros e correção, separados), quem autorizou e a data e hora. Esses dados aparecem no quadro "Encargos dispensados" da janela do recibo, para auditoria. O recibo impresso mostra a multa, os juros e a correção do contrato e mais a linha "Encargos dispensados" (ajustável em `ReciboImpresso.MOSTRAR_ENCARGOS_DISPENSADOS`). Quem pode dispensar é a permissão **"Dispensar multa, juros e correção"**: o Administrador já vem com ela e escolhe, na tela de **Usuários**, quem mais pode dispensar. Para quem não tem a permissão, e quando não há encargos, a opção aparece desabilitada com a explicação.
-
-**Caixa e Banco (BOARD-43, D4).** Cada recibo gera sozinho um lançamento, na mesma transação: dinheiro e cheque entram no **Caixa**; PIX, transferência e boleto, no **Banco**. O valor é o total pago (aluguel, taxas e os encargos cobrados) e a data é a do pagamento. O Banco é o total das contas bancárias, sem separar conta por conta. Os lançamentos ficam na tabela `lancamento` (valor positivo é entrada; negativo, saída) e alimentam a tela de movimento (D5).
-
-**Tela Caixa e banco (BOARD-63, D5).** No menu **Caixa e banco**: as disponibilidades de hoje (Caixa, Banco e total), e o movimento do mês de cada um (saldo anterior, entradas, saídas, saldo final e a lista de lançamentos com o saldo depois de cada um). O **saldo inicial** é informado uma vez pelo Administrador (permissão "Informar o saldo inicial"), com a data: quanto havia no Caixa e no Banco naquele dia. Recebimentos de antes dessa data não contam, porque já estão dentro do saldo informado. Secretaria e Financeiro veem a tela.
-
-**Cancelar recibo (BOARD-65, D10).** Na janela do recibo, o botão **Cancelar recibo** (permissão "Cancelar recibo", que só o Administrador tem por padrão) pede o motivo e, numa única transação: registra o cancelamento (tabela `recibo_cancelamento`, com motivo, quem e quando), volta o aluguel para "em aberto" e lança um **estorno** (saída) no Caixa ou no Banco, na data do cancelamento. O recibo e o número não são apagados e o número não é reaproveitado; o aluguel pode ser recebido de novo, com recibo novo. Para isso, a coluna `recibo.aluguel_id` deixou de ser UNIQUE: o `Database.inicializar` ajusta sozinho os bancos antigos (`db/Migracoes`), sem perder recibos. Receber duas vezes continua impossível, porque o recibo só é gravado se o aluguel ainda estava em aberto.
-
-**Importar planilha (revisão da SR2).** Menu **Importar planilha** (só para quem tem a permissão "Importar imóveis, inquilinos e contratos de uma planilha"; o Administrador tem). Serve para a Fundação trazer de uma vez o que tem hoje no papel ou no Excel. 1) **Baixar modelo (.xlsx)**: abas "Como preencher", Imóveis, Inquilinos e Contratos, com dica em cada coluna, listas de escolha e uma linha de exemplo marcada "(exemplo)" que é ignorada (`ModeloPlanilha`). 2) Preencher no Excel. 3) **Escolher planilha…**: a `ImportacaoPlanilha` faz um **ensaio numa cópia do banco**, cadastrando cada linha pelos mesmos services das telas, e mostra cada problema com a aba e a linha; nada é gravado. 4) **Importar agora** só aparece sem nenhum problema; antes de gravar o sistema guarda uma cópia do banco e, se algo der errado, volta tudo como estava (tudo ou nada). As colunas são achadas pelo título (a ordem pode mudar); CPF digitado como número recupera os zeros. Contratos importados não geram os meses que já passaram (contam como pagos no papel). Biblioteca: fastexcel e fastexcel-reader 0.18.4 (leves).
-
-## Visual das telas (design system)
-
-O sistema segue o design system da Fundação (azul #1D4D7A, fontes Urbanist e Plus Jakarta Sans):
-
-- **AtlantaFX** dá a base moderna dos controles e **`css/tema.css`** aplica as cores e medidas da Fundação.
-- **Ícones:** pacote Feather do Ikonli. No FXML: `<FontIcon iconLiteral="fth-home"/>`
-  (lista completa: https://kordamp.org/ikonli/cheat-sheet-feather.html).
-- **Fontes:** já estão em `src/main/resources/br/org/fmc/fonts/` (licença livre, Google Fonts).
-- **Modelo para telas novas:** a tela de Inquilinos (`inquilinos.fxml` + `InquilinosController`):
-  cabeçalho com título e botão principal, tabela num cartão (`tabela-fmc`) e o formulário numa
-  janela por cima da tela (`Navegador.mostrarJanela`).
-
-## Combinados de trabalho com Git
-
-As regras completas, com passo a passo e prompts prontos para a IA, estão no **Guia de Git do Grupo FMC** (peça o link ao PO). O resumo:
-
-1. **Ninguém faz commit direto na `main`.** Tudo entra por Pull Request, com 1 aprovação de outra pessoa.
-2. **Uma tarefa do Plane = uma branch**, no modelo `tipo/BOARD-numero-descricao`.
-   Ex.: `feature/BOARD-53-cadastro-usuarios` (tipos: `feature/`, `fix/`, `docs/`, `test/`).
-3. Antes de criar a branch, atualize a `main` (**Pull**).
-4. Commits pequenos, no modelo `tipo(BOARD-numero): o que foi feito`.
-   Ex.: `feat(BOARD-53): cria tela de cadastro de usuários`.
-5. Antes do Pull Request, o sistema precisa compilar e abrir.
+**Todos os direitos reservados.** É permitido baixar, compilar e executar o sistema só para avaliação. Copiar,
+modificar, distribuir ou usar comercialmente depende de autorização por escrito. Veja o arquivo [LICENSE](LICENSE).
