@@ -244,4 +244,5 @@ Projeto 2 da CESAR School (disciplinas GTI e POO), Grupo 2, em parceria com a Fu
 
 ## Licença
 
-A definir.
+**Todos os direitos reservados.** É permitido baixar, compilar e executar o sistema só para avaliação. Copiar,
+modificar, distribuir ou usar comercialmente depende de autorização por escrito. Veja o arquivo [LICENSE](LICENSE).
