@@ -148,7 +148,8 @@ public class ServicoContratos {
         if (!regras.isEmpty()) {
             throw new RegraNegocioException(regras);
         }
-        contratos.salvar(contrato); // grava contrato + garantia e ocupa o imóvel, tudo junto
+        // grava contrato + garantia, ocupa o imóvel e lança a caução no Caixa ou Banco, tudo junto
+        contratos.salvar(contrato, Sessao.usuario());
         return contrato;
     }
 

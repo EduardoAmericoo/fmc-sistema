@@ -6,6 +6,11 @@ public enum TipoLancamento {
     SALDO_INICIAL("Saldo inicial"),
     /** Recebimento de aluguel: gerado sozinho junto com o recibo. */
     RECEBIMENTO_ALUGUEL("Recebimento de aluguel"),
+    /**
+     * Caução recebida no cadastro do contrato: o dinheiro está com a Fundação, então entra no Caixa
+     * (dinheiro e cheque) ou no Banco. Gerado sozinho junto com o contrato.
+     */
+    CAUCAO_RECEBIDA("Caução recebida"),
     /** Saída que desfaz um recebimento (cancelamento de recibo, D10). */
     ESTORNO("Estorno"),
     /**

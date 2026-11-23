@@ -219,8 +219,11 @@ class CadastroContratoTest {
     @Test
     void contratoGuardaOAluguelDoDiaDoCadastro() throws Exception {
         Contrato novo = servico.cadastrar(comFiador(imovel, maria));
-        imoveis.salvarFormulario(imovel.getId(), "IM-001", "", TipoImovel.CASA, "Rua Exemplo, 52", "Centro", "",
-                "1.200,00", "50,00", "20,00", SituacaoImovel.OCUPADO); // reajuste no imóvel
+        // Com contrato ativo, o aluguel só muda pelo reajuste do contrato: mudar no imóvel é recusado.
+        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> imoveis.salvarFormulario(
+                imovel.getId(), "IM-001", "", TipoImovel.CASA, "Rua Exemplo, 52", "Centro", "",
+                "1.200,00", "50,00", "20,00", SituacaoImovel.OCUPADO));
+        assertTrue(e.getErros().get(0).startsWith("Este imóvel tem contrato ativo: o aluguel muda pelo reajuste"));
 
         assertEquals(new BigDecimal("1000.00"), repoContratos.buscarPorId(novo.getId()).orElseThrow().getValorAluguel());
     }

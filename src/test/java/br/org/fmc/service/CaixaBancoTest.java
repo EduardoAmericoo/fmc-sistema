@@ -56,8 +56,9 @@ class CaixaBancoTest {
         long imovel = new ImovelRepository().listarTodos().get(0).getId();
         long inquilino = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25",
                 "(79) 99999-0000", "teste@exemplo.org", EstadoCivil.SOLTEIRO, "", "", "5.000,00", "", "", "", "")).getId();
-        new ServicoContratos().cadastrar(new DadosContrato(imovel, inquilino, PrazoContrato.MESES_12, chaves, null,
-                new DadosContrato.Caucao("3.000,00", chaves, FormaPagamento.PIX, "")));
+        new ServicoContratos().cadastrar(new DadosContrato(imovel, inquilino, PrazoContrato.MESES_12, chaves, 
+                new DadosContrato.Fiador("José Fiador", "123.456.789-09", "(79) 99999-1111", EstadoCivil.SOLTEIRO,
+                "5.000,00", "Rua do Fiador, 10", "", ""), null));
         Clock relogio = Clock.fixed(HOJE.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
         alugueis.usarRelogio(relogio);
         recebimento.usarRelogio(relogio);

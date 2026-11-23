@@ -160,6 +160,14 @@ public class ServicoCaixaBanco {
      */
     public BigDecimal disponivelEm(Conta conta, LocalDate data) throws SQLException {
         Sessao.exigir(Acao.VER_CAIXA_BANCO);
+        return disponivel(conta, data);
+    }
+
+    /**
+     * O mesmo cálculo, sem pedir a permissão de ver o Caixa e Banco: quem cancela um recibo
+     * precisa saber se a conta tem o valor do estorno, mesmo sem poder abrir aquela tela.
+     */
+    BigDecimal disponivel(Conta conta, LocalDate data) throws SQLException {
         List<Lancamento> lista = considerados(conta);
         BigDecimal saldo = BigDecimal.ZERO;
         for (Lancamento l : lista) {
