@@ -103,6 +103,10 @@ public class LoginController {
         String ultimo = PREFERENCIAS.get(ULTIMO_EMAIL, "");
         campoEmail.setText(ultimo);
         Platform.runLater(() -> (ultimo.isEmpty() ? campoEmail : campoSenha).requestFocus());
+        if (Navegador.saiuPorInatividade()) {
+            mostrarGeral("Por segurança, o sistema saiu sozinho depois de "
+                    + Navegador.MINUTOS_INATIVIDADE + " minutos sem uso. Entre de novo.");
+        }
     }
 
     /** Botão Entrar (ou Enter). */

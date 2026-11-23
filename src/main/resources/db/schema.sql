@@ -207,6 +207,23 @@ CREATE TABLE IF NOT EXISTS contrato_encerramento (
     feito_por     TEXT    NOT NULL
 );
 
+-- Aluguéis cancelados pelo encerramento: quando o encerramento é registrado dias depois da saída,
+-- os aluguéis já gerados que vencem depois da saída não são devidos. Eles saem da tabela aluguel
+-- (e da cobrança) e ficam guardados aqui, com o motivo, quem encerrou e quando.
+CREATE TABLE IF NOT EXISTS aluguel_cancelado (
+    aluguel_id    INTEGER PRIMARY KEY,
+    contrato_id   INTEGER NOT NULL REFERENCES contrato(id),
+    competencia   TEXT    NOT NULL,
+    vencimento    TEXT    NOT NULL,
+    valor_aluguel TEXT    NOT NULL,
+    taxa_luz      TEXT    NOT NULL,
+    valor_iptu    TEXT    NOT NULL,
+    outros        TEXT    NOT NULL,
+    motivo        TEXT    NOT NULL,
+    cancelado_por TEXT    NOT NULL,
+    cancelado_em  TEXT    NOT NULL
+);
+
 -- BOARD-39 · Recibos de pagamento: um recibo por aluguel recebido.
 -- O pagamento, forma, referência do documento e encargos ficam preservados para auditoria.
 -- [D10] BOARD-65: o aluguel_id não é mais UNIQUE, porque um aluguel pode ter um recibo

@@ -97,6 +97,16 @@ public class ServicoImoveis {
         BigDecimal valorAluguel = lerDinheiro(aluguel, "aluguel", true, erros);
         BigDecimal taxaLuz = lerDinheiro(luz, "taxa de luz", false, erros);
         BigDecimal valorIptu = lerDinheiro(iptu, "IPTU", false, erros);
+        // Imóvel com contrato ativo: o aluguel cobrado é o do contrato e só muda pelo reajuste anual.
+        // Mudar aqui deixaria a tela mostrando um valor e a cobrança usando outro.
+        boolean comContratoAtivo = id != null && contratos.existeAtivoNoImovel(id);
+        if (comContratoAtivo && erros.isEmpty()) {
+            Imovel atual = buscar(id);
+            if (valorAluguel.compareTo(atual.getValorAluguel()) != 0) {
+                erros.add("Este imóvel tem contrato ativo: o aluguel muda pelo reajuste anual do contrato "
+                        + "(Contratos > abrir o contrato > Reajustar), não por aqui.");
+            }
+        }
         if (!erros.isEmpty()) {
             throw new RegraNegocioException(erros);
         }
@@ -113,7 +123,13 @@ public class ServicoImoveis {
         imovel.setTaxaLuz(taxaLuz);
         imovel.setValorIptu(valorIptu);
         imovel.setSituacao(situacao);
-        repositorio.salvar(imovel);
+        if (comContratoAtivo) {
+            // Luz e IPTU novos (ex.: o IPTU do ano) valem para o contrato e para os aluguéis em aberto
+            // que ainda vão vencer, tudo junto.
+            repositorio.salvarComLuzEIptuNoContrato(imovel, LocalDate.now());
+        } else {
+            repositorio.salvar(imovel);
+        }
     }
 
     /** "Ocupado" só vem do contrato: não dá para ocupar à mão, nem desocupar com contrato ativo. */
@@ -142,6 +158,7 @@ public class ServicoImoveis {
             throw new RegraNegocioException("O imóvel " + imovel.getCodigo()
                     + " tem contrato ativo. Encerre o contrato antes de arquivar.");
         }
+        ServicoInquilinos.exigirMotivo(motivo);
         imovel.arquivar(LocalDate.now(), motivo);
         repositorio.salvarArquivamento(imovel);
         return imovel;

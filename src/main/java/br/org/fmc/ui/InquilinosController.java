@@ -375,7 +375,7 @@ public class InquilinosController {
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Erro no banco de dados: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 
@@ -401,7 +401,7 @@ public class InquilinosController {
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
-            contagem.setText("Erro no banco de dados: " + e.getMessage());
+            contagem.setText(Falha.doBanco(e));
         }
     }
 

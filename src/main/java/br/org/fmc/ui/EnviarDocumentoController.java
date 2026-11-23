@@ -209,7 +209,7 @@ public class EnviarDocumentoController {
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Erro no banco de dados: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 

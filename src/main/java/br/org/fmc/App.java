@@ -6,6 +6,7 @@ import br.org.fmc.service.ServicoCopiaSeguranca;
 import br.org.fmc.service.ServicoDadosTeste;
 import br.org.fmc.ui.Navegador;
 import br.org.fmc.ui.Tema;
+import br.org.fmc.util.ModoSistema;
 import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.control.Alert;
@@ -42,10 +43,10 @@ public class App extends Application {
         Navegador.mostrarLogin();
         stage.show();
 
-        String opcao = System.getenv("FMC_DADOS_TESTE");
-        if ("recarregar".equalsIgnoreCase(opcao)) {
+        // No modo cliente (computador da Fundação) nunca entram dados de teste.
+        if (ModoSistema.recarregarDadosDeTeste()) {
             carregarDadosDeTeste(stage, true);
-        } else if (!"nao".equalsIgnoreCase(opcao)) {
+        } else if (!ModoSistema.cliente()) {
             carregarDadosDeTeste(stage, false);
         }
     }

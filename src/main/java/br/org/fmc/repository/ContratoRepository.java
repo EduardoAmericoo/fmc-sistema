@@ -3,6 +3,7 @@ package br.org.fmc.repository;
 import br.org.fmc.db.Database;
 import br.org.fmc.model.Caucao;
 import br.org.fmc.model.Conjuge;
+import br.org.fmc.model.Conta;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
 import br.org.fmc.model.Encerramento;
@@ -13,12 +14,15 @@ import br.org.fmc.model.FormaPagamento;
 import br.org.fmc.model.Garantia;
 import br.org.fmc.model.Imovel;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.Lancamento;
 import br.org.fmc.model.MotivoEncerramento;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.Prorrogacao;
 import br.org.fmc.model.Reajuste;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
+import br.org.fmc.model.TipoLancamento;
+import br.org.fmc.model.Usuario;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,6 +30,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,14 +57,22 @@ public class ContratoRepository implements Repositorio<Contrato> {
      */
     @Override
     public void salvar(Contrato contrato) throws SQLException {
+        salvar(contrato, null);
+    }
+
+    /**
+     * Grava o contrato. Se a garantia for caução e quem cadastrou for informado, a caução recebida
+     * entra no Caixa ou no Banco na mesma transação (o dinheiro já está com a Fundação).
+     */
+    public void salvar(Contrato contrato, Usuario quem) throws SQLException {
         if (contrato.getId() == null) {
-            inserir(contrato);
+            inserir(contrato, quem);
         } else {
             atualizarStatus(contrato);
         }
     }
 
-    private void inserir(Contrato c) throws SQLException {
+    private void inserir(Contrato c, Usuario quem) throws SQLException {
         try (Connection conexao = Database.conectar()) {
             conexao.setAutoCommit(false); // começa a transação
             try {
@@ -71,6 +85,13 @@ public class ContratoRepository implements Repositorio<Contrato> {
                 }
                 inserirGarantia(conexao, id, c.getGarantia());
                 ocuparImovel(conexao, c.getImovel());
+                if (quem != null && c.getGarantia() instanceof Caucao caucao) {
+                    String descricao = "Caução do contrato " + numero + " · " + c.getInquilino().getNome()
+                            + (caucao.getNumeroRecibo() == null ? "" : " · recibo " + caucao.getNumeroRecibo());
+                    LancamentoRepository.inserir(conexao, new Lancamento(null, Conta.de(caucao.getFormaPagamento()),
+                            TipoLancamento.CAUCAO_RECEBIDA, caucao.getDataRecebimento(), caucao.getValor(), descricao,
+                            null, quem, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)));
+                }
                 conexao.commit(); // deu tudo certo: grava de verdade
                 c.setId(id);
                 c.setNumero(numero);
@@ -300,11 +321,40 @@ public class ContratoRepository implements Repositorio<Contrato> {
                     st.setLong(2, contrato.getImovel().getId());
                     st.executeUpdate();
                 }
+                cancelarAlugueisDepoisDaSaida(conexao, contrato.getId(), e);
                 conexao.commit();
             } catch (SQLException | RuntimeException erro) {
                 conexao.rollback();
                 throw erro;
             }
+        }
+    }
+
+    /**
+     * Encerramento registrado dias depois da saída: o sistema já pode ter gerado aluguéis que vencem
+     * depois que o inquilino foi embora, e eles não são devidos. Esses aluguéis (não pagos e sem
+     * recibo) vão para aluguel_cancelado, com o motivo, e saem da cobrança. Nada se perde: a cópia
+     * fica guardada com quem encerrou e quando.
+     */
+    private static void cancelarAlugueisDepoisDaSaida(Connection conexao, long contratoId, Encerramento e)
+            throws SQLException {
+        String filtro = " FROM aluguel WHERE contrato_id = ? AND data_pagamento IS NULL AND vencimento > ?"
+                + " AND NOT EXISTS (SELECT 1 FROM recibo r WHERE r.aluguel_id = aluguel.id)";
+        try (PreparedStatement st = conexao.prepareStatement("INSERT INTO aluguel_cancelado (aluguel_id, contrato_id, "
+                + "competencia, vencimento, valor_aluguel, taxa_luz, valor_iptu, outros, motivo, cancelado_por, "
+                + "cancelado_em) SELECT id, contrato_id, competencia, vencimento, valor_aluguel, taxa_luz, valor_iptu, "
+                + "outros, ?, ?, ?" + filtro)) {
+            st.setString(1, "Vence depois da saída do inquilino (" + e.getDataSaida() + "): não é devido.");
+            st.setString(2, e.getFeitoPor());
+            st.setString(3, e.getRegistradoEm().toString());
+            st.setLong(4, contratoId);
+            st.setString(5, e.getDataSaida().toString());
+            st.executeUpdate();
+        }
+        try (PreparedStatement st = conexao.prepareStatement("DELETE" + filtro)) {
+            st.setLong(1, contratoId);
+            st.setString(2, e.getDataSaida().toString());
+            st.executeUpdate();
         }
     }
 

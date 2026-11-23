@@ -156,7 +156,7 @@ public class RegistrarContatoController {
         } catch (IOException e) {
             mostrarErros("Não foi possível enviar o e-mail. Confira a internet e tente de novo. (" + e.getMessage() + ")");
         } catch (SQLException e) {
-            mostrarErros("O e-mail saiu, mas não foi possível registrar no histórico: " + e.getMessage());
+            mostrarErros("O e-mail saiu, mas não foi possível registrar no histórico. " + Falha.doBanco(e));
         }
     }
 
@@ -178,7 +178,7 @@ public class RegistrarContatoController {
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Não foi possível registrar no histórico: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 
@@ -273,7 +273,7 @@ public class RegistrarContatoController {
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Não foi possível salvar o contato: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 

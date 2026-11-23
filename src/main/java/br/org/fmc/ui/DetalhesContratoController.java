@@ -462,7 +462,7 @@ public class DetalhesContratoController {
             avisar(String.join(" ", e.getErros()));
             return;
         } catch (SQLException e) {
-            avisar("Erro no banco de dados: " + e.getMessage());
+            avisar(Falha.doBanco(e));
             return;
         }
         if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
@@ -493,7 +493,7 @@ public class DetalhesContratoController {
         } catch (RegraNegocioException e) {
             avisar(String.join(" ", e.getErros()));
         } catch (SQLException e) {
-            avisar("Erro no banco de dados: " + e.getMessage());
+            avisar(Falha.doBanco(e));
         }
     }
 
@@ -504,7 +504,7 @@ public class DetalhesContratoController {
         } catch (RegraNegocioException e) {
             avisar(String.join(" ", e.getErros()));
         } catch (SQLException e) {
-            avisar("Erro no banco de dados: " + e.getMessage());
+            avisar(Falha.doBanco(e));
         }
     }
 

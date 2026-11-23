@@ -83,6 +83,59 @@ public class ImovelRepository implements Repositorio<Imovel> {
         }
     }
 
+    /**
+     * Imóvel ocupado com taxa de luz ou IPTU novos (ex.: o IPTU muda todo ano). Grava o imóvel e,
+     * na mesma transação, leva os valores novos ao contrato ativo e aos aluguéis dele ainda não pagos
+     * que vencem a partir de "desde". Os aluguéis que já venceram ficam como estavam: foram cobrados
+     * com o valor da época.
+     *
+     * @return quantos aluguéis em aberto mudaram
+     */
+    public int salvarComLuzEIptuNoContrato(Imovel i, java.time.LocalDate desde) throws SQLException {
+        try (Connection c = Database.conectar()) {
+            c.setAutoCommit(false);
+            try {
+                try (PreparedStatement s = c.prepareStatement("UPDATE imovel SET codigo=?,tipo=?,endereco=?,bairro=?,"
+                        + "grupo=?,valor_aluguel=?,taxa_luz=?,valor_iptu=?,situacao=?,unidade=? WHERE id=?")) {
+                    s.setString(1, i.getCodigo());
+                    s.setString(2, i.getTipo().name());
+                    s.setString(3, i.getEndereco());
+                    s.setString(4, i.getBairro());
+                    s.setString(5, i.getGrupo());
+                    s.setString(6, i.getValorAluguel().toPlainString());
+                    s.setString(7, i.getTaxaLuz().toPlainString());
+                    s.setString(8, i.getValorIptu().toPlainString());
+                    s.setString(9, i.getSituacao().name());
+                    s.setString(10, i.getUnidade());
+                    s.setLong(11, i.getId());
+                    if (s.executeUpdate() != 1) throw new SQLException("Imóvel não encontrado.");
+                }
+                try (PreparedStatement s = c.prepareStatement(
+                        "UPDATE contrato SET taxa_luz=?, valor_iptu=? WHERE imovel_id=? AND status='ATIVO'")) {
+                    s.setString(1, i.getTaxaLuz().toPlainString());
+                    s.setString(2, i.getValorIptu().toPlainString());
+                    s.setLong(3, i.getId());
+                    s.executeUpdate();
+                }
+                int alugueis;
+                try (PreparedStatement s = c.prepareStatement("UPDATE aluguel SET taxa_luz=?, valor_iptu=? "
+                        + "WHERE data_pagamento IS NULL AND vencimento >= ? AND contrato_id IN "
+                        + "(SELECT id FROM contrato WHERE imovel_id=? AND status='ATIVO')")) {
+                    s.setString(1, i.getTaxaLuz().toPlainString());
+                    s.setString(2, i.getValorIptu().toPlainString());
+                    s.setString(3, desde.toString());
+                    s.setLong(4, i.getId());
+                    alugueis = s.executeUpdate();
+                }
+                c.commit();
+                return alugueis;
+            } catch (SQLException | RuntimeException e) {
+                c.rollback();
+                throw e;
+            }
+        }
+    }
+
     @Override
     public Optional<Imovel> buscarPorId(long id) throws SQLException {
         try (Connection c = Database.conectar();

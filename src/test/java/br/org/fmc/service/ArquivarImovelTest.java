@@ -79,7 +79,7 @@ class ArquivarImovelTest {
     @Test
     void reativarTrazDeVolta() throws Exception {
         Imovel imovel = novoImovel("IM-200", SituacaoImovel.VAGO);
-        servico.arquivar(imovel.getId(), "");
+        servico.arquivar(imovel.getId(), "Motivo de teste");
 
         servico.reativar(imovel.getId());
 
@@ -92,7 +92,7 @@ class ArquivarImovelTest {
         Imovel imovel = novoImovel("IM-200", SituacaoImovel.VAGO);
         contratoAtivo(imovel);
 
-        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.arquivar(imovel.getId(), ""));
+        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.arquivar(imovel.getId(), "Motivo de teste"));
         assertEquals(List.of("O imóvel IM-200 tem contrato ativo. Encerre o contrato antes de arquivar."), e.getErros());
     }
 
@@ -116,10 +116,10 @@ class ArquivarImovelTest {
     void secretariaArquivaMasFinanceiroNao() throws Exception {
         Imovel imovel = novoImovel("IM-200", SituacaoImovel.VAGO);
         Sessao.iniciar(new Usuario("Consulta", "consulta@exemplo.org", Perfil.FINANCEIRO));
-        assertThrows(AcessoNegadoException.class, () -> servico.arquivar(imovel.getId(), ""));
+        assertThrows(AcessoNegadoException.class, () -> servico.arquivar(imovel.getId(), "Motivo de teste"));
 
         Sessao.iniciar(new Usuario("Secretária", "secretaria@exemplo.org", Perfil.SECRETARIA));
-        servico.arquivar(imovel.getId(), "");
+        servico.arquivar(imovel.getId(), "Motivo de teste");
         assertTrue(repo.buscarPorId(imovel.getId()).orElseThrow().estaArquivado());
     }
 }

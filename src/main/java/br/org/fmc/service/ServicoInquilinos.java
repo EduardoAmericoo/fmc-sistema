@@ -309,6 +309,15 @@ public class ServicoInquilinos {
             throw new RegraNegocioException(inquilino.getNome()
                     + " tem contrato ativo. Encerre o contrato na tela Contratos antes de arquivar.");
         }
+        // Arquivar quem ainda deve tiraria a pessoa da lista do dia a dia com a dívida em aberto.
+        long emAberto = alugueis.listarEmAberto().stream()
+                .filter(a -> a.getContrato().getInquilino().getId().equals(id)).count();
+        if (emAberto > 0) {
+            throw new RegraNegocioException(inquilino.getNome() + " ainda tem " + emAberto
+                    + (emAberto == 1 ? " aluguel em aberto" : " aluguéis em aberto")
+                    + ". Receba ou resolva a dívida (Aluguéis e cobrança) antes de arquivar.");
+        }
+        exigirMotivo(motivo);
         inquilino.arquivar(LocalDate.now(), motivo);
         inquilinos.salvarArquivamento(inquilino);
         return inquilino;
@@ -420,6 +429,13 @@ public class ServicoInquilinos {
         c.setCpf(preenchido(d.conjugeCpf()) ? new Cpf(d.conjugeCpf()) : null);
         c.setRenda(renda);
         return c;
+    }
+
+    /** Todo arquivamento diz o porquê (prestação de contas): ex.: "Mudou de cidade", "Imóvel vendido". */
+    static void exigirMotivo(String motivo) {
+        if (motivo == null || motivo.strip().length() < 5) {
+            throw new RegraNegocioException("Informe o motivo do arquivamento (ex.: mudou de cidade, imóvel vendido).");
+        }
     }
 
     private static boolean preenchido(String texto) {

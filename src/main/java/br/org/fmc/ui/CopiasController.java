@@ -193,7 +193,7 @@ public class CopiasController {
         } catch (IOException e) {
             erro("Não foi possível gravar a cópia: " + e.getMessage());
         } catch (SQLException e) {
-            erro("Erro no banco de dados: " + e.getMessage() + ". Nada foi alterado.");
+            erro(Falha.doBanco(e) + " Nada foi alterado.");
         } finally {
             raiz.setCursor(Cursor.DEFAULT);
         }

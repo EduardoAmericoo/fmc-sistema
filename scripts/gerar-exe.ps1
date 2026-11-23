@@ -3,6 +3,10 @@
 # Como usar, no PowerShell, dentro da pasta do projeto:
 #   .\scripts\gerar-exe.ps1                 gera o instalador e o .zip portátil
 #   .\scripts\gerar-exe.ps1 -SemInstalador  gera só o .zip portátil (não precisa do WiX)
+#   .\scripts\gerar-exe.ps1 -Modo cliente   versão para o computador da Fundação: sem dados de teste,
+#                                           sem e-mail simulado e com troca obrigatória da senha do
+#                                           admin no 1º acesso (ver util/ModoSistema.java). Os arquivos
+#                                           saem com "-cliente" no nome. Sem -Modo, sai a demonstração.
 #
 # O resultado fica em target\pacote:
 #   - Instalar-FMC-<versao>.exe          o instalador: Avançar, Instalar, Concluir. Cria o ícone na
@@ -21,7 +25,12 @@
 # Os dados (banco, documentos e cópias) não ficam junto do programa: ficam em
 # %LOCALAPPDATA%\FMC\data (ver db/Database.java).
 
-param([switch]$SemInstalador)
+param([switch]$SemInstalador, [ValidateSet('demonstracao', 'cliente')][string]$Modo = 'demonstracao')
+
+# No modo cliente o programa abre com -Dfmc.modo=cliente, e os arquivos ganham "-cliente" no nome
+# para não confundir com a versão de demonstração do Release.
+$opcoesModo = if ($Modo -eq 'cliente') { @('--java-options', '-Dfmc.modo=cliente') } else { @() }
+$sufixo = if ($Modo -eq 'cliente') { '-cliente' } else { '' }
 
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
@@ -97,11 +106,12 @@ $modulos = 'javafx.controls,javafx.fxml,java.sql,java.desktop,java.naming,java.l
     --add-modules $modulos `
     --java-options '--enable-native-access=javafx.graphics,ALL-UNNAMED' `
     --java-options '-Dfile.encoding=UTF-8' `
+    @opcoesModo `
     --dest $pacote
 if ($LASTEXITCODE -ne 0) { throw 'O jpackage falhou.' }
 
 Write-Host "5/$etapas Compactando a versão portátil..."
-$zip = Join-Path $pacote "FMC-Sistema-$versaoNumerica-windows.zip"
+$zip = Join-Path $pacote "FMC-Sistema-$versaoNumerica$sufixo-windows.zip"
 Compress-Archive -Path (Join-Path $pacote 'FMC') -DestinationPath $zip -Force
 
 if (-not $SemInstalador) {
@@ -124,7 +134,7 @@ if (-not $SemInstalador) {
         --dest $pacote
     if ($LASTEXITCODE -ne 0) { throw 'O jpackage falhou ao montar o instalador.' }
     $gerado = Join-Path $pacote "FMC-$versaoNumerica.exe"
-    $instalador = Join-Path $pacote "Instalar-FMC-$versaoNumerica.exe"
+    $instalador = Join-Path $pacote "Instalar-FMC-$versaoNumerica$sufixo.exe"
     Move-Item $gerado $instalador -Force
 }
 

@@ -104,7 +104,7 @@ class ArquivarInquilinoTest {
         contratoDaMaria();
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
-                () -> servico.arquivar(maria.getId(), ""));
+                () -> servico.arquivar(maria.getId(), "Motivo de teste"));
         assertEquals(List.of("Maria Teste tem contrato ativo. Encerre o contrato na tela Contratos antes de arquivar."),
                 e.getErros());
         assertFalse(repo.buscarPorId(maria.getId()).orElseThrow().estaArquivado());
@@ -115,12 +115,13 @@ class ArquivarInquilinoTest {
         Contrato contrato = contratoDaMaria();
         contratos.encerrar(contrato.getId(), LocalDate.of(2025, 6, 20), MotivoEncerramento.SAIDA_DO_INQUILINO, "");
 
-        servico.arquivar(maria.getId(), "");
+        servico.arquivar(maria.getId(), "Motivo de teste");
 
         Contrato lido = new ContratoRepository().buscarPorId(contrato.getId()).orElseThrow();
         assertEquals("Maria Teste", lido.getInquilino().getNome());
         assertTrue(lido.getInquilino().estaArquivado());
-        assertEquals(null, repo.buscarPorId(maria.getId()).orElseThrow().getMotivoArquivamento()); // motivo é opcional
+        // O motivo é obrigatório desde a revisão de 23/11 e fica guardado.
+        assertEquals("Motivo de teste", repo.buscarPorId(maria.getId()).orElseThrow().getMotivoArquivamento());
     }
 
     @Test
@@ -138,7 +139,7 @@ class ArquivarInquilinoTest {
 
     @Test
     void naoFazContratoComInquilinoArquivado() throws Exception {
-        servico.arquivar(maria.getId(), "");
+        servico.arquivar(maria.getId(), "Motivo de teste");
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class, this::contratoDaMaria);
         assertTrue(e.getErros().contains(
@@ -148,7 +149,7 @@ class ArquivarInquilinoTest {
 
     @Test
     void cpfDeInquilinoArquivadoAvisaParaReativar() throws Exception {
-        servico.arquivar(maria.getId(), "");
+        servico.arquivar(maria.getId(), "Motivo de teste");
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.cadastrar(dadosDaMaria()));
         assertEquals(List.of("Este CPF já está cadastrado para Maria Teste, que está arquivado. "
@@ -157,9 +158,9 @@ class ArquivarInquilinoTest {
 
     @Test
     void naoArquivaDuasVezes() throws Exception {
-        servico.arquivar(maria.getId(), "");
+        servico.arquivar(maria.getId(), "Motivo de teste");
 
-        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.arquivar(maria.getId(), ""));
+        RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.arquivar(maria.getId(), "Motivo de teste"));
         assertEquals(List.of("Maria Teste já está arquivado."), e.getErros());
     }
 
@@ -167,7 +168,7 @@ class ArquivarInquilinoTest {
     void soQuemTemAPermissaoArquivaEReativa() throws Exception {
         Sessao.iniciar(new Usuario("Consulta", "financeiro@exemplo.org", Perfil.FINANCEIRO));
 
-        assertThrows(AcessoNegadoException.class, () -> servico.arquivar(maria.getId(), ""));
+        assertThrows(AcessoNegadoException.class, () -> servico.arquivar(maria.getId(), "Motivo de teste"));
         assertThrows(AcessoNegadoException.class, () -> servico.reativar(maria.getId()));
         assertTrue(Perfil.SECRETARIA.permite(br.org.fmc.model.Acao.ARQUIVAR_INQUILINO));
     }

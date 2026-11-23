@@ -2,6 +2,7 @@ package br.org.fmc.service;
 
 import br.org.fmc.model.Acao;
 import br.org.fmc.model.Aluguel;
+import br.org.fmc.model.Conta;
 import br.org.fmc.model.DispensaEncargos;
 import br.org.fmc.model.Encargos;
 import br.org.fmc.model.FormaPagamento;
@@ -9,10 +10,10 @@ import br.org.fmc.model.Lancamento;
 import br.org.fmc.model.Recibo;
 import br.org.fmc.model.Usuario;
 import br.org.fmc.repository.ReciboRepository;
+import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Clock;
-import br.org.fmc.util.Formatos;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -96,6 +97,19 @@ public class ServicoRecebimento {
         }
         if (recibos.estaCancelado(recibo.getId())) {
             throw new RegraNegocioException("Este recibo já foi cancelado.");
+        }
+        // O estorno sai da conta onde o dinheiro entrou. Se ele já foi depositado (ou sacado), a conta
+        // pode não ter mais o valor: cancelar assim deixaria o Caixa ou o Banco negativo.
+        Conta conta = recibo.getConta();
+        LocalDate hoje = LocalDate.now(relogio);
+        BigDecimal disponivel = new ServicoCaixaBanco().disponivel(conta, hoje);
+        if (recibo.getValorTotal().compareTo(disponivel) > 0) {
+            throw new RegraNegocioException("O " + conta.getDescricao() + " tem " + Formatos.moeda(disponivel)
+                    + " e o estorno deste recibo é de " + Formatos.moeda(recibo.getValorTotal()) + ". "
+                    + (conta == Conta.CAIXA
+                            ? "O dinheiro já foi depositado: registre antes um saque do Banco para o Caixa"
+                            : "Registre antes um depósito do Caixa no Banco")
+                    + " (tela Caixa e banco) e cancele o recibo de novo.");
         }
         return recibos.cancelar(recibo, motivo.strip(), Sessao.usuario(),
                 LocalDateTime.now(relogio).truncatedTo(ChronoUnit.SECONDS));

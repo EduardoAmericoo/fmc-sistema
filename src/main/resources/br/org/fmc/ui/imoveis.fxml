@@ -193,7 +193,7 @@
                     <Label fx:id="textoAvisoArquivar" wrapText="true" minHeight="-Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
                 <VBox spacing="6">
-                    <Label text="Motivo" labelFor="$campoMotivo" styleClass="rotulo"/>
+                    <Label text="Motivo *" labelFor="$campoMotivo" styleClass="rotulo"/>
                     <TextField fx:id="campoMotivo" promptText="Ex.: vendido em outubro de 2026" styleClass="campo"/>
                 </VBox>
             </VBox>

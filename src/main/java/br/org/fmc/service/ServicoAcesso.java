@@ -6,6 +6,7 @@ import br.org.fmc.model.RegraSenha;
 import br.org.fmc.model.Usuario;
 import br.org.fmc.repository.TentativaLoginRepository;
 import br.org.fmc.repository.UsuarioRepository;
+import br.org.fmc.util.ModoSistema;
 import br.org.fmc.util.SenhaUtil;
 import java.sql.SQLException;
 import java.time.Clock;
@@ -359,6 +360,9 @@ public class ServicoAcesso {
         }
         Usuario admin = new Usuario("Administrador", EMAIL_ADMIN_INICIAL, Perfil.ADMINISTRADOR);
         admin.setSenhaHash(SenhaUtil.gerarHash(SENHA_ADMIN_INICIAL));
+        // No computador da Fundação, a senha inicial (que está no README) só serve para o 1º acesso:
+        // o sistema obriga a trocar antes de qualquer coisa. Na demonstração ela continua valendo.
+        admin.setSenhaProvisoria(ModoSistema.cliente());
         usuarios.salvar(admin);
         return true;
     }

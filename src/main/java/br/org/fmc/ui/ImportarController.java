@@ -147,7 +147,7 @@ public class ImportarController {
         } catch (IOException e) {
             erro(e.getMessage());
         } catch (SQLException e) {
-            erro("Erro no banco de dados: " + e.getMessage() + ". Nada foi gravado.");
+            erro(Falha.doBanco(e) + " Nada foi gravado.");
         } finally {
             raiz.setCursor(Cursor.DEFAULT);
         }
