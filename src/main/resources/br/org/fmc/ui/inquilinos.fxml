@@ -120,11 +120,11 @@
                             <ComboBox fx:id="campoEstadoCivil" maxWidth="Infinity" styleClass="campo"/>
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="2">
-                            <Label text="Telefone" labelFor="$campoTelefone" styleClass="rotulo"/>
+                            <Label text="Telefone com DDD *" labelFor="$campoTelefone" styleClass="rotulo"/>
                             <TextField fx:id="campoTelefone" promptText="DDD e número" styleClass="campo"/>
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="2" GridPane.columnIndex="1">
-                            <Label text="E-mail" labelFor="$campoEmail" styleClass="rotulo"/>
+                            <Label text="E-mail *" labelFor="$campoEmail" styleClass="rotulo"/>
                             <TextField fx:id="campoEmail" promptText="nome@exemplo.org" styleClass="campo"/>
                         </VBox>
                     </GridPane>
@@ -144,7 +144,7 @@
                             <TextField fx:id="campoLocalTrabalho" styleClass="campo"/>
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="1">
-                            <Label text="Renda mensal (R$)" labelFor="$campoRenda" styleClass="rotulo"/>
+                            <Label text="Renda mensal (R$) *" labelFor="$campoRenda" styleClass="rotulo"/>
                             <TextField fx:id="campoRenda" promptText="2.500,00" styleClass="campo"/>
                         </VBox>
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
@@ -164,7 +164,7 @@
                                 <ColumnConstraints percentWidth="50"/>
                             </columnConstraints>
                             <VBox spacing="6" GridPane.columnSpan="2">
-                                <Label text="Nome do cônjuge" labelFor="$campoConjugeNome" styleClass="rotulo"/>
+                                <Label text="Nome do cônjuge *" labelFor="$campoConjugeNome" styleClass="rotulo"/>
                                 <TextField fx:id="campoConjugeNome" styleClass="campo"/>
                             </VBox>
                             <VBox spacing="6" GridPane.rowIndex="1">

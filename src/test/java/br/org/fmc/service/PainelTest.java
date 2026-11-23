@@ -101,7 +101,7 @@ class PainelTest {
     private Contrato contrato(String codigo, String valor, String nome, String cpf, String renda, LocalDate chaves)
             throws Exception {
         Imovel imovel = novoImovel(codigo, valor);
-        Inquilino inquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "", "",
+        Inquilino inquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", renda, "", "", "", ""));
         DadosContrato.Fiador fiador = new DadosContrato.Fiador("José Fiador", "123.456.789-09", "(79) 99999-1111",
                 EstadoCivil.SOLTEIRO, "9.000,00", "Rua do Fiador, 10", "", "");

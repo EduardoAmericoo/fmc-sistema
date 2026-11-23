@@ -82,8 +82,14 @@ class MensagemCobrancaTest {
                 "1.000,00", "50,00", "20,00", SituacaoImovel.VAGO);
         long idImovel = new ImovelRepository().listarTodos().stream().filter(i -> i.getCodigo().equals(imovel))
                 .findFirst().orElseThrow().getId();
-        long idInquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, telefone, email,
-                EstadoCivil.SOLTEIRO, "", "", "5.000,00", "", "", "", "")).getId();
+        br.org.fmc.model.Inquilino cadastrado = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf,
+                "(79) 99999-0000", "teste@exemplo.org", EstadoCivil.SOLTEIRO, "", "", "5.000,00", "", "", "", ""));
+        // Hoje telefone e e-mail são obrigatórios. Cadastros antigos (de antes da regra) podem não ter:
+        // grava direto no banco para simular um desses.
+        cadastrado.setTelefone(telefone);
+        cadastrado.setEmail(email);
+        new br.org.fmc.repository.InquilinoRepository().salvar(cadastrado);
+        long idInquilino = cadastrado.getId();
         new ServicoContratos().cadastrar(new DadosContrato(idImovel, idInquilino, PrazoContrato.MESES_12, chaves,
                 null, new DadosContrato.Caucao("3.000,00", chaves, FormaPagamento.PIX, "")));
     }

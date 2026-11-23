@@ -8,6 +8,7 @@ import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.TipoImovel;
 import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.ImovelRepository;
+import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.util.Formatos;
 import br.org.fmc.util.TextoBusca;
 import java.math.BigDecimal;
@@ -70,6 +71,10 @@ public class ServicoImoveis {
         List<String> erros = new ArrayList<>();
         if (codigo == null || codigo.isBlank()) {
             erros.add("Informe o código de identificação do imóvel.");
+        } else if (!codigo.matches(".*[\\p{L}\\p{N}].*")) {
+            erros.add("O código do imóvel precisa ter letras ou números, ex.: IM-125.");
+        } else if (codigo.trim().length() > 20) {
+            erros.add("O código do imóvel pode ter no máximo 20 caracteres, ex.: IM-125.");
         } else if (repositorio.existeCodigo(codigo, id)) {
             erros.add("Já existe um imóvel com o código " + codigo.trim() + ".");
         }
@@ -81,6 +86,8 @@ public class ServicoImoveis {
         }
         if (endereco == null || endereco.isBlank()) {
             erros.add("Informe o endereço.");
+        } else if (!ServicoContratos.enderecoCompleto(endereco)) {
+            erros.add("Endereço incompleto: informe a rua e o número, ex.: Rua Itabaiana, 120.");
         }
         if (situacao == null) {
             erros.add("Escolha a situação do imóvel.");
@@ -158,15 +165,16 @@ public class ServicoImoveis {
             erros.add("Informe o valor do " + campo + ".");
             return BigDecimal.ZERO;
         }
-        try {
-            BigDecimal valor = Formatos.lerValor(texto);
-            if (obrigatorio && valor.signum() <= 0) {
-                erros.add("O valor do " + campo + " precisa ser maior que zero.");
-            }
-            return valor;
-        } catch (IllegalArgumentException e) {
-            erros.add("Valor do " + campo + " inválido: use só números, ex.: 1.500,00.");
-            return BigDecimal.ZERO;
+        int errosAntes = erros.size();
+        BigDecimal valor = ValorDigitado.ler(texto, "Valor do " + campo + " inválido", "O valor do " + campo, erros);
+        if (obrigatorio && erros.size() == errosAntes && valor.signum() <= 0) {
+            erros.add("O valor do " + campo + " precisa ser maior que zero.");
+        } else if (obrigatorio && erros.size() == errosAntes
+                && valor.compareTo(RegrasNegocio.ALUGUEL_MINIMO) < 0) {
+            // Só o aluguel é obrigatório: abaixo do mínimo é quase certo erro de digitação (ex.: 1,50 no lugar de 1.500).
+            erros.add("O valor do " + campo + " precisa ser de pelo menos " + Formatos.moeda(RegrasNegocio.ALUGUEL_MINIMO)
+                    + ". Confira se digitou certo.");
         }
+        return valor;
     }
 }

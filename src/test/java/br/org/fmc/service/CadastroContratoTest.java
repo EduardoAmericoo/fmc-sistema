@@ -76,7 +76,7 @@ class CadastroContratoTest {
     }
 
     private Inquilino novaInquilina(String nome, String cpf, String renda) throws Exception {
-        return new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "", "", EstadoCivil.SOLTEIRO,
+        return new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "(79) 99999-0000", "teste@exemplo.org", EstadoCivil.SOLTEIRO,
                 "", "", renda, "", "", "", ""));
     }
 
@@ -176,8 +176,8 @@ class CadastroContratoTest {
 
     @Test
     void fiadorNaoPodeSerOProprioInquilino() {
-        DadosContrato.Fiador mesmaPessoa = new DadosContrato.Fiador("Maria Teste", CPF_MARIA, "",
-                EstadoCivil.SOLTEIRO, "5.000,00", "", "", "");
+        DadosContrato.Fiador mesmaPessoa = new DadosContrato.Fiador("Maria Teste", CPF_MARIA, "(79) 99999-1111",
+                EstadoCivil.SOLTEIRO, "5.000,00", "Rua Exemplo, 50", "", "");
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class, () -> servico.cadastrar(
                 new DadosContrato(imovel.getId(), maria.getId(), PrazoContrato.MESES_12, CHAVES, mesmaPessoa, null)));

@@ -64,7 +64,7 @@ class FichaInquilinoTest {
         acesso.login(ServicoAcesso.EMAIL_ADMIN_INICIAL, ServicoAcesso.SENHA_ADMIN_INICIAL);
         servico.usarRelogio(Clock.fixed(HOJE.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault()));
 
-        maria = servico.cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "(79) 99999-0000", "",
+        maria = servico.cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "Professora", "", "4.000,00", "", "", "", ""));
         ServicoContratos contratos = new ServicoContratos();
         antigo = contratos.cadastrar(contrato(novoImovel("IM-002"), LocalDate.of(2025, 1, 10)));
@@ -138,7 +138,7 @@ class FichaInquilinoTest {
 
     @Test
     void fichaDeInquilinoArquivadoContinuaAbrindo() throws Exception {
-        Inquilino joana = servico.cadastrar(new DadosInquilino("Joana Teste", "390.533.447-05", "", "",
+        Inquilino joana = servico.cadastrar(new DadosInquilino("Joana Teste", "390.533.447-05", "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", "3.000,00", "", "", "", ""));
         servico.arquivar(joana.getId(), "Mudou de cidade");
 

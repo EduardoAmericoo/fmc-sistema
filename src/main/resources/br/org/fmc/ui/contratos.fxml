@@ -187,7 +187,7 @@
                                 <ComboBox fx:id="campoFiadorEstadoCivil" maxWidth="Infinity" styleClass="campo"/>
                             </VBox>
                             <VBox spacing="6" GridPane.rowIndex="2">
-                                <Label text="Telefone" labelFor="$campoFiadorTelefone" styleClass="rotulo"/>
+                                <Label text="Telefone com DDD *" labelFor="$campoFiadorTelefone" styleClass="rotulo"/>
                                 <TextField fx:id="campoFiadorTelefone" promptText="DDD e número" styleClass="campo"/>
                             </VBox>
                             <VBox spacing="6" GridPane.rowIndex="2" GridPane.columnIndex="1">
@@ -195,7 +195,7 @@
                                 <TextField fx:id="campoFiadorRenda" promptText="4.500,00" styleClass="campo"/>
                             </VBox>
                             <VBox spacing="6" GridPane.rowIndex="3" GridPane.columnSpan="2">
-                                <Label text="Endereço" labelFor="$campoFiadorEndereco" styleClass="rotulo"/>
+                                <Label text="Endereço *" labelFor="$campoFiadorEndereco" styleClass="rotulo"/>
                                 <TextField fx:id="campoFiadorEndereco" styleClass="campo"/>
                             </VBox>
                         </GridPane>

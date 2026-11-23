@@ -89,14 +89,14 @@ class CadastroInquilinoTest {
     @Test
     void editaInquilinoMantendoOProprioCpf() throws Exception {
         Inquilino maria = servico.cadastrar(maria(CPF_MARIA));
-        DadosInquilino casada = new DadosInquilino("Maria Teste Silva", CPF_MARIA, "", "",
+        DadosInquilino casada = new DadosInquilino("Maria Teste Silva", CPF_MARIA, "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.CASADO, "", "", "2500", "", "Carlos Teste", CPF_CARLOS, "1.000,00");
 
         servico.editar(maria.getId(), casada);
 
         Inquilino lido = repo.buscarPorId(maria.getId()).orElseThrow();
         assertEquals("Maria Teste Silva", lido.getNome());
-        assertNull(lido.getTelefone());
+        assertEquals("(79) 99999-0000", lido.getTelefone());
         assertEquals("Carlos Teste", lido.getConjuge().getNome());
         assertEquals(new BigDecimal("3500.00"), lido.rendaConsiderada());
         assertEquals(1, repo.listarTodos().size());
@@ -105,8 +105,8 @@ class CadastroInquilinoTest {
     @Test
     void edicaoNaoPodeUsarOCpfDeOutroInquilino() throws Exception {
         servico.cadastrar(maria(CPF_MARIA));
-        Inquilino carlos = servico.cadastrar(new DadosInquilino("Carlos Teste", CPF_CARLOS, "", "",
-                EstadoCivil.SOLTEIRO, "", "", "", "", "", "", ""));
+        Inquilino carlos = servico.cadastrar(new DadosInquilino("Carlos Teste", CPF_CARLOS, "(79) 99999-0000", "teste@exemplo.org",
+                EstadoCivil.SOLTEIRO, "", "", "3.000,00", "", "", "", ""));
 
         RegraNegocioException e = assertThrows(RegraNegocioException.class,
                 () -> servico.editar(carlos.getId(), maria(CPF_MARIA)));
@@ -121,16 +121,17 @@ class CadastroInquilinoTest {
         assertEquals(List.of(
                 "Informe o nome completo.",
                 "Informe o CPF.",
-                "Informe um e-mail válido.",
+                "Informe o telefone com DDD.",
+                "Falta o @ no e-mail. Exemplo: nome@exemplo.org",
                 "Renda mensal inválida: use só números, ex.: 2.500,00.",
-                "Informe o nome do cônjuge.",
+                "Estado civil casado(a): informe o nome do cônjuge.",
                 "Cônjuge: CPF incompleto: tem 3 números, precisa ter 11."), e.getErros());
     }
 
     @Test
     void solteiroIgnoraCamposDoConjuge() throws Exception {
-        DadosInquilino solteira = new DadosInquilino("Maria Teste", CPF_MARIA, "", "", EstadoCivil.SOLTEIRO,
-                "", "", "", "", "Sobrou da tela", "", "");
+        DadosInquilino solteira = new DadosInquilino("Maria Teste", CPF_MARIA, "(79) 99999-0000", "teste@exemplo.org", EstadoCivil.SOLTEIRO,
+                "", "", "2.500,00", "", "Sobrou da tela", "", "");
         assertNull(servico.cadastrar(solteira).getConjuge());
     }
 

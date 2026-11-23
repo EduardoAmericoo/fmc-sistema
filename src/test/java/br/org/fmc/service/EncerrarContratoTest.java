@@ -68,7 +68,7 @@ class EncerrarContratoTest {
         new ServicoImoveis().salvarFormulario(null, "IM-001", "", TipoImovel.CASA, "Rua Exemplo, 52", "Centro", "",
                 "1.000,00", "50,00", "20,00", SituacaoImovel.VAGO);
         imovel = repoImoveis.listarTodos().get(0);
-        maria = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "", "",
+        maria = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", "3.000,00", "", "", "", ""));
         contrato = servico.cadastrar(contratoNovo());
         servico.usarRelogio(Clock.fixed(HOJE.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault()));

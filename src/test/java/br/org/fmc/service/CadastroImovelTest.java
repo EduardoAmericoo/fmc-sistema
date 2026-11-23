@@ -34,9 +34,9 @@ class CadastroImovelTest {
     }
 
     @Test void unidadeOpcionalPodeFicarVaziaEmVariosImoveis() throws Exception {
-        servico.salvarFormulario(null, "01", "", TipoImovel.CASA, "Rua A", "", "", "1000", "", "",
+        servico.salvarFormulario(null, "01", "", TipoImovel.CASA, "Rua A, 10", "", "", "1000", "", "",
                 SituacaoImovel.VAGO);
-        servico.salvarFormulario(null, "02", "  ", TipoImovel.CASA, "Rua B", "", "", "1000", "", "",
+        servico.salvarFormulario(null, "02", "  ", TipoImovel.CASA, "Rua B, 20", "", "", "1000", "", "",
                 SituacaoImovel.VAGO);
         assertEquals(2, servico.listar().size());
         assertTrue(servico.listar().stream().allMatch(i -> i.getUnidade() == null));
@@ -68,22 +68,22 @@ class CadastroImovelTest {
     }
 
     @Test void bloqueiaUnidadeRepetidaMesmoComOutroCodigoOuEndereco() throws Exception {
-        salvarUnidade(null, "01", "Apto 101", "Rua A");
+        salvarUnidade(null, "01", "Apto 101", "Rua A, 10");
         var erro = assertThrows(RegraNegocioException.class,
-                () -> salvarUnidade(null, "02", " apto 101 ", "Rua A"));
+                () -> salvarUnidade(null, "02", " apto 101 ", "Rua A, 10"));
         assertTrue(erro.getMessage().contains("unidade"));
         assertThrows(RegraNegocioException.class,
-                () -> salvarUnidade(null, "02", "Apto 101", "Rua B"));
+                () -> salvarUnidade(null, "02", "Apto 101", "Rua B, 20"));
         assertEquals(1, servico.listar().size());
     }
 
     @Test void permiteEnderecoRepetidoEEditarSemMudarUnidade() throws Exception {
-        salvarUnidade(null, "01", "101", "Rua A");
+        salvarUnidade(null, "01", "101", "Rua A, 10");
         Long id = servico.listar().getFirst().getId();
-        salvarUnidade(null, "02", "102", "Rua A");
-        salvarUnidade(id, "01", "101", "Rua A atualizada");
+        salvarUnidade(null, "02", "102", "Rua A, 10");
+        salvarUnidade(id, "01", "101", "Rua A, 10 atualizada");
         assertThrows(RegraNegocioException.class,
-                () -> salvarUnidade(id, "01", "102", "Rua A atualizada"));
+                () -> salvarUnidade(id, "01", "102", "Rua A, 10 atualizada"));
         assertEquals(2, servico.listar().size());
         assertEquals("101", servico.listar().stream().filter(i -> i.getId().equals(id))
                 .findFirst().orElseThrow().getUnidade());

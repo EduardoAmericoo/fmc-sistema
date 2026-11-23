@@ -44,6 +44,31 @@ public final class RegrasNegocio {
     /** [D7] BOARD-64: a data prometida pode ser de no máximo 90 dias depois do contato. */
     public static final int DIAS_MAXIMO_PROMESSA = 90;
 
+    /** Tamanho máximo do nome de uma pessoa: cabe no contrato e no recibo. */
+    public static final int NOME_MAXIMO = 120;
+
+    /**
+     * Teto de qualquer valor digitado (renda, aluguel, caução, luz, IPTU): R$ 1.000.000,00.
+     * Pega zeros a mais por engano (ex.: 2500000 no lugar de 2500,00).
+     */
+    public static final BigDecimal VALOR_MAXIMO = new BigDecimal("1000000.00");
+
+    /** Aluguel mínimo de um imóvel: abaixo disso é quase certo erro de digitação. A validar com o cliente. */
+    public static final BigDecimal ALUGUEL_MINIMO = new BigDecimal("50.00");
+
+    /** O endereço precisa de pelo menos 5 letras e números (ex.: "Rua A, 1"). */
+    public static final int ENDERECO_MINIMO = 5;
+
+    /**
+     * A entrega das chaves pode ser marcada até 60 dias à frente (contrato assinado antes da mudança)
+     * e não antes de 2000 (contrato antigo vindo do papel ou da planilha).
+     */
+    public static final int DIAS_MAXIMO_CHAVES_NO_FUTURO = 60;
+    public static final int ANO_MINIMO_CONTRATO = 2000;
+
+    /** A caução é recebida no máximo 60 dias antes da entrega das chaves. */
+    public static final int DIAS_MAXIMO_CAUCAO_ANTES_DAS_CHAVES = 60;
+
     private RegrasNegocio() {
     }
 }

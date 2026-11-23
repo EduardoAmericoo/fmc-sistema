@@ -69,7 +69,7 @@ class GerarAlugueisTest {
                 "1.000,00", "50,00", "20,00", SituacaoImovel.VAGO);
         long imovel = new ImovelRepository().listarTodos().stream().filter(i -> i.getCodigo().equals(codigo))
                 .findFirst().orElseThrow().getId();
-        long inquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "", "",
+        long inquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", "5.000,00", "", "", "", "")).getId();
         return servicoContratos.cadastrar(new DadosContrato(imovel, inquilino, PrazoContrato.MESES_12,
                 LocalDate.of(2026, 7, 2), null,
