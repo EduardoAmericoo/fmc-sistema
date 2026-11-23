@@ -12,6 +12,7 @@ import br.org.fmc.repository.ReciboRepository;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Clock;
+import br.org.fmc.util.Formatos;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -124,6 +125,12 @@ public class ServicoRecebimento {
         }
         if (dataPagamento.isAfter(hoje())) {
             throw new RegraNegocioException("A data do pagamento não pode estar no futuro.");
+        }
+        // Ninguém paga aluguel antes de pegar as chaves: data assim é erro de digitação (ex.: ano errado).
+        LocalDate chaves = aluguel.getContrato().getDataEntregaChaves();
+        if (dataPagamento.isBefore(chaves)) {
+            throw new RegraNegocioException("A data do pagamento não pode ser antes da entrega das chaves ("
+                    + Formatos.data(chaves) + "). Confira a data.");
         }
         if (formaPagamento == null) {
             throw new RegraNegocioException("Escolha a forma de pagamento.");

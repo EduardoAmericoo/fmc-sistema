@@ -65,7 +65,7 @@ class GeracaoMesesQueFaltamTest {
                 "1.000,00", "50,00", "20,00", SituacaoImovel.VAGO);
         long idImovel = new ImovelRepository().listarTodos().stream().filter(i -> i.getCodigo().equals(imovel))
                 .findFirst().orElseThrow().getId();
-        long idInquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "", "",
+        long idInquilino = new ServicoInquilinos().cadastrar(new DadosInquilino(nome, cpf, "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", "5.000,00", "", "", "", "")).getId();
         return new DadosContrato(idImovel, idInquilino, PrazoContrato.MESES_12, chaves, null,
                 new DadosContrato.Caucao("3.000,00", chaves, FormaPagamento.PIX, ""));

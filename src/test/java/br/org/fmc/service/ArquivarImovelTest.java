@@ -53,7 +53,7 @@ class ArquivarImovelTest {
 
     /** Cadastra uma inquilina e um contrato ativo no imóvel (que passa a Ocupado). */
     private void contratoAtivo(Imovel imovel) throws Exception {
-        long inquilina = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "", "",
+        long inquilina = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", "5.000,00", "", "", "", "")).getId();
         new ServicoContratos().cadastrar(new DadosContrato(imovel.getId(), inquilina, PrazoContrato.MESES_12,
                 LocalDate.of(2026, 11, 1), null,

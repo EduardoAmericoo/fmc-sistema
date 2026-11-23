@@ -13,12 +13,14 @@ import br.org.fmc.model.Imovel;
 import br.org.fmc.model.SituacaoContrato;
 import br.org.fmc.model.Inquilino;
 import br.org.fmc.model.MotivoEncerramento;
+import br.org.fmc.model.NomePessoa;
 import br.org.fmc.model.PrazoContrato;
 import br.org.fmc.model.Prorrogacao;
 import br.org.fmc.model.Reajuste;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.SituacaoImovel;
 import br.org.fmc.model.StatusContrato;
+import br.org.fmc.model.Telefone;
 import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.ImovelRepository;
 import br.org.fmc.repository.InquilinoRepository;
@@ -134,9 +136,7 @@ public class ServicoContratos {
         if (d.prazo() == null) {
             erros.add("Escolha o prazo do contrato.");
         }
-        if (d.entregaChaves() == null) {
-            erros.add("Informe a data de entrega das chaves.");
-        }
+        conferirEntregaChaves(d.entregaChaves(), erros);
         Garantia garantia = montarGarantia(d, inquilino, erros);
 
         if (!erros.isEmpty()) {
@@ -383,13 +383,48 @@ public class ServicoContratos {
             erros.add("Escolha só uma garantia: fiador ou caução.");
             return null;
         }
-        return d.fiador() != null ? montarFianca(d.fiador(), inquilino, erros) : montarCaucao(d.caucao(), erros);
+        return d.fiador() != null ? montarFianca(d.fiador(), inquilino, erros)
+                : montarCaucao(d.caucao(), d.entregaChaves(), erros);
+    }
+
+    /**
+     * A entrega das chaves pode ser de um contrato antigo (desde 2000, vindo do papel ou da planilha)
+     * ou de um assinado antes da mudança (até 60 dias à frente). Fora disso é erro de digitação.
+     */
+    private void conferirEntregaChaves(LocalDate chaves, List<String> erros) {
+        if (chaves == null) {
+            erros.add("Informe a data de entrega das chaves.");
+        } else if (chaves.getYear() < RegrasNegocio.ANO_MINIMO_CONTRATO) {
+            erros.add("A entrega das chaves não pode ser antes de " + RegrasNegocio.ANO_MINIMO_CONTRATO
+                    + ". Confira o ano.");
+        } else if (chaves.isAfter(hoje().plusDays(RegrasNegocio.DIAS_MAXIMO_CHAVES_NO_FUTURO))) {
+            erros.add("A entrega das chaves pode ser no máximo " + RegrasNegocio.DIAS_MAXIMO_CHAVES_NO_FUTURO
+                    + " dias à frente (até " + Formatos.data(hoje().plusDays(RegrasNegocio.DIAS_MAXIMO_CHAVES_NO_FUTURO))
+                    + "). Confira o ano.");
+        }
+    }
+
+    /** Endereço com pelo menos 5 letras e números e alguma letra (ex.: "Rua A, 1"). */
+    static boolean enderecoCompleto(String endereco) {
+        String limpo = endereco.replaceAll("[^\\p{L}\\p{N}]", "");
+        return limpo.length() >= RegrasNegocio.ENDERECO_MINIMO && limpo.matches(".*\\p{L}.*");
     }
 
     private static Fianca montarFianca(DadosContrato.Fiador f, Inquilino inquilino, List<String> erros) {
         int errosAntes = erros.size();
-        if (!preenchido(f.nome())) {
-            erros.add("Informe o nome do fiador.");
+        String problemaNome = NomePessoa.problema(f.nome(), " do fiador");
+        if (problemaNome != null) {
+            erros.add(problemaNome);
+        }
+        // Telefone e endereço do fiador são obrigatórios: se o inquilino não paga, é ele quem é cobrado.
+        String problemaTelefone = Telefone.problema(f.telefone());
+        if (problemaTelefone != null) {
+            erros.add("Fiador: " + Character.toLowerCase(problemaTelefone.charAt(0)) + problemaTelefone.substring(1));
+        }
+        if (!preenchido(f.endereco())) {
+            erros.add("Informe o endereço do fiador.");
+        } else if (!enderecoCompleto(f.endereco())) {
+            erros.add("Endereço do fiador incompleto: informe a rua e o número.");
         }
         if (!preenchido(f.cpf())) {
             erros.add("Informe o CPF do fiador.");
@@ -401,10 +436,19 @@ public class ServicoContratos {
         if (f.estadoCivil() == null) {
             erros.add("Escolha o estado civil do fiador.");
         }
-        BigDecimal renda = lerValor(f.renda(), "Renda do fiador inválida", erros);
+        BigDecimal renda = ValorDigitado.ler(f.renda(), "Renda do fiador inválida", "A renda do fiador", erros);
         boolean temConjuge = f.estadoCivil() != null && f.estadoCivil().temConjuge();
+        if (temConjuge && preenchido(f.conjugeNome())) {
+            String problemaConjuge = NomePessoa.problema(f.conjugeNome(), " do cônjuge do fiador");
+            if (problemaConjuge != null) {
+                erros.add(problemaConjuge);
+            }
+        }
         if (temConjuge && preenchido(f.conjugeCpf()) && !Cpf.ehValido(f.conjugeCpf())) {
             erros.add("Cônjuge do fiador: " + Cpf.problema(f.conjugeCpf()));
+        } else if (temConjuge && preenchido(f.conjugeCpf()) && preenchido(f.cpf()) && Cpf.ehValido(f.cpf())
+                && new Cpf(f.conjugeCpf()).equals(new Cpf(f.cpf()))) {
+            erros.add("O CPF do cônjuge do fiador não pode ser o mesmo do fiador.");
         }
         if (erros.size() > errosAntes) {
             return null;
@@ -424,14 +468,19 @@ public class ServicoContratos {
         return new Fianca(fiador);
     }
 
-    private static Caucao montarCaucao(DadosContrato.Caucao c, List<String> erros) {
+    private static Caucao montarCaucao(DadosContrato.Caucao c, LocalDate chaves, List<String> erros) {
         int errosAntes = erros.size();
-        BigDecimal valor = lerValor(c.valor(), "Valor da caução inválido", erros);
+        BigDecimal valor = ValorDigitado.ler(c.valor(), "Valor da caução inválido", "O valor da caução", erros);
         if (erros.size() == errosAntes && valor.signum() <= 0) {
             erros.add("Informe o valor da caução.");
         }
         if (c.recebidaEm() == null) {
             erros.add("Informe a data em que a caução foi recebida.");
+        } else if (chaves != null && c.recebidaEm().isBefore(
+                chaves.minusDays(RegrasNegocio.DIAS_MAXIMO_CAUCAO_ANTES_DAS_CHAVES))) {
+            // A outra ponta (não depois das chaves) é conferida pela própria Caucao.
+            erros.add("A caução precisa ser recebida no máximo " + RegrasNegocio.DIAS_MAXIMO_CAUCAO_ANTES_DAS_CHAVES
+                    + " dias antes da entrega das chaves (" + Formatos.data(chaves) + "). Confira a data.");
         }
         if (c.forma() == null) {
             erros.add("Escolha a forma de pagamento da caução.");
@@ -442,15 +491,6 @@ public class ServicoContratos {
         Caucao caucao = new Caucao(valor, c.recebidaEm(), c.forma());
         caucao.setNumeroRecibo(c.recibo());
         return caucao;
-    }
-
-    private static BigDecimal lerValor(String texto, String erro, List<String> erros) {
-        try {
-            return Formatos.lerValor(texto);
-        } catch (IllegalArgumentException e) {
-            erros.add(erro + ": use só números, ex.: 2.500,00.");
-            return BigDecimal.ZERO;
-        }
     }
 
     private static boolean preenchido(String texto) {

@@ -7,13 +7,14 @@ import br.org.fmc.model.ContatoCobranca;
 import br.org.fmc.model.Contrato;
 import br.org.fmc.model.Cpf;
 import br.org.fmc.model.Inquilino;
+import br.org.fmc.model.NomePessoa;
 import br.org.fmc.model.RegrasNegocio;
 import br.org.fmc.model.StatusContrato;
+import br.org.fmc.model.Telefone;
 import br.org.fmc.repository.AluguelRepository;
 import br.org.fmc.repository.ContatoCobrancaRepository;
 import br.org.fmc.repository.ContratoRepository;
 import br.org.fmc.repository.InquilinoRepository;
-import br.org.fmc.util.Formatos;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Clock;
@@ -329,8 +330,9 @@ public class ServicoInquilinos {
     private Inquilino salvar(Long id, DadosInquilino d) throws SQLException {
         List<String> erros = new ArrayList<>();
 
-        if (d.nome() == null || d.nome().isBlank()) {
-            erros.add("Informe o nome completo.");
+        String problemaNome = NomePessoa.problema(d.nome(), "");
+        if (problemaNome != null) {
+            erros.add(problemaNome);
         }
         Cpf cpf = null;
         if (d.cpf() == null || d.cpf().isBlank()) {
@@ -347,18 +349,30 @@ public class ServicoInquilinos {
                                 : ". Para mudar os dados, clique no nome na lista."));
             }
         }
-        if (d.email() != null && !d.email().isBlank() && !d.email().trim().matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {
-            erros.add("Informe um e-mail válido.");
+        // Telefone e e-mail são obrigatórios: são por eles que a Fundação cobra o inquilino.
+        String problemaTelefone = Telefone.problema(d.telefone());
+        if (problemaTelefone != null) {
+            erros.add(problemaTelefone);
+        }
+        String problemaEmail = ServicoAcesso.problemaEmail(d.email());
+        if (problemaEmail != null) {
+            erros.add(problemaEmail);
         }
         if (d.estadoCivil() == null) {
             erros.add("Escolha o estado civil.");
         }
-        BigDecimal renda = lerValor(d.rendaMensal(), "Renda mensal inválida", erros);
-        BigDecimal outras = lerValor(d.outrasRendas(), "Outras rendas inválidas", erros);
+        int errosAntesDaRenda = erros.size();
+        BigDecimal renda = ValorDigitado.ler(d.rendaMensal(), "Renda mensal inválida", "A renda mensal", erros);
+        // Sem renda não dá para conferir a regra dos 3 aluguéis: a renda é obrigatória.
+        if (erros.size() == errosAntesDaRenda && renda.signum() <= 0) {
+            erros.add("Informe a renda mensal, maior que zero.");
+        }
+        BigDecimal outras = ValorDigitado.ler(d.outrasRendas(), "Outras rendas inválidas", "Outras rendas", erros);
 
         Conjuge conjuge = null;
-        if (d.estadoCivil() != null && d.estadoCivil().temConjuge() && conjugeInformado(d)) {
-            conjuge = montarConjuge(d, erros);
+        if (d.estadoCivil() != null && d.estadoCivil().temConjuge()) {
+            // Casado ou em união estável: o cônjuge entra na renda familiar e assina junto.
+            conjuge = montarConjuge(d, cpf, erros);
         }
 
         if (!erros.isEmpty()) {
@@ -379,21 +393,26 @@ public class ServicoInquilinos {
         return inquilino;
     }
 
-    private static boolean conjugeInformado(DadosInquilino d) {
-        return preenchido(d.conjugeNome()) || preenchido(d.conjugeCpf()) || preenchido(d.conjugeRenda());
-    }
-
     /** Monta o cônjuge; se algo estiver errado, anota em erros e devolve null. */
-    private static Conjuge montarConjuge(DadosInquilino d, List<String> erros) {
+    private static Conjuge montarConjuge(DadosInquilino d, Cpf cpfInquilino, List<String> erros) {
         int errosAntes = erros.size();
         if (!preenchido(d.conjugeNome())) {
-            erros.add("Informe o nome do cônjuge.");
+            erros.add("Estado civil " + d.estadoCivil().getDescricao().toLowerCase()
+                    + ": informe o nome do cônjuge.");
+        } else {
+            String problemaNome = NomePessoa.problema(d.conjugeNome(), " do cônjuge");
+            if (problemaNome != null) {
+                erros.add(problemaNome);
+            }
         }
         // O CPF do cônjuge não é obrigatório, mas, se for digitado, precisa ser válido.
         if (preenchido(d.conjugeCpf()) && !Cpf.ehValido(d.conjugeCpf())) {
             erros.add("Cônjuge: " + Cpf.problema(d.conjugeCpf()));
+        } else if (preenchido(d.conjugeCpf()) && new Cpf(d.conjugeCpf()).equals(cpfInquilino)) {
+            erros.add("O CPF do cônjuge não pode ser o mesmo do inquilino.");
         }
-        BigDecimal renda = lerValor(d.conjugeRenda(), "Renda do cônjuge inválida", erros);
+        BigDecimal renda = ValorDigitado.ler(d.conjugeRenda(), "Renda do cônjuge inválida", "A renda do cônjuge",
+                erros);
         if (erros.size() > errosAntes) {
             return null;
         }
@@ -401,15 +420,6 @@ public class ServicoInquilinos {
         c.setCpf(preenchido(d.conjugeCpf()) ? new Cpf(d.conjugeCpf()) : null);
         c.setRenda(renda);
         return c;
-    }
-
-    private static BigDecimal lerValor(String texto, String erro, List<String> erros) {
-        try {
-            return Formatos.lerValor(texto);
-        } catch (IllegalArgumentException e) {
-            erros.add(erro + ": use só números, ex.: 2.500,00.");
-            return BigDecimal.ZERO;
-        }
     }
 
     private static boolean preenchido(String texto) {

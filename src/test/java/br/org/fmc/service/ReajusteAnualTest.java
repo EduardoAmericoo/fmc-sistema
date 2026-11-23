@@ -62,7 +62,7 @@ class ReajusteAnualTest {
         new ServicoImoveis().salvarFormulario(null, "IM-001", "", TipoImovel.CASA, "Rua Exemplo, 52", "Centro", "",
                 "1.000,00", "50,00", "20,00", SituacaoImovel.VAGO);
         Imovel imovel = new ImovelRepository().listarTodos().get(0);
-        long maria = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "", "",
+        long maria = new ServicoInquilinos().cadastrar(new DadosInquilino("Maria Teste", "529.982.247-25", "(79) 99999-0000", "teste@exemplo.org",
                 EstadoCivil.SOLTEIRO, "", "", "4.000,00", "", "", "", "")).getId();
         DadosContrato.Fiador fiador = new DadosContrato.Fiador("José Fiador", "123.456.789-09", "(79) 99999-1111",
                 EstadoCivil.SOLTEIRO, "9.000,00", "Rua do Fiador, 10", "", "");

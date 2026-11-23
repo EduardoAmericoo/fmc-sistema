@@ -68,7 +68,7 @@ class ArquivarInquilinoTest {
     }
 
     private static DadosInquilino dadosDaMaria() {
-        return new DadosInquilino("Maria Teste", "529.982.247-25", "", "", EstadoCivil.SOLTEIRO, "", "",
+        return new DadosInquilino("Maria Teste", "529.982.247-25", "(79) 99999-0000", "teste@exemplo.org", EstadoCivil.SOLTEIRO, "", "",
                 "3.000,00", "", "", "", "");
     }
 
