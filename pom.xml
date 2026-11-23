@@ -28,6 +28,19 @@
         <main.class>br.org.fmc.App</main.class>
     </properties>
 
+    <!-- Versões fixadas de bibliotecas que vêm "de carona" com outras.
+         commons-lang3 vem com o fastexcel-reader. A 3.16.0 tem a falha CVE-2025-48924
+         (auditoria de segurança, item 9), e a 3.18.0 corrige. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.18.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Toolkit gráfico (telas) -->
         <dependency>

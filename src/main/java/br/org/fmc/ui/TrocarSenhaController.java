@@ -92,7 +92,7 @@ public class TrocarSenhaController {
         } catch (RegraNegocioException e) {
             mostrarErro(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErro("Erro no banco de dados: " + e.getMessage());
+            mostrarErro(Falha.doBanco(e));
         }
     }
 

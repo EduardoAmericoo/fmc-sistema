@@ -212,7 +212,7 @@ public class ReceberAluguelController {
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Nao foi possivel registrar o recebimento: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 

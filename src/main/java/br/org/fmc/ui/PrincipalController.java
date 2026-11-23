@@ -62,7 +62,7 @@ public class PrincipalController {
         try {
             statusBanco = "Banco de dados conectado (schema v" + servicoSistema.versaoDoBanco() + ")";
         } catch (Exception e) {
-            statusBanco = "Erro no banco de dados: " + e.getMessage();
+            statusBanco = Falha.doBanco(e);
         }
         Tooltip.install(cartaoUsuario, new Tooltip(statusBanco));
     }

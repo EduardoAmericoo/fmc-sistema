@@ -84,7 +84,7 @@ public class PainelController {
             dataDeHoje.setText(String.join(" ", e.getErros()));
             return;
         } catch (SQLException e) {
-            dataDeHoje.setText("Erro no banco de dados: " + e.getMessage());
+            dataDeHoje.setText(Falha.doBanco(e));
             return;
         }
         dataDeHoje.setText(primeiraMaiuscula(painel.hoje().format(DIA_POR_EXTENSO)));

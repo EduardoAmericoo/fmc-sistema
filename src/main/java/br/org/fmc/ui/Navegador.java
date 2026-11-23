@@ -6,16 +6,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Consumer;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.input.InputEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  * Troca a tela mostrada no centro da janela principal.
@@ -71,6 +74,35 @@ public final class Navegador {
             }
         }
         stage.setMaximized(true);
+
+        // Saída por inatividade (auditoria, item 5): qualquer tecla ou movimento do mouse zera a contagem.
+        // Se ninguém mexer por MINUTOS_INATIVIDADE com alguém logado, a sessão acaba e volta o login,
+        // para ninguém usar o sistema no nome de quem saiu da mesa.
+        inatividade = new PauseTransition(Duration.minutes(MINUTOS_INATIVIDADE));
+        inatividade.setOnFinished(e -> sairPorInatividade());
+        cena.addEventFilter(InputEvent.ANY, e -> inatividade.playFromStart());
+        inatividade.playFromStart();
+    }
+
+    /** Minutos sem uso até o sistema sair sozinho. */
+    public static final int MINUTOS_INATIVIDADE = 15;
+
+    private static PauseTransition inatividade;
+    private static boolean saiuPorInatividade;
+
+    private static void sairPorInatividade() {
+        if (Sessao.estaLogado()) {
+            Sessao.encerrar();
+            saiuPorInatividade = true;
+            mostrarLogin();
+        }
+    }
+
+    /** A tela de login abriu porque o sistema saiu sozinho? (lido uma vez pelo LoginController) */
+    static boolean saiuPorInatividade() {
+        boolean saiu = saiuPorInatividade;
+        saiuPorInatividade = false;
+        return saiu;
     }
 
     /** Mostra a tela de login (ao abrir o sistema e ao sair). */

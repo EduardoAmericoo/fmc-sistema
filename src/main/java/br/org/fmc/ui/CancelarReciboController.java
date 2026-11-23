@@ -87,7 +87,7 @@ public class CancelarReciboController {
         } catch (RegraNegocioException e) { // inclui AcessoNegadoException (sem permissão)
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Não foi possível cancelar o recibo: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 

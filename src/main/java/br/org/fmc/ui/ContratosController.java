@@ -436,7 +436,7 @@ public class ContratosController {
             mostrarToast(String.join(" ", e.getErros()));
             return;
         } catch (SQLException e) {
-            mostrarToast("Erro no banco de dados: " + e.getMessage());
+            mostrarToast(Falha.doBanco(e));
             return;
         }
         campoImovel.setValue(null);
@@ -481,7 +481,7 @@ public class ContratosController {
         } catch (RegraNegocioException e) {
             mostrarErros(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarErros("Erro no banco de dados: " + e.getMessage());
+            mostrarErros(Falha.doBanco(e));
         }
     }
 
@@ -619,7 +619,7 @@ public class ContratosController {
         } catch (RegraNegocioException e) {
             contagem.setText(String.join(" ", e.getErros()));
         } catch (SQLException e) {
-            contagem.setText("Erro no banco de dados: " + e.getMessage());
+            contagem.setText(Falha.doBanco(e));
         }
     }
 

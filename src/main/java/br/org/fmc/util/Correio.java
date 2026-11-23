@@ -31,7 +31,7 @@ public interface Correio {
 
     /**
      * O correio configurado neste computador: SMTP se FMC_SMTP_HOST estiver definido; senão,
-     * o simulado enquanto os dados de teste estão ligados (FMC_DADOS_TESTE diferente de "nao");
+     * o simulado no modo demonstração (ver ModoSistema);
      * senão, nenhum (null): a recuperação por e-mail fica desligada.
      */
     static Correio doSistema() {
@@ -40,7 +40,7 @@ public interface Correio {
             return new Smtp(host, configuracao("FMC_SMTP_PORTA"), configuracao("FMC_SMTP_USUARIO"),
                     configuracao("FMC_SMTP_SENHA"), configuracao("FMC_SMTP_REMETENTE"));
         }
-        if (!"nao".equalsIgnoreCase(System.getenv("FMC_DADOS_TESTE"))) {
+        if (!ModoSistema.cliente()) { // no computador da Fundação nunca há e-mail simulado
             return new Simulado(Database.pasta().resolve("caixa-de-saida"));
         }
         return null;
@@ -61,7 +61,9 @@ public interface Correio {
 
     private static String variavelDoUsuarioNoWindows(String nome) {
         try {
-            Process reg = new ProcessBuilder("reg", "query", "HKCU\\Environment", "/v", nome)
+            // Caminho completo do reg.exe: chamar só "reg" deixaria rodar um reg.exe falso da pasta atual.
+            String regExe = System.getenv().getOrDefault("SystemRoot", "C:\\Windows") + "\\System32\\reg.exe";
+            Process reg = new ProcessBuilder(regExe, "query", "HKCU\\Environment", "/v", nome)
                     .redirectErrorStream(true).start();
             String saida = new String(reg.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             reg.waitFor();
@@ -131,6 +133,10 @@ public interface Correio {
             props.put("mail.smtp.port", porta);
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
+            // Só envia com a conexão criptografada e conferindo o certificado do servidor: sem isso, a
+            // senha de app e o código de recuperação poderiam passar em texto aberto (auditoria, item 4).
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.ssl.checkserveridentity", "true");
             props.put("mail.smtp.connectiontimeout", "10000");
             props.put("mail.smtp.timeout", "10000");
             jakarta.mail.Session sessao = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {

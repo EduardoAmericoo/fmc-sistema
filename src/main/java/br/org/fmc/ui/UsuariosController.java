@@ -274,7 +274,7 @@ public class UsuariosController {
         } catch (RegraNegocioException e) {
             mostrarAviso(avisoNovo, textoAvisoNovo, String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarAviso(avisoNovo, textoAvisoNovo, "Erro no banco de dados: " + e.getMessage());
+            mostrarAviso(avisoNovo, textoAvisoNovo, Falha.doBanco(e));
         }
     }
 
@@ -342,7 +342,7 @@ public class UsuariosController {
         } catch (RegraNegocioException e) {
             avisarErro(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            avisarErro("Erro no banco de dados: " + e.getMessage());
+            avisarErro(Falha.doBanco(e));
         }
     }
 
@@ -361,7 +361,7 @@ public class UsuariosController {
         } catch (RegraNegocioException e) {
             avisarErro(String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            avisarErro("Erro no banco de dados: " + e.getMessage());
+            avisarErro(Falha.doBanco(e));
         }
     }
 
@@ -465,7 +465,7 @@ public class UsuariosController {
         } catch (RegraNegocioException e) {
             mostrarAviso(avisoPermissoes, textoAvisoPermissoes, String.join("\n", e.getErros()));
         } catch (SQLException e) {
-            mostrarAviso(avisoPermissoes, textoAvisoPermissoes, "Erro no banco de dados: " + e.getMessage());
+            mostrarAviso(avisoPermissoes, textoAvisoPermissoes, Falha.doBanco(e));
         }
     }
 
@@ -482,7 +482,7 @@ public class UsuariosController {
             tabela.setPlaceholder(vazio("fth-lock", "Acesso restrito",
                     "O seu perfil não tem acesso à lista de usuários."));
         } catch (SQLException e) {
-            contagem.setText("Erro no banco de dados: " + e.getMessage());
+            contagem.setText(Falha.doBanco(e));
         }
     }
 

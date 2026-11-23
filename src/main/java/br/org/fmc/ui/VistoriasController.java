@@ -391,7 +391,7 @@ public class VistoriasController {
             mostrar(avisoErros, true);
         } catch (SQLException | IOException e) {
             desenhar();
-            textoErros.setText("Não foi possível concluir: " + e.getMessage());
+            textoErros.setText(Falha.doBanco(e));
             mostrar(avisoOk, false);
             mostrar(avisoErros, true);
         }
