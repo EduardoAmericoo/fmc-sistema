@@ -121,4 +121,4 @@ fi
 
 echo
 echo "Pronto:"
-ls -lh "$pacote" | grep -v '^total' | grep -v ' FMC'
+find "$pacote" -maxdepth 1 -type f -exec ls -lh {} \;
