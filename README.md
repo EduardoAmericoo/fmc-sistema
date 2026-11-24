@@ -21,10 +21,10 @@ O cliente validou o protótipo: *"resolve 90% dos meus problemas"*.
 
 ## Testar agora
 
-O sistema é um aplicativo de **Windows**. Ele já abre com dados fictícios para testar: 124 imóveis, 110 inquilinos,
-110 contratos e 18 meses de aluguéis, recibos, cobrança e vistorias com fotos.
+O sistema é um aplicativo de computador para **Windows**, **Mac** e **Linux**. Ele já abre com dados fictícios para
+testar: 124 imóveis, 110 inquilinos, 110 contratos e 18 meses de aluguéis, recibos, cobrança e vistorias com fotos.
 
-### Opção 1: instalar o programa (recomendado)
+### Opção 1: instalar o programa no Windows (recomendado)
 
 1. Abra a página de [**versões (Releases)**](https://github.com/EduardoAmericoo/fmc-sistema/releases/latest) e baixe
    o **`Instalar-FMC-<versão>.exe`**.
@@ -40,6 +40,25 @@ não tem assinatura digital. Clique em **Mais informações** e depois em **Exec
 
 **Sem permissão para instalar programas?** Na mesma página há o **`FMC-Sistema-<versão>-windows.zip`**, a versão
 portátil: extraia, abra a pasta **FMC** e dê dois cliques em **`FMC.exe`**.
+
+### Mac
+
+1. Na mesma página de [**versões**](https://github.com/EduardoAmericoo/fmc-sistema/releases/latest), baixe o
+   **`FMC-Sistema-<versão>-mac-arm64.dmg`** (Mac com chip Apple: M1, M2, M3 ou M4) ou o **`-mac-x64.dmg`** (Mac com
+   Intel). Para saber qual é o seu: menu da maçã → **Sobre Este Mac** → linha **Chip** ou **Processador**.
+2. Abra o `.dmg` e arraste o **FMC** para a pasta **Aplicativos**.
+3. Na primeira vez, o Mac avisa que não pode verificar o desenvolvedor, porque o programa não tem assinatura da Apple.
+   Abra **Ajustes do Sistema → Privacidade e Segurança**, desça até o aviso do FMC e clique em **Abrir Mesmo Assim**.
+   Se aparecer "o FMC está danificado", rode uma vez no Terminal: `xattr -dr com.apple.quarantine /Applications/FMC.app`
+
+### Linux (Ubuntu, Debian, Mint)
+
+Baixe o **`FMC-Sistema-<versão>-linux-amd64.deb`** e instale com `sudo apt install ./FMC-Sistema-<versão>-linux-amd64.deb`.
+O FMC aparece no menu de aplicativos, em **Escritório**. Em outras distribuições, use o **`-linux-x64.tar.gz`**: extraia
+e abra **`FMC/bin/FMC`**.
+
+No Mac e no Linux, os dados ficam na pasta do usuário: `~/Library/Application Support/FMC` no Mac e
+`~/.local/share/FMC` no Linux.
 
 ### Opção 2: rodar pelo código
 
