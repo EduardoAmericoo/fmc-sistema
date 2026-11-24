@@ -18,31 +18,55 @@ import java.sql.Statement;
  *
  * Onde fica a pasta de dados (banco, documentos, cópias e caixa de saída):
  * - rodando pelo código (mvnw ou VS Code): data/, na pasta do projeto, como sempre;
- * - no programa pronto (FMC.exe, instalado ou portátil): %LOCALAPPDATA%\FMC\data
- *   (ex.: C:\Users\maria\AppData\Local\FMC\data). O programa instalado fica em
- *   "Arquivos de Programas", onde o Windows não deixa gravar; além disso, assim o
- *   atalho da Área de Trabalho e uma versão nova do programa enxergam os mesmos dados.
+ * - no programa pronto (instalado ou portátil), na pasta de dados do usuário de cada sistema:
+ *   - Windows: %LOCALAPPDATA%\FMC\data (ex.: C:\Users\maria\AppData\Local\FMC\data);
+ *   - Mac: ~/Library/Application Support/FMC/data;
+ *   - Linux: ~/.local/share/FMC/data (ou $XDG_DATA_HOME/FMC/data, se estiver definido).
+ *   O programa instalado fica numa pasta onde o sistema não deixa gravar ("Arquivos de Programas",
+ *   "Aplicativos" ou /opt); além disso, assim o atalho e uma versão nova do programa enxergam
+ *   os mesmos dados.
  */
 public final class Database {
 
     private static Path arquivo = pastaPadrao(System.getProperty("jpackage.app-path"),
-            System.getenv("LOCALAPPDATA")).resolve("fmc.db");
+            System.getProperty("os.name", ""), System.getenv("LOCALAPPDATA"),
+            System.getProperty("user.home"), System.getenv("XDG_DATA_HOME")).resolve("fmc.db");
 
     private Database() {
     }
 
     /**
-     * A pasta de dados padrão. O jpackage, que monta o FMC.exe, avisa que o sistema está rodando
-     * como programa pronto pela propriedade "jpackage.app-path" (o caminho do FMC.exe).
+     * A pasta de dados padrão. O jpackage, que monta o programa pronto, avisa que o sistema está
+     * rodando instalado pela propriedade "jpackage.app-path" (o caminho do programa).
      *
-     * @param caminhoDoExe  o valor de jpackage.app-path (null rodando pelo código)
-     * @param localAppData  a pasta %LOCALAPPDATA% do Windows
+     * @param caminhoDoPrograma o valor de jpackage.app-path (null rodando pelo código)
+     * @param sistema           o nome do sistema operacional (os.name), ex.: "Windows 11", "Mac OS X", "Linux"
+     * @param localAppData      a pasta %LOCALAPPDATA% do Windows
+     * @param home              a pasta do usuário (user.home), usada no Mac e no Linux
+     * @param xdgDataHome       a variável XDG_DATA_HOME do Linux (normalmente vazia)
      */
-    static Path pastaPadrao(String caminhoDoExe, String localAppData) {
-        if (caminhoDoExe == null || caminhoDoExe.isBlank() || localAppData == null || localAppData.isBlank()) {
+    static Path pastaPadrao(String caminhoDoPrograma, String sistema, String localAppData, String home,
+            String xdgDataHome) {
+        if (vazio(caminhoDoPrograma)) {
             return Path.of("data");
         }
-        return Path.of(localAppData, "FMC", "data");
+        String os = sistema == null ? "" : sistema.toLowerCase();
+        if (os.startsWith("windows")) {
+            return vazio(localAppData) ? Path.of("data") : Path.of(localAppData, "FMC", "data");
+        }
+        if (vazio(home)) {
+            return Path.of("data");
+        }
+        if (os.startsWith("mac")) {
+            return Path.of(home, "Library", "Application Support", "FMC", "data");
+        }
+        // Linux e outros Unix: padrão XDG (~/.local/share)
+        return vazio(xdgDataHome) ? Path.of(home, ".local", "share", "FMC", "data")
+                : Path.of(xdgDataHome, "FMC", "data");
+    }
+
+    private static boolean vazio(String s) {
+        return s == null || s.isBlank();
     }
 
     /** Troca o arquivo do banco (usado nos testes para não mexer nos dados reais). */

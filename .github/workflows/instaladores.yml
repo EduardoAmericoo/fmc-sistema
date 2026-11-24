@@ -1,0 +1,117 @@
+# Gera os instaladores do FMC para Windows, Mac e Linux (GitHub Actions).
+#
+# O jpackage só gera instalador para o sistema em que está rodando, então cada um é montado
+# numa máquina do GitHub com aquele sistema:
+#   - Windows: Instalar-FMC-<versao>.exe e FMC-Sistema-<versao>-windows.zip (scripts/gerar-exe.ps1)
+#   - Mac:     FMC-Sistema-<versao>-mac-arm64.dmg (Apple M1 em diante) e -mac-x64.dmg (Mac com Intel)
+#   - Linux:   FMC-Sistema-<versao>-linux-amd64.deb e -linux-x64.tar.gz (scripts/gerar-instalador.sh)
+#
+# Quando roda:
+#   - ao publicar uma tag de versão (ex.: git tag v0.1.2 && git push origin v0.1.2): monta tudo e
+#     anexa os arquivos no Release dessa versão no GitHub;
+#   - num pull request que mexe nos scripts ou neste arquivo: monta tudo para conferir, sem
+#     publicar (os arquivos ficam em "Artifacts", na página da execução);
+#   - à mão, pela aba Actions (botão "Run workflow").
+
+name: Instaladores
+
+on:
+  push:
+    tags: ["v*"]
+    branches: [melhoria/instaladores-multiplataforma] # temporario: so para conferir antes do PR
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/instaladores.yml"
+      - "scripts/**"
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Instalar o WiX 3.14 (o jpackage usa para montar o .exe)
+        shell: pwsh
+        run: |
+          $destino = Join-Path $env:LOCALAPPDATA 'wix314'
+          Invoke-WebRequest 'https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip' -OutFile wix.zip
+          Expand-Archive wix.zip -DestinationPath $destino -Force
+      - name: Gerar o instalador e o .zip
+        shell: pwsh
+        run: ./scripts/gerar-exe.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fmc-windows
+          path: |
+            target/pacote/*.exe
+            target/pacote/*.zip
+
+  mac:
+    name: Mac (${{ matrix.arq }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest      # Apple M1 em diante
+            arq: arm64
+          - os: macos-15-intel    # Mac com processador Intel
+            arq: x64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Gerar o .dmg
+        run: bash scripts/gerar-instalador.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fmc-mac-${{ matrix.arq }}
+          path: target/pacote/*.dmg
+
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Gerar o .deb e o .tar.gz
+        run: bash scripts/gerar-instalador.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fmc-linux
+          path: |
+            target/pacote/*.deb
+            target/pacote/*.tar.gz
+
+  release:
+    name: Anexar no Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, mac, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: instaladores
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: instaladores/*
