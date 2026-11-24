@@ -18,7 +18,6 @@ name: Instaladores
 on:
   push:
     tags: ["v*"]
-    branches: [melhoria/instaladores-multiplataforma] # temporario: so para conferir antes do PR
   pull_request:
     branches: [main]
     paths:
