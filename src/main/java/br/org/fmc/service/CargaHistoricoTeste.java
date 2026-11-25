@@ -89,10 +89,12 @@ class CargaHistoricoTeste {
     }
 
     static PerfilPagador perfil(Contrato c) {
-        long resto = c.getId() % 10;
-        if (resto == 9) {
+        // Proporções pensadas para parecer uma carteira real (revisão antes do cliente, 24/11):
+        // antes 1 em cada 10 era devedor e o Painel mostrava 1 em cada 3 inquilinos em cobrança.
+        if (c.getId() % 20 == 9) {
             return PerfilPagador.DEVEDOR;
         }
+        long resto = c.getId() % 10;
         if (resto == 7) {
             return PerfilPagador.ATRASA_SEMPRE;
         }
@@ -207,7 +209,7 @@ class CargaHistoricoTeste {
         return switch (perfil(c)) {
             case PONTUAL -> venc.minusDays(c.getId() % 4);
             case OCASIONAL -> mes % 4 == c.getId() % 4 ? venc.plusDays(8 + semente % 13) : venc.minusDays(1);
-            case ATRASA_SEMPRE -> semente % 3 == 0 ? venc.plusDays(2) : venc.plusDays(6 + semente % 25);
+            case ATRASA_SEMPRE -> semente % 3 == 0 ? venc.plusDays(2) : venc.plusDays(6 + semente % 12);
             case DEVEDOR -> venc.plusDays(10 + semente % 31);
         };
     }
@@ -257,10 +259,13 @@ class CargaHistoricoTeste {
         List<ServicoCobranca.Linha> devedores = ServicoCobranca.montarLista(
                 ServicoAlugueis.listaDeCobranca(alugueis.listarEmAberto(), hoje), Map.of(), hoje);
         LocalDateTime agora = hoje.atTime(14, 0);
+        // O tipo de contato vai pela posição na lista (e não pelo número do contrato): com poucos
+        // devedores, todos os tipos continuam aparecendo.
+        int posicao = 0;
         for (ServicoCobranca.Linha l : devedores) {
             long id = l.contrato().getId();
             String email = l.contrato().getInquilino().getEmail();
-            switch ((int) (id % 6)) {
+            switch (posicao++ % 6) {
                 case 1 -> contato(id, agora.minusDays(6), ResultadoContato.NAO_ATENDEU, null, "Caixa postal", aprendiz);
                 case 2 -> contato(id, agora.minusDays(10), ResultadoContato.PROMETEU_PAGAR, hoje.plusDays(3),
                         "Vai pagar quando receber o salário", secretaria);
@@ -326,12 +331,12 @@ class CargaHistoricoTeste {
         return i;
     }
 
-    /** Metade dos contratos com reajuste vencido já foi reajustada (média INPC + IGP-DI digitada). */
+    /** Quase todos os contratos com reajuste vencido já foram reajustados (média INPC + IGP-DI digitada). */
     private int aplicarReajustes() throws SQLException {
         ServicoContratos servico = new ServicoContratos();
         int feitos = 0;
         for (Contrato c : new ContratoRepository().listarTodos()) {
-            if (c.getStatus() == StatusContrato.ATIVO && c.reajustePendente(hoje) && c.getId() % 2 == 0) {
+            if (c.getStatus() == StatusContrato.ATIVO && c.reajustePendente(hoje) && c.getId() % 8 != 1) {
                 try {
                     servico.reajustar(c.getId(), c.getId() % 4 == 0 ? "4,85" : "5,12");
                     feitos++;
