@@ -4,6 +4,7 @@ import br.org.fmc.db.Database;
 import br.org.fmc.service.ServicoAcesso;
 import br.org.fmc.service.ServicoCopiaSeguranca;
 import br.org.fmc.service.ServicoDadosTeste;
+import br.org.fmc.ui.Falha;
 import br.org.fmc.ui.Navegador;
 import br.org.fmc.ui.Tema;
 import br.org.fmc.util.ModoSistema;
@@ -27,6 +28,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        Falha.ligarRedeDeProtecao();
         Database.inicializar();
         // Se o sistema não foi fechado direito ontem (queda de energia, computador desligado),
         // a cópia do dia ainda não existe: faz agora, antes de qualquer mudança.

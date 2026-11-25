@@ -36,7 +36,7 @@ public class PrincipalController {
     private VBox menu;
 
     @FXML
-    private HBox cartaoUsuario;
+    private VBox cartaoUsuario;
 
     @FXML
     private Label avatar;

@@ -262,7 +262,15 @@ public class CaixaBancoController {
         if (total.signum() <= 0) {
             return "0";
         }
-        return valor.multiply(BigDecimal.valueOf(100)).divide(total, 0, RoundingMode.HALF_UP).toPlainString();
+        BigDecimal pct = valor.multiply(BigDecimal.valueOf(100)).divide(total, 0, RoundingMode.HALF_UP);
+        // Com dinheiro guardado, "0%" (ou "100%" no outro lado) parece que não há nada: mostra "menos de 1%".
+        if (valor.signum() > 0 && pct.signum() == 0) {
+            return "<1";
+        }
+        if (valor.compareTo(total) < 0 && pct.intValue() == 100) {
+            return ">99";
+        }
+        return pct.toPlainString();
     }
 
     @FXML
