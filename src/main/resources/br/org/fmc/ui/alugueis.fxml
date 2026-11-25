@@ -28,7 +28,7 @@
 <StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
            fx:controller="br.org.fmc.ui.AlugueisController">
 
-    <VBox styleClass="conteudo" spacing="24">
+    <VBox fx:id="raiz" styleClass="conteudo" spacing="24">
         <HBox fx:id="cabecalho" alignment="BOTTOM_LEFT" spacing="24">
             <VBox spacing="6" HBox.hgrow="ALWAYS">
                 <Label text="Aluguéis e cobrança" styleClass="titulo"/>
@@ -62,7 +62,7 @@
         </HBox>
 
         <VBox fx:id="resumoMes" styleClass="cartao-resumo" spacing="14">
-            <VBox spacing="4" styleClass="bloco-resumo-mes">
+            <VBox fx:id="blocoTituloResumo" spacing="4" styleClass="bloco-resumo-mes">
                 <Label fx:id="tituloResumoMes" styleClass="subtitulo"/>
                 <Label fx:id="textoResumoMes" styleClass="texto" wrapText="true"/>
             </VBox>
@@ -83,7 +83,7 @@
         <VBox fx:id="resumoCobranca" styleClass="cartao-resumo" spacing="10" managed="false" visible="false">
             <VBox spacing="4">
                 <Label text="Em atraso" styleClass="subtitulo"/>
-                <Label text="Todos os inquilinos com aluguel em atraso (passados os 5 dias de tolerância), de quem deve há mais tempo para o mais recente. Valores atualizados com multa, juros e INPC."
+                <Label fx:id="explicacaoCobranca" text="Todos os inquilinos com aluguel em atraso (passados os 5 dias de tolerância), de quem deve há mais tempo para o mais recente. Valores atualizados com multa, juros e INPC."
                        styleClass="texto" wrapText="true" minHeight="-Infinity"/>
                 <HBox spacing="28" styleClass="resumo-calculado">
                     <VBox spacing="3"><Label fx:id="contagemUmMes" text="1 mês"/><Label fx:id="valorUmMes"/></VBox>

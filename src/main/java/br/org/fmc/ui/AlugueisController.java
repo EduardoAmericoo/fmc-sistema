@@ -193,11 +193,24 @@ public class AlugueisController {
     private TableColumn<Linha, Linha> cobrancaAcao;
 
     @FXML
+    private VBox raiz;
+    @FXML
+    private VBox blocoTituloResumo;
+    @FXML
+    private Label explicacaoCobranca;
+
+    /** Abaixo desta altura (tela de notebook, 1366×768) a tela fica compacta. */
+    private static final double ALTURA_COMPACTA = 780;
+
+    @FXML
     private void initialize() {
         hoje = servico.hoje();
         montarTabela();
         montarTabelaCobranca();
         barraSituacoes.widthProperty().addListener((obs, antes, agora) -> ajustarBarraSituacoes());
+        // Em tela de notebook, o resumo do mês ocupava tanto espaço que a tabela mostrava 1 ou 2
+        // linhas. Compacta: tira o título repetido do resumo e a explicação longa, e aproxima os blocos.
+        raiz.heightProperty().addListener((obs, antes, agora) -> compactar(agora.doubleValue() < ALTURA_COMPACTA));
 
         // Abas por situação: cada uma guarda a situação que filtra; "Todos" guarda null.
         abaAtraso.setUserData(SituacaoAluguel.EM_ATRASO);
@@ -521,6 +534,13 @@ public class AlugueisController {
         } catch (SQLException e) {
             contagem.setText("Não foi possível carregar os aluguéis do banco de dados.");
         }
+    }
+
+    private void compactar(boolean compacto) {
+        raiz.setSpacing(compacto ? 12 : 24);
+        resumoMes.setSpacing(compacto ? 8 : 14);
+        mostrar(blocoTituloResumo, !compacto);
+        mostrar(explicacaoCobranca, !compacto);
     }
 
     /** Mostra só os aluguéis da aba e da busca, e atualiza as contagens. */
