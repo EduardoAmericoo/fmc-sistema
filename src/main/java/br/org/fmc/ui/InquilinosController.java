@@ -520,9 +520,17 @@ public class InquilinosController {
         alerta.show();
     }
 
+    private static final java.util.Map<String, String> ROTULOS = java.util.Map.of("fth-archive", "Arquivar", "fth-rotate-ccw", "Reativar");
+
     private static Button botaoIcone(String icone, String dica, Runnable acao) {
-        Button botao = new Button(null, new FontIcon(icone));
+        // Revisão de usabilidade (24/11): quem nunca usou não sabe o que um ícone sozinho faz, então
+        // as ações menos óbvias ganham um nome curto ao lado do ícone. O lápis (editar) fica só ícone.
+        Button botao = new Button(ROTULOS.get(icone), new FontIcon(icone));
         botao.getStyleClass().add("botao-icone");
+        if (botao.getText() != null) {
+            botao.getStyleClass().add("botao-icone-texto");
+            botao.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // o nome nunca vira "Arq…"
+        }
         botao.setTooltip(new Tooltip(dica));
         botao.setOnAction(e -> acao.run());
         return botao;

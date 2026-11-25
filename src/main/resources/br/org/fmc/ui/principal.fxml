@@ -70,20 +70,29 @@
             <Region VBox.vgrow="ALWAYS"/>
 
             <!-- Quem está logado; passar o mouse mostra a situação do banco de dados -->
-            <HBox fx:id="cartaoUsuario" styleClass="cartao-usuario" spacing="10" alignment="CENTER_LEFT">
-                <Label fx:id="avatar" styleClass="avatar"/>
-                <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
-                    <Label fx:id="usuarioNome" styleClass="usuario-nome"/>
-                    <Label fx:id="usuarioPerfil" styleClass="usuario-perfil"/>
-                </VBox>
-                <Button onAction="#trocarSenha" styleClass="botao-icone" accessibleText="Trocar minha senha">
-                    <graphic><FontIcon iconLiteral="fth-key"/></graphic>
-                    <tooltip><Tooltip text="Trocar minha senha"/></tooltip>
-                </Button>
-                <Button onAction="#sair" styleClass="botao-icone, botao-sair" accessibleText="Sair">
-                    <graphic><FontIcon iconLiteral="fth-log-out"/></graphic>
-                </Button>
-            </HBox>
+            <!-- Revisão de usabilidade (24/11): o nome e o perfil ficavam cortados ("Adminis…") ao lado
+                 de dois ícones. Agora os botões, com nome, ficam numa linha embaixo. -->
+            <VBox fx:id="cartaoUsuario" styleClass="cartao-usuario" spacing="6">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label fx:id="avatar" styleClass="avatar" minWidth="-Infinity"/>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
+                        <Label fx:id="usuarioNome" styleClass="usuario-nome" wrapText="true"/>
+                        <Label fx:id="usuarioPerfil" styleClass="usuario-perfil"/>
+                    </VBox>
+                </HBox>
+                <HBox spacing="4" alignment="CENTER_LEFT">
+                    <Button text="Trocar senha" onAction="#trocarSenha" styleClass="botao-icone, botao-icone-texto"
+                            accessibleText="Trocar minha senha">
+                        <graphic><FontIcon iconLiteral="fth-key"/></graphic>
+                        <tooltip><Tooltip text="Trocar minha senha"/></tooltip>
+                    </Button>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Sair" onAction="#sair" styleClass="botao-icone, botao-icone-texto, botao-sair"
+                            accessibleText="Sair">
+                        <graphic><FontIcon iconLiteral="fth-log-out"/></graphic>
+                    </Button>
+                </HBox>
+            </VBox>
         </VBox>
     </left>
 </BorderPane>

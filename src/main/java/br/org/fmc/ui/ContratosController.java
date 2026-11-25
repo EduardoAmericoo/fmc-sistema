@@ -400,8 +400,10 @@ public class ContratosController {
     }
 
     private Button botaoProrrogar(Contrato c) {
-        Button botao = new Button(null, new FontIcon("fth-refresh-cw"));
-        botao.getStyleClass().addAll("botao-icone", "botao-tabela", "botao-prorrogar");
+        // Com o nome ao lado do ícone (revisão de usabilidade, 24/11): o ícone sozinho não dizia o que fazia.
+        Button botao = new Button("Prorrogar", new FontIcon("fth-refresh-cw"));
+        botao.getStyleClass().addAll("botao-icone", "botao-icone-texto", "botao-tabela", "botao-prorrogar");
+        botao.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         botao.setAccessibleText("Prorrogar");
         botao.setTooltip(new Tooltip("Prorrogar o contrato " + c.getNumero() + " por 12, 24 ou 36 meses"));
         botao.setOnAction(e -> ProrrogarContratoController.abrir(c, servico, resultado -> {

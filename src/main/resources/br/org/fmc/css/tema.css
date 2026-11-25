@@ -835,6 +835,25 @@
     -fx-icon-size: 16;
 }
 
+/* Botão de ícone com o nome ao lado (ex.: "Arquivar", "Prorrogar"), para quem nunca usou o sistema.
+   Vem depois de .botao-icone e .botao-tabela para soltar a largura fixa de 34 e 28. */
+.botao-icone.botao-icone-texto {
+    -fx-min-width: -1;
+    -fx-max-width: -1;
+    -fx-padding: 0 8 0 6;
+    -fx-graphic-text-gap: 5;
+    -fx-text-fill: -fmc-texto-suave;
+    -fx-font-size: 12px;
+}
+
+.botao-icone.botao-icone-texto:hover {
+    -fx-text-fill: -fmc-azul;
+}
+
+.botao-prorrogar.botao-icone-texto {
+    -fx-text-fill: -fmc-azul;
+}
+
 /* ===================== Painel (BOARD-40 e BOARD-61) ===================== */
 
 /* Cartão de número (KpiCard do design system) */
